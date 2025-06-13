@@ -78,7 +78,7 @@ const CategoryPicker = ({ type, onChange }: Props) => {
           }}
         >
           <CommandInput placeholder="Search category..." />
-          <CreateCategoryDialog type={type} SuccessCallback={SuccessCallback} />
+          <CreateCategoryDialog type={type} successCallback={SuccessCallback} />
           <CommandEmpty>
             <p>Category not found</p>
             <p className="text-xs text-muted-foreground">
