@@ -1,12 +1,24 @@
+import { Button } from "@/components/ui/button";
+import { prisma } from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
+import { type Metadata } from "next";
 import { redirect } from "next/navigation";
-import { Button } from "../../components/ui/button";
-import { prisma } from "../../lib/prisma";
 import CreateTransactionDialog from "./_components/CreateTransactionDialog";
 import History from "./_components/History";
 import Overview from "./_components/Overview";
 
-const page = async () => {
+export const metadata: Metadata = {
+  title: "Dashboard",
+  description:
+    "Your personal dashboard to track income, expenses, and see a complete overview of your financial health.",
+
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
+
+const DashboardPage = async () => {
   const user = await currentUser();
   if (!user) {
     redirect("/sign-in");
@@ -59,4 +71,4 @@ const page = async () => {
   );
 };
 
-export default page;
+export default DashboardPage;
