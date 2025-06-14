@@ -23,7 +23,7 @@ import {
 import { useMemo, useState } from "react";
 
 import { DataTableColumnHeader } from "@/components/datatable/ColumnHeader";
-import { DataTableFacetedFilter } from "@/components/datatable/facetedFilters";
+import { DataTableFacetedFilter } from "@/components/datatable/FacetedFilters";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Button } from "@/components/ui/button";
 import {
@@ -198,7 +198,7 @@ const TransactionTable = ({ from, to }: Props) => {
         transaction.type === "expense"
           ? `-${transaction.formattedAmount}`
           : transaction.formattedAmount,
-      Currency: transaction.formattedAmount.replace(/[^a-zA-Z]/g, ""), // Extract currency symbol
+      Currency: transaction.formattedAmount.replace(/[^a-zA-Z]/g, ""),
     }));
   }, [history.data]);
 

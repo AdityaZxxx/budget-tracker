@@ -19,18 +19,12 @@ const Overview = ({ userSettings }: { userSettings: UserSettings }) => {
       <div className="container flex flex-wrap items-end justify-between gap-2 py-6">
         <h2 className="text-3xl font-bold">Overview</h2>
         <div className="flex items-center gap-3">
-          {/* PENYEMPURNAAN UX: Disarankan untuk mengubah DateRangePicker menjadi 'controlled'.
-            Ganti props dari 'initialDateFrom' menjadi props seperti 'range' atau 'value' 
-            yang menerima state `dateRange` secara langsung.
-          */}
           <DateRangePicker
             onUpdate={(values) => {
               const { from, to } = values.range;
               if (!from || !to) return;
 
-              // Validasi rentang tanggal
               if (differenceInDays(to, from) > MAX_DATE_RANGE) {
-                // DIPERBAIKI: Typo pada pesan toast
                 toast.error(
                   `The selected date range is too big. Max allowed range is ${MAX_DATE_RANGE} days.`
                 );
@@ -38,12 +32,11 @@ const Overview = ({ userSettings }: { userSettings: UserSettings }) => {
               }
               setDateRange({ from, to });
             }}
-            showCompare={false} // Prop ini diasumsikan sudah ada
+            showCompare={false}
           />
         </div>
       </div>
 
-      {/* DIPERBAIKI: Typo pada class name 'flex-' dihapus */}
       <div className="container flex w-full flex-col gap-4">
         <StatsCards
           userSettings={userSettings}
