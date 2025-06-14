@@ -35,9 +35,8 @@ const StatsCards = ({ from, to, userSettings }: Props) => {
         throw error;
       }
     },
-    // Add some default options for better UX
     refetchOnWindowFocus: false,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
   });
 
   const formatter = useMemo(() => {

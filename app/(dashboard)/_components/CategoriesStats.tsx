@@ -1,5 +1,3 @@
-// app/(dashboard)/_components/CategoriesStats.tsx
-
 "use client";
 
 import SkeletonWrapper from "@/components/SkeletonWrapper";
@@ -125,7 +123,6 @@ function CategoriesCard({ data, type, formatter, total }: CategoriesCardProps) {
                         {formatter.format(amount)}
                       </span>
                     </div>
-                    {/* DIPERBAIKI: Gunakan prop 'indicatorClassName' yang baru */}
                     <Progress
                       value={percentage}
                       indicatorClassName={

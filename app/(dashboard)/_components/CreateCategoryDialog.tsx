@@ -80,7 +80,7 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
         queryKey: ["categories"],
       });
 
-      setOpen(false); // Cukup set false, tidak perlu toggle dengan !prev
+      setOpen(false);
     },
     onError: () => {
       toast.error("Something went wrong", {
@@ -102,7 +102,6 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {/* BONUS: Perbaikan typo class (berder-b pz-3 -> border-b px-3) */}
         {trigger ? (
           trigger
         ) : (
@@ -131,7 +130,6 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
           </DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          {/* Note: Tidak perlu tag <form> di dalam <Form>, komponen <Form> sudah me-render-nya */}
           <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
               control={form.control}
@@ -195,7 +193,6 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
                 </FormItem>
               )}
             />
-            {/* Tombol submit dipindahkan ke dalam <form> agar lebih standar */}
             <DialogFooter>
               <DialogClose asChild>
                 <Button
