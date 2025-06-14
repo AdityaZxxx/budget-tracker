@@ -39,7 +39,6 @@ const History = ({ userSettings }: { userSettings: UserSettings }) => {
 
   const historyDataQuery = useQuery({
     queryKey: ["overview", "history", timeframe, period],
-    // DIPERBAIKI: Menambahkan error handling pada fetch
     queryFn: async () => {
       const response = await fetch(
         `/api/history-data?timeframe=${timeframe}&year=${period.year}&month=${period.month}`
@@ -48,13 +47,11 @@ const History = ({ userSettings }: { userSettings: UserSettings }) => {
         const errorText = await response.text();
         throw new Error(`Failed to fetch history data: ${errorText}`);
       }
-      // Pastikan untuk memberi tipe pada data yang diharapkan jika memungkinkan
-      return response.json();
+       return response.json();
     },
   });
 
-  // Pengecekan dataAvailable sekarang lebih aman karena kita tahu jika ada data, itu pasti array
-  const dataAvailable =
+   const dataAvailable =
     historyDataQuery.data &&
     Array.isArray(historyDataQuery.data) &&
     historyDataQuery.data.length > 0;

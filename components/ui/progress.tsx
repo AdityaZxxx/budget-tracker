@@ -7,7 +7,6 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-// PENYEMPURNAAN: Tambahkan prop `indicatorClassName` ke tipe
 interface ProgressProps
   extends React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> {
   indicatorClassName?: string;
@@ -15,7 +14,7 @@ interface ProgressProps
 
 const Progress = React.forwardRef<
   React.ComponentRef<typeof ProgressPrimitive.Root>,
-  ProgressProps // Gunakan tipe yang sudah di-update
+  ProgressProps
 >(({ className, value, indicatorClassName, ...props }, ref) => (
   <ProgressPrimitive.Root
     ref={ref}
@@ -26,7 +25,6 @@ const Progress = React.forwardRef<
     {...props}
   >
     <ProgressPrimitive.Indicator
-      // PENYEMPURNAAN: Gabungkan kelas default dengan prop baru
       className={cn(
         "h-full w-full flex-1 bg-primary transition-all",
         indicatorClassName

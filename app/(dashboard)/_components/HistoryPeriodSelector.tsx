@@ -62,7 +62,6 @@ const HistoryPeriodSelector = ({
             <MonthSelector
               period={period}
               setPeriod={setPeriod}
-              //   month={historyPeriods.data || []}
             />
           </SkeletonWrapper>
         )}
