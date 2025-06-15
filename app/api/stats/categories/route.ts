@@ -1,7 +1,7 @@
+import prisma from "@/lib/prisma";
+import { OverviewQuerySchema } from "@/schemas/overview";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { prisma } from "../../../../lib/prisma";
-import { OverviewQuerySchema } from "../../../../schemas/overview";
 
 interface GetRequestParams {
   request: Request;

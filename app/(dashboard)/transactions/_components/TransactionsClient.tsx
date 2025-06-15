@@ -1,10 +1,10 @@
 "use client";
 
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { MAX_DATE_RANGE } from "@/lib/constants";
 import { differenceInDays, startOfMonth } from "date-fns";
 import { useState } from "react";
 import { toast } from "sonner";
-import { DateRangePicker } from "../../../../components/ui/date-range-picker";
-import { MAX_DATE_RANGE } from "../../../../lib/constants";
 import TransactionTable from "./TransactionTable";
 
 const TransactionsClient = () => {

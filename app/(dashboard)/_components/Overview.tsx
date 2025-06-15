@@ -2,10 +2,10 @@
 
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { MAX_DATE_RANGE } from "@/lib/constants";
+import { UserSettings } from "@/lib/generated/prisma";
 import { differenceInDays, startOfMonth } from "date-fns";
 import { useState } from "react";
 import { toast } from "sonner";
-import { UserSettings } from "../../../lib/generated/prisma";
 import CategoriesStats from "./CategoriesStats";
 import StatsCards from "./StatsCards";
 

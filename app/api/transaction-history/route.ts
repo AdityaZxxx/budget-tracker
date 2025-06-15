@@ -1,9 +1,9 @@
+import { GetFormatterForCurrency } from "@/lib/helpers";
+import prisma from "@/lib/prisma";
+import { OverviewQuerySchema } from "@/schemas/overview";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { NextRequest } from "next/server";
-import { GetFormatterForCurrency } from "../../../lib/helpers";
-import { prisma } from "../../../lib/prisma";
-import { OverviewQuerySchema } from "../../../schemas/overview";
 
 export async function GET(request: NextRequest) {
   const user = await currentUser();

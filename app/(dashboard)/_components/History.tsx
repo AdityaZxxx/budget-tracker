@@ -1,5 +1,12 @@
 "use client";
 
+import SkeletonWrapper from "@/components/SkeletonWrapper";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { UserSettings } from "@/lib/generated/prisma";
+import { GetFormatterForCurrency } from "@/lib/helpers";
+import { Period, Timeframe } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
 import CountUp from "react-countup";
@@ -12,18 +19,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import SkeletonWrapper from "../../../components/SkeletonWrapper";
-import { Badge } from "../../../components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../../../components/ui/card";
-import { UserSettings } from "../../../lib/generated/prisma";
-import { GetFormatterForCurrency } from "../../../lib/helpers";
-import { Period, Timeframe } from "../../../lib/types";
-import { cn } from "../../../lib/utils";
 import HistoryPeriodSelector from "./HistoryPeriodSelector";
 
 const History = ({ userSettings }: { userSettings: UserSettings }) => {
@@ -47,11 +42,11 @@ const History = ({ userSettings }: { userSettings: UserSettings }) => {
         const errorText = await response.text();
         throw new Error(`Failed to fetch history data: ${errorText}`);
       }
-       return response.json();
+      return response.json();
     },
   });
 
-   const dataAvailable =
+  const dataAvailable =
     historyDataQuery.data &&
     Array.isArray(historyDataQuery.data) &&
     historyDataQuery.data.length > 0;

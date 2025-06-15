@@ -1,8 +1,8 @@
+import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { NextRequest } from "next/server";
 import { z } from "zod";
-import { prisma } from "../../../lib/prisma";
 export async function GET(request: NextRequest) {
   const user = await currentUser();
 

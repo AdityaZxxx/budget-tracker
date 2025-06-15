@@ -1,21 +1,21 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { PlusSquare, TrashIcon, TrendingDown, TrendingUp } from "lucide-react";
-import { CurrencyComboBox } from "../../../../components/CurrencyComboBox";
-import SkeletonWrapper from "../../../../components/SkeletonWrapper";
-import { Button } from "../../../../components/ui/button";
+import { CurrencyComboBox } from "@/components/CurrencyComboBox";
+import SkeletonWrapper from "@/components/SkeletonWrapper";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../../../../components/ui/card";
-import { Separator } from "../../../../components/ui/separator";
-import { Category } from "../../../../lib/generated/prisma";
-import { TransactionType } from "../../../../lib/types";
-import { cn } from "../../../../lib/utils";
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Category } from "@/lib/generated/prisma";
+import { TransactionType } from "@/lib/types";
+import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { PlusSquare, TrashIcon, TrendingDown, TrendingUp } from "lucide-react";
 import CreateCategoryDialog from "../../_components/CreateCategoryDialog";
 import DeleteCategoryDialog from "../../_components/DeletecategoryDialog";
 

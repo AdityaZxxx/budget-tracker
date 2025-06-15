@@ -1,7 +1,5 @@
 "use client";
 
-import { ReactNode, useCallback, useState } from "react";
-import { useForm } from "react-hook-form";
 import {
   Dialog,
   DialogClose,
@@ -10,16 +8,17 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "../../../components/ui/dialog";
-import { TransactionType } from "../../../lib/types";
-import { cn } from "../../../lib/utils";
+} from "@/components/ui/dialog";
+import { TransactionType } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import {
   CreateTransactionSchema,
   CreateTransactionSchemaType,
-} from "../../../schemas/transaction";
+} from "@/schemas/transaction";
+import { ReactNode, useCallback, useState } from "react";
+import { useForm } from "react-hook-form";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "../../../components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -28,21 +27,22 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "../../../components/ui/form";
-import { Input } from "../../../components/ui/input";
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "../../../components/ui/popover";
+} from "@/components/ui/popover";
+import { zodResolver } from "@hookform/resolvers/zod";
 import CategoryPicker from "./CategoryPicker";
 
+import { Calendar } from "@/components/ui/calendar";
+import { DateToUTCDate } from "@/lib/helpers";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { Calendar } from "../../../components/ui/calendar";
-import { DateToUTCDate } from "../../../lib/helpers";
 import { CreateTransaction } from "../_actions/transaction";
 
 interface Props {

@@ -1,7 +1,5 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,7 +9,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "../../../../components/ui/alert-dialog";
+} from "@/components/ui/alert-dialog";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { DeleteTransaction } from "../_actions/DeleteTransaction";
 
 interface Props {

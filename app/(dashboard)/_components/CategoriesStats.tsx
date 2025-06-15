@@ -4,11 +4,11 @@ import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { UserSettings } from "@/lib/generated/prisma";
 import { DateToUTCDate, GetFormatterForCurrency } from "@/lib/helpers";
 import { TransactionType } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { UserSettings } from "../../../lib/generated/prisma";
 import { type GetCategoriesStatsResponseType } from "../../api/stats/categories/route";
 
 interface CategoriesCardProps {

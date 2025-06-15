@@ -1,6 +1,6 @@
+import { MAX_DATE_RANGE } from "@/lib/constants";
 import { differenceInDays } from "date-fns";
 import { z } from "zod";
-import { MAX_DATE_RANGE } from "../lib/constants";
 
 export const OverviewQuerySchema = z
   .object({

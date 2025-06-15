@@ -23,9 +23,18 @@ import {
 import { useMemo, useState } from "react";
 
 import { DataTableColumnHeader } from "@/components/datatable/ColumnHeader";
+import { DataTableViewOptions } from "@/components/datatable/Columntoggle";
 import { DataTableFacetedFilter } from "@/components/datatable/FacetedFilters";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -37,15 +46,6 @@ import {
 import { DateToUTCDate } from "@/lib/helpers";
 import { cn } from "@/lib/utils";
 import { CSVLink } from "react-csv";
-import { DataTableViewOptions } from "../../../../components/datatable/Columntoggle";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "../../../../components/ui/dropdown-menu";
 import { GetTrasactionsHistoryResponseType } from "../../../api/transaction-history/route";
 import DeleteTransactionDialog from "./DeleteTransactionDialog";
 
@@ -188,18 +188,26 @@ const TransactionTable = ({ from, to }: Props) => {
   const csvData = useMemo(() => {
     if (!history.data) return [];
 
-    return history.data.map((transaction) => ({
-      Date: new Date(transaction.date).toLocaleDateString(),
-      Category: transaction.category,
-      Description: transaction.description,
-      Type:
-        transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1),
-      Amount:
-        transaction.type === "expense"
-          ? `-${transaction.formattedAmount}`
-          : transaction.formattedAmount,
-      Currency: transaction.formattedAmount.replace(/[^a-zA-Z]/g, ""),
-    }));
+    return history.data.map(
+      (transaction: {
+        date: string | number | Date;
+        category: any;
+        description: any;
+        type: string;
+        formattedAmount: string;
+      }) => ({
+        Date: new Date(transaction.date).toLocaleDateString(),
+        Category: transaction.category,
+        Description: transaction.description,
+        Type:
+          transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1),
+        Amount:
+          transaction.type === "expense"
+            ? `-${transaction.formattedAmount}`
+            : transaction.formattedAmount,
+        Currency: transaction.formattedAmount.replace(/[^a-zA-Z]/g, ""),
+      })
+    );
   }, [history.data]);
 
   const csvHeaders = [
@@ -213,12 +221,14 @@ const TransactionTable = ({ from, to }: Props) => {
 
   const categoriesOptions = useMemo(() => {
     const categoriesMap = new Map();
-    history.data?.forEach((transaction) => {
-      categoriesMap.set(transaction.category, {
-        value: transaction.category,
-        label: `${transaction.categoryIcon} ${transaction.category}`,
-      });
-    });
+    history.data?.forEach(
+      (transaction: { category: string; categoryIcon: any }) => {
+        categoriesMap.set(transaction.category, {
+          value: transaction.category,
+          label: `${transaction.categoryIcon} ${transaction.category}`,
+        });
+      }
+    );
     return Array.from(categoriesMap.values());
   }, [history.data]);
 

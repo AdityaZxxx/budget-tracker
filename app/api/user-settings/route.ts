@@ -1,8 +1,8 @@
+import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
-import { prisma } from "../../../lib/prisma";
 
 export async function GET() {
   const user = await currentUser();

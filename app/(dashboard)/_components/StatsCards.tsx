@@ -2,12 +2,12 @@
 
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Card } from "@/components/ui/card";
+import { UserSettings } from "@/lib/generated/prisma";
 import { DateToUTCDate, GetFormatterForCurrency } from "@/lib/helpers";
 import { useQuery } from "@tanstack/react-query";
 import { TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { ReactNode, useMemo } from "react";
 import CountUp from "react-countup";
-import { UserSettings } from "../../../lib/generated/prisma";
 import { type GetBalanceStatsResponseType } from "../../api/stats/balance/route";
 
 interface Props {
