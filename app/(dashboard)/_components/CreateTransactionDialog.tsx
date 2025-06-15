@@ -90,7 +90,12 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
         queryKey: ["overview"],
       });
 
-      setOpen((prev) => !prev);
+      setOpen(false);
+    },
+    onError: () => {
+      toast.error("Failed to create transaction", {
+        id: "create-transaction",
+      });
     },
   });
 
@@ -111,19 +116,19 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="text-lg sm:text-xl">
             Create a new{" "}
             <span
               className={cn(
                 "m-1",
-                type === "income" ? "text-teal-500" : "text-red-500"
+                type === "income" ? "text-teal-500" : "text-rose-500"
               )}
             >
               {type}
             </span>
-            Transaction
+            transaction
           </DialogTitle>
         </DialogHeader>
         <Form {...form}>
@@ -135,14 +140,16 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} placeholder="e.g. Groceries, Salary" />
                   </FormControl>
-                  <FormDescription>
+                  <FormDescription className="text-xs sm:text-sm">
                     Transaction description (optional)
                   </FormDescription>
+                  <FormMessage />
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="amount"
@@ -150,21 +157,30 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                 <FormItem>
                   <FormLabel>Amount</FormLabel>
                   <FormControl>
-                    <Input type="number" {...field} />
+                    <Input
+                      type="number"
+                      {...field}
+                      placeholder="0.00"
+                      onChange={(e) => {
+                        const value = parseFloat(e.target.value);
+                        field.onChange(isNaN(value) ? 0 : value);
+                      }}
+                    />
                   </FormControl>
-                  <FormDescription>
+                  <FormDescription className="text-xs sm:text-sm">
                     Transaction amount (required)
                   </FormDescription>
+                  <FormMessage />
                 </FormItem>
               )}
             />
 
-            <div className="flex items-center justify-between gap-2 ">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <FormField
                 control={form.control}
                 name="category"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col">
+                  <FormItem className="flex-1">
                     <FormLabel>Category</FormLabel>
                     <FormControl>
                       <CategoryPicker
@@ -172,9 +188,10 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                         onChange={handleCategoryChange}
                       />
                     </FormControl>
-                    <FormDescription>
-                      Select a category for this transaction
+                    <FormDescription className="text-xs sm:text-sm">
+                      Select a category
                     </FormDescription>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -183,14 +200,14 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                 control={form.control}
                 name="date"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Transaction date</FormLabel>
+                  <FormItem className="flex-1">
+                    <FormLabel>Date</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
                             className={cn(
-                              "w-[200px] pl-3 text-left font-normal",
+                              "w-full pl-3 text-left font-normal",
                               !field.value && "text-muted-foreground"
                             )}
                             variant={"outline"}
@@ -204,7 +221,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
+                      <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
                           selected={field.value}
@@ -212,33 +229,36 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                             if (!value) return;
                             field.onChange(value);
                           }}
-                          autoFocus
+                          initialFocus
                         />
                       </PopoverContent>
                     </Popover>
-                    <FormDescription>
-                      Select a date for this transaction
+                    <FormDescription className="text-xs sm:text-sm">
+                      Transaction date
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            <DialogFooter>
+
+            <DialogFooter className="gap-2 sm:gap-0">
               <DialogClose asChild>
                 <Button
-                  variant={"secondary"}
                   type="button"
-                  onClick={() => {
-                    form.reset();
-                  }}
+                  variant="outline"
+                  className="w-full sm:w-auto"
+                  onClick={() => form.reset()}
                 >
                   Cancel
                 </Button>
               </DialogClose>
-              <Button type="submit" disabled={isPending}>
-                {!isPending && "Create"}
-                {isPending && <Loader2 className="animate-spin" />}
+              <Button
+                type="submit"
+                disabled={isPending}
+                className="w-full sm:w-auto"
+              >
+                {!isPending ? "Create" : <Loader2 className="animate-spin" />}
               </Button>
             </DialogFooter>
           </form>
