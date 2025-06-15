@@ -1,11 +1,10 @@
+import prisma from "@/lib/prisma";
+import { Period, Timeframe } from "@/lib/types";
 import { currentUser } from "@clerk/nextjs/server";
 import { getDaysInMonth } from "date-fns";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { prisma } from "../../../lib/prisma";
-import { Period, Timeframe } from "../../../lib/types";
 
-// PENYEMPURNAAN: Definisikan tipe data yang akan dikembalikan
 type HistoryData = {
   year: number;
   month: number;
@@ -46,11 +45,9 @@ export async function GET(request: Request) {
     year: queryParams.data.year,
   });
 
-  // DIPERBAIKI: Fungsi GET harus mengembalikan sebuah Response
   return Response.json(data);
 }
 
-// Tipe ini sudah benar dan sangat bagus
 export type GetHistoryDataResponseType = Awaited<
   ReturnType<typeof getHistoryData>
 >;
@@ -78,7 +75,6 @@ async function getYearHistoryData(userId: string, year: number) {
 
   if (!result || result.length === 0) return [];
 
-  // PENYEMPURNAAN: Gunakan Map untuk performa lookup yang lebih baik
   const dataMap = new Map(result.map((row) => [row.month, row._sum]));
   const history: HistoryData[] = [];
 
@@ -111,7 +107,6 @@ async function getMonthHistoryData(
   const history: HistoryData[] = [];
   const dataMap = new Map(result.map((row) => [row.day, row._sum]));
 
-  // DIPERBAIKI: Gunakan jumlah hari yang benar untuk bulan tersebut
   const daysInMonth = getDaysInMonth(new Date(year, month));
   for (let i = 1; i <= daysInMonth; i++) {
     const dayData = dataMap.get(i);

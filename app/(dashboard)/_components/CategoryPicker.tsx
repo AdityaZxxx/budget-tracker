@@ -1,9 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-import { Button } from "../../../components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -11,15 +8,18 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "../../../components/ui/command";
+} from "@/components/ui/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "../../../components/ui/popover";
-import { Category } from "../../../lib/generated/prisma";
-import { TransactionType } from "../../../lib/types";
-import { cn } from "../../../lib/utils";
+} from "@/components/ui/popover";
+import { Category } from "@/lib/generated/prisma";
+import { TransactionType } from "@/lib/types";
+import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import CreateCategoryDialog from "./CreateCategoryDialog";
 
 interface Props {

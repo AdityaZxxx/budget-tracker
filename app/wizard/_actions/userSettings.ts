@@ -1,9 +1,9 @@
 "use server";
 
+import prisma from "@/lib/prisma";
+import { UpdateUserCurrencySchema } from "@/schemas/userSetting";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { prisma } from "../../../lib/prisma";
-import { UpdateUserCurrencySchema } from "../../../schemas/userSetting";
 
 export async function UpdateUserCurrency(currency: string) {
   const parsedBody = UpdateUserCurrencySchema.safeParse({

@@ -1,16 +1,16 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import SkeletonWrapper from "../../../components/SkeletonWrapper";
+import SkeletonWrapper from "@/components/SkeletonWrapper";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../../components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "../../../components/ui/tabs";
-import { Period, Timeframe } from "../../../lib/types";
+} from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Period, Timeframe } from "@/lib/types";
+import { useQuery } from "@tanstack/react-query";
 import { GetHistoryPeriodsResponseType } from "../../api/history-periods/route";
 
 interface Props {
@@ -59,10 +59,7 @@ const HistoryPeriodSelector = ({
             isLoading={historyPeriods.isFetching}
             fullWidth={false}
           >
-            <MonthSelector
-              period={period}
-              setPeriod={setPeriod}
-            />
+            <MonthSelector period={period} setPeriod={setPeriod} />
           </SkeletonWrapper>
         )}
       </div>
