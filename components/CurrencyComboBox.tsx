@@ -16,13 +16,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { UserSettings } from "@prisma/client";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ChevronsUpDown } from "lucide-react";
 import * as React from "react";
 import { toast } from "sonner";
 import { UpdateUserCurrency } from "../app/wizard/_actions/userSettings";
 import { Currencies, Currency } from "../lib/currencies";
-import { UserSettings } from "../lib/generated/prisma";
 import SkeletonWrapper from "./SkeletonWrapper";
 
 export function CurrencyComboBox() {
