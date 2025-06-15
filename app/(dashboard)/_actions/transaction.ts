@@ -1,12 +1,12 @@
 "use server";
 
-import { currentUser } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
-import { prisma } from "../../../lib/prisma";
+import prisma from "@/lib/prisma";
 import {
   CreateTransactionSchema,
   CreateTransactionSchemaType,
-} from "../../../schemas/transaction";
+} from "@/schemas/transaction";
+import { currentUser } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
 export async function CreateTransaction(form: CreateTransactionSchemaType) {
   const parsedBody = CreateTransactionSchema.safeParse(form);

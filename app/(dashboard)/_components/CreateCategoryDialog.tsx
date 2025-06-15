@@ -1,5 +1,36 @@
 // app/(dashboard)/_components/CreateCategoryDialog.tsx
 
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Category } from "@/lib/generated/prisma";
+import { TransactionType } from "@/lib/types";
+import { cn } from "@/lib/utils";
+import {
+  CreateCategorySchema,
+  CreateCategorySchemaType,
+} from "@/schemas/categories";
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,37 +40,6 @@ import { useTheme } from "next-themes";
 import { ReactNode, useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { Button } from "../../../components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../../../components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "../../../components/ui/form";
-import { Input } from "../../../components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "../../../components/ui/popover";
-import { Category } from "../../../lib/generated/prisma";
-import { TransactionType } from "../../../lib/types";
-import { cn } from "../../../lib/utils";
-import {
-  CreateCategorySchema,
-  CreateCategorySchemaType,
-} from "../../../schemas/categories";
 import { CreateCategory } from "../_actions/categories";
 
 interface Props {
