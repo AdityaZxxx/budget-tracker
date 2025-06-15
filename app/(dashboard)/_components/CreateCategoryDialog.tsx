@@ -1,5 +1,3 @@
-// app/(dashboard)/_components/CreateCategoryDialog.tsx
-
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,7 +22,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Category } from "@/lib/generated/prisma";
 import { TransactionType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import {
@@ -34,6 +31,7 @@ import {
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Category } from "@prisma/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CircleOff, Loader2, PlusSquare } from "lucide-react";
 import { useTheme } from "next-themes";
