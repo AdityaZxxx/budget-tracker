@@ -14,9 +14,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Category } from "@/lib/generated/prisma";
 import { TransactionType } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { Category } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
