@@ -21,8 +21,8 @@ import DeleteCategoryDialog from "../../_components/DeletecategoryDialog";
 
 const ManagePageClient = () => {
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card py-8 px-6">
+    <div className="min-h-screen bg-background px-6">
+      <header className="border-b bg-card py-8">
         <div className="container">
           <div className="space-y-1">
             <h1 className="text-3xl font-bold tracking-tight">Manage</h1>
@@ -33,7 +33,7 @@ const ManagePageClient = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container py-8">
         <div className="space-y-8">
           <section>
             <Card className="transition-all hover:shadow-md">
