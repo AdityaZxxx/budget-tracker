@@ -218,30 +218,27 @@ function ErrorState({
 
 function CategoryCard({ category }: { category: Category }) {
   return (
-    <div className="group relative overflow-hidden rounded-lg border transition-all hover:shadow-md">
-      <div className="flex items-center gap-4 p-4">
+    <div className="group relative flex items-center justify-between rounded-lg border p-4 transition-all hover:shadow-md">
+      <div className="flex items-center gap-4">
         <span className="text-2xl" role="img" aria-label={category.name}>
           {category.icon}
         </span>
         <span className="font-medium">{category.name}</span>
       </div>
 
-      <div className="absolute inset-x-0 bottom-0 translate-y-full bg-background/90 opacity-0 transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100">
-        <DeleteCategoryDialog
-          category={category}
-          trigger={
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full rounded-none text-destructive hover:bg-destructive/10"
-              aria-label={`Delete ${category.name} category`}
-            >
-              <TrashIcon className="mr-2 h-4 w-4" />
-              Delete
-            </Button>
-          }
-        />
-      </div>
+      <DeleteCategoryDialog
+        category={category}
+        trigger={
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-destructive opacity-100 hover:bg-destructive/10 md:opacity-0 md:group-hover:opacity-100"
+            aria-label={`Delete ${category.name} category`}
+          >
+            <TrashIcon className="h-4 w-4" />
+          </Button>
+        }
+      />
     </div>
   );
 }
