@@ -15,10 +15,12 @@ import {
   CreateTransactionSchema,
   CreateTransactionSchemaType,
 } from "@/schemas/transaction";
-import { ReactNode, useCallback, useState } from "react";
+import { ReactNode, useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
+import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Form,
   FormControl,
@@ -34,16 +36,17 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { zodResolver } from "@hookform/resolvers/zod";
-import CategoryPicker from "./CategoryPicker";
-
-import { Calendar } from "@/components/ui/calendar";
+import { Currencies } from "@/lib/currencies";
 import { DateToUTCDate } from "@/lib/helpers";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { UserSettings } from "@prisma/client";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
+import { NumericFormat } from "react-number-format";
 import { toast } from "sonner";
 import { CreateTransaction } from "../_actions/transaction";
+import CategoryPicker from "./CategoryPicker";
 
 interface Props {
   trigger: ReactNode;
@@ -63,6 +66,29 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
   });
 
   const [open, setOpen] = useState(false);
+
+  const userSettings = useQuery<UserSettings>({
+    queryKey: ["userSettings"],
+    queryFn: () => fetch("/api/user-settings").then((res) => res.json()),
+  });
+
+  const currency = Currencies.find(
+    (c) => c.value === userSettings.data?.currency
+  );
+
+  const { thousandSeparator, decimalSeparator } = useMemo(() => {
+    const formatter = new Intl.NumberFormat(currency?.locale, {
+      style: "decimal",
+    });
+    const parts = formatter.formatToParts(1234.5);
+    const ts = parts.find((p) => p.type === "group")?.value;
+    const ds = parts.find((p) => p.type === "decimal")?.value;
+    return {
+      thousandSeparator: ts,
+      decimalSeparator: ds,
+    };
+  }, [currency]);
+
   const handleCategoryChange = useCallback(
     (value: string) => {
       form.setValue("category", value);
@@ -157,15 +183,20 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                 <FormItem>
                   <FormLabel>Amount</FormLabel>
                   <FormControl>
-                    <Input
-                      type="number"
-                      {...field}
-                      placeholder="0.00"
-                      onChange={(e) => {
-                        const value = parseFloat(e.target.value);
-                        field.onChange(isNaN(value) ? 0 : value);
-                      }}
-                    />
+                    <SkeletonWrapper isLoading={userSettings.isFetching}>
+                      <NumericFormat
+                        customInput={Input}
+                        placeholder="0.00"
+                        value={field.value}
+                        onValueChange={(values) => {
+                          field.onChange(values.floatValue);
+                        }}
+                        thousandSeparator={thousandSeparator}
+                        decimalSeparator={decimalSeparator}
+                        decimalScale={2}
+                        allowNegative={false}
+                      />
+                    </SkeletonWrapper>
                   </FormControl>
                   <FormDescription className="text-xs sm:text-sm">
                     Transaction amount (required)
