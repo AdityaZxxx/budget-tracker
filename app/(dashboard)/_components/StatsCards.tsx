@@ -95,7 +95,7 @@ const StatsCards = ({ from, to, userSettings }: Props) => {
 export default StatsCards;
 
 interface StatCardProps {
-  formatter: Intl.NumberFormat;
+  formatter: { format: (value: number) => string };
   value: number;
   title: string;
   icon: ReactNode;
