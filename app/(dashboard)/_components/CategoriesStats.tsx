@@ -12,7 +12,7 @@ import { useMemo } from "react";
 import { type GetCategoriesStatsResponseType } from "../../api/stats/categories/route";
 
 interface CategoriesCardProps {
-  formatter: Intl.NumberFormat;
+  formatter: { format: (value: number) => string };
   type: TransactionType;
   data: GetCategoriesStatsResponseType;
   total: number;
