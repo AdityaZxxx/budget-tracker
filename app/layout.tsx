@@ -19,16 +19,16 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Budget Tracker",
-    template: "%s | Budget Tracker",
+    default: "Sora",
+    template: "%s | Sora",
   },
   description:
-    "A personal budget manager for tracking your financial activities and achieving your financial goals.",
+    "A free shared finance app for couples and households: one ledger, budgets, and goals.",
   keywords: [
-    "budget tracker",
+    "shared finances",
+    "couple budget",
+    "household budget",
     "expense tracker",
-    "personal finance",
-    "money manager",
     "saving goals",
   ],
   creator: "Aditya Rahmad",
@@ -37,21 +37,21 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: siteUrl,
-    title: "Budget Tracker",
-    description: "Take control of your finances with Budget Tracker.",
-    siteName: "Budget Tracker",
+    title: "Sora",
+    description: "Take control of your finances with Sora.",
+    siteName: "Sora",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Budget Tracker Overview",
+        alt: "Sora Overview",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Budget Tracker - Your Personal Finance Companion",
+    title: "Sora - Your Personal Finance Companion",
     description: "Track expenses, manage income, and reach your saving goals.",
     images: ["/og-image.png"],
     creator: "@adxxya30",
@@ -65,7 +65,7 @@ export const metadata: Metadata = {
 
   manifest: "/manifest.json",
   appleWebApp: {
-    title: "Budget Tracker",
+    title: "Sora",
     statusBarStyle: "default",
     capable: true,
   },
