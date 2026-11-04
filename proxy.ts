@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 const authPages = ["/sign-in", "/sign-up"];
+// Invite pages are public: accepting an invite is what signs a new user in.
+const publicPrefixes = ["/invite"];
 const protectedPrefixes = ["/transactions", "/manage", "/wizard"];
 
 export function proxy(request: NextRequest) {
@@ -10,12 +12,14 @@ export function proxy(request: NextRequest) {
   const sessionCookie = getSessionCookie(request);
 
   const isAuthPage = authPages.some((page) => pathname.startsWith(page));
+  const isPublic = publicPrefixes.some((prefix) => pathname.startsWith(prefix));
   const isAuthApi = pathname.startsWith("/api/auth");
   const isApiRoute = pathname.startsWith("/api");
   const isProtected =
-    pathname === "/" ||
-    protectedPrefixes.some((prefix) => pathname.startsWith(prefix)) ||
-    (isApiRoute && !isAuthApi);
+    !isPublic &&
+    (pathname === "/" ||
+      protectedPrefixes.some((prefix) => pathname.startsWith(prefix)) ||
+      (isApiRoute && !isAuthApi));
 
   if (sessionCookie && isAuthPage) {
     return NextResponse.redirect(new URL("/", request.url));

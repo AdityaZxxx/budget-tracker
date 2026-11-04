@@ -28,7 +28,11 @@ function GoogleIcon() {
   );
 }
 
-export default function GoogleSignInButton() {
+export default function GoogleSignInButton({
+  callbackURL = "/",
+}: {
+  callbackURL?: string;
+}) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleGoogleSignIn = async () => {
@@ -37,7 +41,7 @@ export default function GoogleSignInButton() {
       provider: "google",
       // New users without settings are redirected to /wizard by the
       // dashboard page, so "/" works for both sign-in and sign-up.
-      callbackURL: "/",
+      callbackURL,
     });
     if (error) {
       setIsLoading(false);
