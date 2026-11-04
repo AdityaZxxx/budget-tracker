@@ -25,6 +25,7 @@ import {
 import CreateCategoryDialog from "../../_components/CreateCategoryDialog";
 import DeleteCategoryDialog from "../../_components/DeletecategoryDialog";
 import AccountSection from "./AccountSection";
+import BudgetsSection from "./BudgetsSection";
 import InviteLinkDialog from "./InviteLinkDialog";
 import MembersSection from "./MembersSection";
 
@@ -83,6 +84,8 @@ const ManagePageClient = () => {
           </section>
 
           <MembersSection />
+
+          <BudgetsSection />
 
           <AccountSection />
 

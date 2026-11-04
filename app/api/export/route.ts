@@ -10,12 +10,20 @@ export async function GET() {
 
   const { session, household } = result;
 
-  const [members, transactions, categories, goals, inviteLinks] =
-    await Promise.all([
+  const [
+    members,
+    transactions,
+    categories,
+    goals,
+    inviteLinks,
+    budgets,
+    notifications,
+  ] = await Promise.all([
     prisma.householdMembership.findMany({
       where: { householdId: household.id },
       select: {
         joinedAt: true,
+        emailDigest: true,
         user: {
           select: {
             id: true,
@@ -52,6 +60,15 @@ export async function GET() {
       },
       orderBy: { createdAt: "desc" },
     }),
+    prisma.budget.findMany({
+      where: { householdId: household.id },
+      orderBy: { createdAt: "asc" },
+    }),
+    // Only the caller's own notifications are exported.
+    prisma.notification.findMany({
+      where: { householdId: household.id, userId: session.user.id },
+      orderBy: { createdAt: "desc" },
+    }),
   ]);
 
   const payload = {
@@ -66,10 +83,13 @@ export async function GET() {
       name: member.user.name,
       email: member.user.email,
       joinedAt: member.joinedAt,
+      emailDigest: member.emailDigest,
     })),
     transactions,
     categories,
     goals,
+    budgets,
+    notifications,
     inviteLinks,
   };
 

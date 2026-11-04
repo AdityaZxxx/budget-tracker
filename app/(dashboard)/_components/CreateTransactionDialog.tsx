@@ -120,10 +120,17 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
 
       setOpen(false);
     },
-    onError: () => {
-      toast.error("Unable to create transaction. Try again.", {
-        id: "create-transaction",
-      });
+    onError: (error) => {
+      // Server actions throw domain errors (e.g. a hard budget rejecting the
+      // expense); surface the message when the runtime exposes it.
+      toast.error(
+        error instanceof Error && error.message
+          ? error.message
+          : "Unable to create transaction. Try again.",
+        {
+          id: "create-transaction",
+        }
+      );
     },
   });
 
