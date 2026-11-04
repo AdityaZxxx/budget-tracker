@@ -1,4 +1,4 @@
-import { currentUser } from "@clerk/nextjs/server";
+import { getSession } from "@/lib/auth";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { CurrencyComboBox } from "../../components/CurrencyComboBox";
@@ -14,15 +14,18 @@ import {
 import { Separator } from "../../components/ui/separator";
 
 const page = async () => {
-  const user = await currentUser();
-  if (!user) {
+  const session = await getSession();
+  if (!session) {
     redirect("/sign-in");
   }
   return (
     <div className="container flex max-w-2xl flex-col items-center justify-between gap-4">
       <div>
         <h1 className="text-center text-3xl">
-          Welcome, <span className="ml-2 font-bold">{user.firstName}! 👋</span>
+          Welcome,{" "}
+          <span className="ml-2 font-bold">
+            {session.user.name.split(" ")[0]}! 👋
+          </span>
         </h1>
         <h2 className="mt-4 text-center text-base text-muted-foreground">
           Les &apos;s get started by setting up your currency
