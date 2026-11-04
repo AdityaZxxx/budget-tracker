@@ -25,7 +25,7 @@ const signUpSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
-export default function SignUpForm() {
+export default function SignUpForm({ next }: { next?: string }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -60,7 +60,7 @@ export default function SignUpForm() {
       }
 
       toast.success("Account created");
-      router.push("/wizard");
+      router.push(next ?? "/wizard");
       router.refresh();
     },
   });
@@ -179,10 +179,13 @@ export default function SignUpForm() {
           <span className="text-xs text-muted-foreground">or</span>
           <div className="h-px flex-1 bg-border" />
         </div>
-        <GoogleSignInButton />
+        <GoogleSignInButton callbackURL={next ?? "/"} />
         <p className="mt-4 text-center text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Link href="/sign-in" className="underline underline-offset-4">
+          <Link
+            href={next ? `/sign-in?next=${encodeURIComponent(next)}` : "/sign-in"}
+            className="underline underline-offset-4"
+          >
             Sign in
           </Link>
         </p>
