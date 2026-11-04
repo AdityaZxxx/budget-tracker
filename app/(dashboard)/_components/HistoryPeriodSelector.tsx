@@ -82,6 +82,7 @@ function YearSelector({
     <Select
       value={period.year.toString()}
       onValueChange={(value) => {
+        if (value === null) return;
         setPeriod({ month: period.month, year: parseInt(value) });
       }}
     >
@@ -110,6 +111,7 @@ function MonthSelector({
     <Select
       value={period.month.toString()}
       onValueChange={(value) => {
+        if (value === null) return;
         setPeriod({ year: period.year, month: parseInt(value) });
       }}
     >
