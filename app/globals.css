@@ -140,3 +140,7 @@
     @apply bg-background text-foreground;
   }
 }
+
+.container {
+  margin-inline: auto;
+}
