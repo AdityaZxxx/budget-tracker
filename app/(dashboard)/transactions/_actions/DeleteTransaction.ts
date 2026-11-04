@@ -1,18 +1,20 @@
 "use server";
 
-import { getSession } from "@/lib/auth";
+import { requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 
 export async function DeleteTransaction(id: string) {
-  const session = await getSession();
-  if (!session) {
+  const result = await requireHousehold();
+  if (!result) {
     redirect("/sign-in");
   }
 
+  const { household } = result;
+
   const transaction = await prisma.transaction.findUnique({
     where: {
-      userId: session.user.id,
+      householdId: household.id,
       id,
     },
   });
@@ -25,13 +27,13 @@ export async function DeleteTransaction(id: string) {
     prisma.transaction.delete({
       where: {
         id,
-        userId: session.user.id,
+        householdId: household.id,
       },
     }),
     prisma.monthHistory.update({
       where: {
-        day_month_year_userId: {
-          userId: session.user.id,
+        day_month_year_householdId: {
+          householdId: household.id,
           day: transaction.date.getUTCDate(),
           month: transaction.date.getUTCMonth(),
           year: transaction.date.getUTCFullYear(),
@@ -53,8 +55,8 @@ export async function DeleteTransaction(id: string) {
 
     prisma.yearHistory.update({
       where: {
-        month_year_userId: {
-          userId: session.user.id,
+        month_year_householdId: {
+          householdId: household.id,
           month: transaction.date.getUTCMonth(),
           year: transaction.date.getUTCFullYear(),
         },

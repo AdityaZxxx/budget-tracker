@@ -1,4 +1,4 @@
-import { getSession } from "@/lib/auth";
+import { requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 import { Period, Timeframe } from "@/lib/types";
 import { getDaysInMonth } from "date-fns";
@@ -20,8 +20,8 @@ const getHistoryDataSchema = z.object({
 });
 
 export async function GET(request: Request) {
-  const session = await getSession();
-  if (!session) {
+  const result = await requireHousehold();
+  if (!result) {
     redirect("/sign-in");
   }
 
@@ -40,10 +40,14 @@ export async function GET(request: Request) {
     return Response.json(queryParams.error.message, { status: 400 });
   }
 
-  const data = await getHistoryData(session.user.id, queryParams.data.timeframe, {
-    month: queryParams.data.month,
-    year: queryParams.data.year,
-  });
+  const data = await getHistoryData(
+    result.household.id,
+    queryParams.data.timeframe,
+    {
+      month: queryParams.data.month,
+      year: queryParams.data.year,
+    }
+  );
 
   return Response.json(data);
 }
@@ -53,22 +57,22 @@ export type GetHistoryDataResponseType = Awaited<
 >;
 
 async function getHistoryData(
-  userId: string,
+  householdId: string,
   timeframe: Timeframe,
   period: Period
 ) {
   switch (timeframe) {
     case "year":
-      return await getYearHistoryData(userId, period.year);
+      return await getYearHistoryData(householdId, period.year);
     case "month":
-      return await getMonthHistoryData(userId, period.year, period.month);
+      return await getMonthHistoryData(householdId, period.year, period.month);
   }
 }
 
-async function getYearHistoryData(userId: string, year: number) {
+async function getYearHistoryData(householdId: string, year: number) {
   const result = await prisma.yearHistory.groupBy({
     by: ["month"],
-    where: { userId, year },
+    where: { householdId, year },
     _sum: { expense: true, income: true },
     orderBy: [{ month: "asc" }],
   });
@@ -91,13 +95,13 @@ async function getYearHistoryData(userId: string, year: number) {
 }
 
 async function getMonthHistoryData(
-  userId: string,
+  householdId: string,
   year: number,
   month: number
 ) {
   const result = await prisma.monthHistory.groupBy({
     by: ["day"],
-    where: { userId, year, month },
+    where: { householdId, year, month },
     _sum: { expense: true, income: true },
     orderBy: [{ day: "asc" }],
   });

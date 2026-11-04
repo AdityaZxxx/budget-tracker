@@ -12,8 +12,9 @@ datasource db {
   provider = "postgresql"
 }
 
-// Better Auth core models (user IDs match the app tables' userId, migrated
-// from Clerk with their original IDs preserved)
+// Better Auth core models (user IDs are referenced by the app tables through
+// HouseholdMembership.userId and Transaction.addedById, migrated from Clerk
+// with their original IDs preserved)
 model User {
   id            String    @id
   name          String
@@ -24,6 +25,45 @@ model User {
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
+
+  memberships       HouseholdMembership[]
+  addedTransactions Transaction[]
+  createdInviteLinks InviteLink[]
+}
+
+model Household {
+  id        String   @id @default(uuid())
+  currency  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships  HouseholdMembership[]
+  inviteLinks  InviteLink[]
+  transactions Transaction[]
+  categories   Category[]
+  monthHistory MonthHistory[]
+  yearHistory  YearHistory[]
+}
+
+model HouseholdMembership {
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  joinedAt    DateTime  @default(now())
+
+  @@id([householdId, userId])
+}
+
+model InviteLink {
+  id          String    @id @default(uuid())
+  token       String    @unique
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  createdById String
+  createdBy   User      @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  revokedAt   DateTime?
 }
 
 model Session {
@@ -64,19 +104,15 @@ model Verification {
   updatedAt  DateTime @updatedAt
 }
 
-model UserSettings {
-  userId String @id
-  currency String
-}
-
 model Category {
   createdAt DateTime @default(now())
   name String
-  userId String
+  householdId String
+  household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
   icon String
   type String @default("income")
 
-  @@unique([name, userId, type])
+  @@unique([name, householdId, type])
 }
 
 model Transaction {
@@ -87,7 +123,10 @@ model Transaction {
   amount Float
   description String
   date DateTime
-  userId String
+  householdId String
+  household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  addedById String
+  addedBy User @relation(fields: [addedById], references: [id], onDelete: Cascade)
   type String @default("income")
 
   category String
@@ -95,22 +134,24 @@ model Transaction {
 }
 
 model MonthHistory {
-  userId String
+  householdId String
+  household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
   day Int
   month Int
   year Int
   income Float
   expense Float
 
-  @@id([day, month, year, userId])
+  @@id([day, month, year, householdId])
 }
 
 model YearHistory {
-  userId String
+  householdId String
+  household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
   month Int
   year Int
   income Float
   expense Float
 
-  @@id([month, year, userId])
+  @@id([month, year, householdId])
 }

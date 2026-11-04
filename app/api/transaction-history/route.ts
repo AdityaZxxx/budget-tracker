@@ -1,4 +1,4 @@
-import { getSession } from "@/lib/auth";
+import { requireHousehold } from "@/lib/household";
 import { GetFormatterForCurrency } from "@/lib/helpers";
 import prisma from "@/lib/prisma";
 import { OverviewQuerySchema } from "@/schemas/overview";
@@ -6,9 +6,9 @@ import { redirect } from "next/navigation";
 import { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
-  const session = await getSession();
+  const result = await requireHousehold();
 
-  if (!session) {
+  if (!result) {
     redirect("/sign-in");
   }
 
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
   }
 
   const transactions = await getTrasactionsHistory(
-    session.user.id,
+    result.household.id,
     queryParams.data.from,
     queryParams.data.to
   );
@@ -40,22 +40,22 @@ export type GetTrasactionsHistoryResponseType = Awaited<
   ReturnType<typeof getTrasactionsHistory>
 >;
 
-async function getTrasactionsHistory(userId: string, from: Date, to: Date) {
-  const userSettings = await prisma.userSettings.findUnique({
+async function getTrasactionsHistory(householdId: string, from: Date, to: Date) {
+  const household = await prisma.household.findUnique({
     where: {
-      userId,
+      id: householdId,
     },
   });
 
-  if (!userSettings) {
-    throw new Error("user setting not found");
+  if (!household?.currency) {
+    throw new Error("household currency not set");
   }
 
-  const formatter = GetFormatterForCurrency(userSettings.currency);
+  const formatter = GetFormatterForCurrency(household.currency);
 
   const transactions = await prisma.transaction.findMany({
     where: {
-      userId,
+      householdId,
       date: {
         gte: from,
         lte: to,

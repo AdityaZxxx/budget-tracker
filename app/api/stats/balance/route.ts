@@ -1,4 +1,4 @@
-import { getSession } from "@/lib/auth";
+import { requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 import { OverviewQuerySchema } from "@/schemas/overview";
 import { redirect } from "next/navigation";
@@ -13,8 +13,8 @@ interface QueryParams {
 }
 
 export async function GET(request: Request): Promise<Response> {
-  const session = await getSession();
-  if (!session) {
+  const result = await requireHousehold();
+  if (!result) {
     redirect("/sign-in");
   }
 
@@ -31,7 +31,7 @@ export async function GET(request: Request): Promise<Response> {
   }
 
   const stats = await getBalanceStats(
-    session.user.id,
+    result.household.id,
     queryParams.data.from,
     queryParams.data.to
   );
@@ -43,11 +43,11 @@ export type GetBalanceStatsResponseType = Awaited<
   ReturnType<typeof getBalanceStats>
 >;
 
-async function getBalanceStats(userId: string, from: Date, to: Date) {
+async function getBalanceStats(householdId: string, from: Date, to: Date) {
   const totals = await prisma.transaction.groupBy({
     by: ["type"],
     where: {
-      userId,
+      householdId,
       date: {
         gte: from,
         lte: to,
