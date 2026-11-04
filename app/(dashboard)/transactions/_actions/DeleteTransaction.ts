@@ -30,49 +30,54 @@ export async function DeleteTransaction(id: string) {
         householdId: household.id,
       },
     }),
-    prisma.monthHistory.update({
-      where: {
-        day_month_year_householdId: {
-          householdId: household.id,
-          day: transaction.date.getUTCDate(),
-          month: transaction.date.getUTCMonth(),
-          year: transaction.date.getUTCFullYear(),
-        },
-      },
-      data: {
-        ...(transaction.type === "expense" && {
-          expense: {
-            decrement: transaction.amount,
-          },
-        }),
-        ...(transaction.type === "income" && {
-          income: {
-            decrement: transaction.amount,
-          },
-        }),
-      },
-    }),
+    // Personal transactions were never counted in the household rollups.
+    ...(transaction.shared
+      ? [
+          prisma.monthHistory.update({
+            where: {
+              day_month_year_householdId: {
+                householdId: household.id,
+                day: transaction.date.getUTCDate(),
+                month: transaction.date.getUTCMonth(),
+                year: transaction.date.getUTCFullYear(),
+              },
+            },
+            data: {
+              ...(transaction.type === "expense" && {
+                expense: {
+                  decrement: transaction.amount,
+                },
+              }),
+              ...(transaction.type === "income" && {
+                income: {
+                  decrement: transaction.amount,
+                },
+              }),
+            },
+          }),
 
-    prisma.yearHistory.update({
-      where: {
-        month_year_householdId: {
-          householdId: household.id,
-          month: transaction.date.getUTCMonth(),
-          year: transaction.date.getUTCFullYear(),
-        },
-      },
-      data: {
-        ...(transaction.type === "expense" && {
-          expense: {
-            decrement: transaction.amount,
-          },
-        }),
-        ...(transaction.type === "income" && {
-          income: {
-            decrement: transaction.amount,
-          },
-        }),
-      },
-    }),
+          prisma.yearHistory.update({
+            where: {
+              month_year_householdId: {
+                householdId: household.id,
+                month: transaction.date.getUTCMonth(),
+                year: transaction.date.getUTCFullYear(),
+              },
+            },
+            data: {
+              ...(transaction.type === "expense" && {
+                expense: {
+                  decrement: transaction.amount,
+                },
+              }),
+              ...(transaction.type === "income" && {
+                income: {
+                  decrement: transaction.amount,
+                },
+              }),
+            },
+          }),
+        ]
+      : []),
   ]);
 }

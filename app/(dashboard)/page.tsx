@@ -3,6 +3,7 @@ import { requireHousehold } from "@/lib/household";
 import { type Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getHouseholdMemberCount } from "./_actions/household";
+import Balances from "./_components/Balances";
 import CreateTransactionDialog from "./_components/CreateTransactionDialog";
 import History from "./_components/History";
 import InvitePartnerCta from "./_components/InvitePartnerCta";
@@ -69,6 +70,7 @@ const DashboardPage = async () => {
       </div>
       <InvitePartnerCta memberCount={memberCount} />
       <Overview household={household} />
+      <Balances household={household} />
       <History household={household} />
     </div>
   );
