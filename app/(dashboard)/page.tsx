@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
+import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { currentUser } from "@clerk/nextjs/server";
 import { type Metadata } from "next";
 import { redirect } from "next/navigation";
 import CreateTransactionDialog from "./_components/CreateTransactionDialog";
@@ -19,14 +19,14 @@ export const metadata: Metadata = {
 };
 
 const DashboardPage = async () => {
-  const user = await currentUser();
-  if (!user) {
+  const session = await getSession();
+  if (!session) {
     redirect("/sign-in");
   }
 
   const userSettings = await prisma.userSettings.findUnique({
     where: {
-      userId: user.id,
+      userId: session.user.id,
     },
   });
 
@@ -37,7 +37,9 @@ const DashboardPage = async () => {
     <div className="h-full bg-background px-6">
       <div className="border-b bg-card">
         <div className="container flex flex-wrap items-center justify-between gap-6 py-8">
-          <p className="text-3xl font-bold">Hello, {user.firstName}! 👋</p>
+          <p className="text-3xl font-bold">
+            Hello, {session.user.name.split(" ")[0]}! 👋
+          </p>
 
           <div className="flex items-center gap-3">
             <CreateTransactionDialog

@@ -1,6 +1,6 @@
+import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { OverviewQuerySchema } from "@/schemas/overview";
-import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 interface GetRequestParams {
@@ -13,8 +13,8 @@ interface QueryParams {
 }
 
 export async function GET(request: Request): Promise<Response> {
-  const user = await currentUser();
-  if (!user) {
+  const session = await getSession();
+  if (!session) {
     redirect("/sign-in");
   }
 
@@ -31,7 +31,7 @@ export async function GET(request: Request): Promise<Response> {
   }
 
   const stats = await getCategoriesStats(
-    user.id,
+    session.user.id,
     queryParams.data.from,
     queryParams.data.to
   );

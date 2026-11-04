@@ -1,15 +1,15 @@
+import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 export async function GET() {
-  const user = await currentUser();
+  const session = await getSession();
 
-  if (!user) {
+  if (!session) {
     redirect("/sign-in");
   }
 
-  const periods = await getHistoryPeriods(user.id);
+  const periods = await getHistoryPeriods(session.user.id);
   return Response.json(periods);
 }
 

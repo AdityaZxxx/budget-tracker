@@ -1,14 +1,14 @@
+import { getSession } from "@/lib/auth";
 import { GetFormatterForCurrency } from "@/lib/helpers";
 import prisma from "@/lib/prisma";
 import { OverviewQuerySchema } from "@/schemas/overview";
-import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
-  const user = await currentUser();
+  const session = await getSession();
 
-  if (!user) {
+  if (!session) {
     redirect("/sign-in");
   }
 
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
   }
 
   const transactions = await getTrasactionsHistory(
-    user.id,
+    session.user.id,
     queryParams.data.from,
     queryParams.data.to
   );
