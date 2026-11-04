@@ -64,10 +64,18 @@ async function getTrasactionsHistory(householdId: string, from: Date, to: Date) 
     orderBy: {
       date: "asc",
     },
+    include: {
+      addedBy: {
+        select: {
+          name: true,
+        },
+      },
+    },
   });
 
-  return transactions.map((transaction) => ({
+  return transactions.map(({ addedBy, ...transaction }) => ({
     ...transaction,
+    addedByName: addedBy.name,
     formattedAmount: formatter.format(transaction.amount),
   }));
 }

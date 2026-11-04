@@ -117,6 +117,8 @@ function CategoryList({ type }: { type: TransactionType }) {
         return res.json();
       }),
     retry: 1,
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
   });
 
   const typeConfig = {
