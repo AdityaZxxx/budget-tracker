@@ -104,6 +104,14 @@ model Verification {
   updatedAt  DateTime @updatedAt
 }
 
+// Better Auth rate limiting with storage: "database"
+model RateLimit {
+  id          String @id
+  key         String @unique
+  count       Int
+  lastRequest BigInt
+}
+
 model Category {
   createdAt DateTime @default(now())
   name String
