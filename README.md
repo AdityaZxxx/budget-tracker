@@ -1,6 +1,6 @@
-# Budget Tracker
+# Sora
 
-A modern, full-stack web application designed to help users track their income and expenses, categorize transactions, and visualize their financial habits.
+Sora is a free finance app for couples and households: one shared ledger for income and expenses, with budgets, goals, and spending insights.
 
 ## ✨ Features
 
@@ -19,10 +19,10 @@ A modern, full-stack web application designed to help users track their income a
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
 - **Database**: PostgreSQL (via [Prisma](https://www.prisma.io/))
 - **Authentication**: [Better Auth](https://better-auth.com/)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/) & [shadcn/ui](https://ui.shadcn.com/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) with [Base UI](https://base-ui.com/) components
 - **Data Fetching**: [TanStack Query (React Query)](https://tanstack.com/query/latest)
 - **Charting**: [Recharts](https://recharts.org/)
-- **Form Management**: [React Hook Form](https://react-hook-form.com/) & [Zod](https://zod.dev/)
+- **Form Management**: [TanStack Form](https://tanstack.com/form/latest) & [Zod](https://zod.dev/)
 
 ## 🚀 Getting Started
 
