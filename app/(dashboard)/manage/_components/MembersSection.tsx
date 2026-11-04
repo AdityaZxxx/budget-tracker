@@ -11,19 +11,37 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
 import { useSession } from "@/lib/auth-client";
-import { useQuery } from "@tanstack/react-query";
-import { LogOut, UserMinus } from "lucide-react";
-import { listMembers } from "../_actions/membership";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { LogOut, Mail, UserMinus } from "lucide-react";
+import { toast } from "sonner";
+import { listMembers, setEmailDigest } from "../_actions/membership";
 import LeaveHouseholdDialog from "./LeaveHouseholdDialog";
 import RemoveMemberDialog from "./RemoveMemberDialog";
 
 const MembersSection = () => {
   const { data: session } = useSession();
 
+  const queryClient = useQueryClient();
+
   const { data: members = [], isLoading } = useQuery({
     queryKey: ["householdMembers"],
     queryFn: listMembers,
+  });
+
+  const { mutate: toggleDigest, isPending: isTogglingDigest } = useMutation({
+    mutationFn: setEmailDigest,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["householdMembers"],
+      });
+    },
+    onError: () => {
+      toast.error("Unable to update email digest. Try again.", {
+        id: "email-digest",
+      });
+    },
   });
 
   return (
@@ -71,7 +89,22 @@ const MembersSection = () => {
                         </p>
                       </div>
                     </div>
-                    {!isSelf && (
+                    {isSelf ? (
+                      <div className="flex items-center gap-2">
+                        <Mail className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">
+                          Email digest
+                        </span>
+                        <Switch
+                          checked={member.emailDigest}
+                          disabled={isTogglingDigest}
+                          onCheckedChange={(checked) =>
+                            toggleDigest({ emailDigest: checked })
+                          }
+                          aria-label="Toggle daily email digest"
+                        />
+                      </div>
+                    ) : (
                       <RemoveMemberDialog
                         member={member}
                         trigger={

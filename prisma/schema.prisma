@@ -29,6 +29,7 @@ model User {
   memberships       HouseholdMembership[]
   addedTransactions Transaction[]
   createdInviteLinks InviteLink[]
+  notifications     Notification[]
 }
 
 model Household {
@@ -42,6 +43,8 @@ model Household {
   transactions Transaction[]
   categories   Category[]
   goals        Goal[]
+  budgets      Budget[]
+  notifications Notification[]
   monthHistory MonthHistory[]
   yearHistory  YearHistory[]
 }
@@ -52,6 +55,8 @@ model HouseholdMembership {
   userId      String
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   joinedAt    DateTime  @default(now())
+  // Opt-in to the daily email digest of unread household notifications.
+  emailDigest Boolean   @default(false)
 
   @@id([householdId, userId])
 }
@@ -184,4 +189,31 @@ model YearHistory {
   expense Float
 
   @@id([month, year, householdId])
+}
+
+// Monthly spending limit on one category. "soft" warns at 80%/100% via
+// notifications; "hard" rejects shared expense transactions over the limit.
+model Budget {
+  id          String    @id @default(uuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  category    String
+  amount      Float
+  mode        String    @default("soft")
+  createdAt   DateTime  @default(now())
+
+  @@unique([householdId, category])
+}
+
+// In-app bell entry for one member; userId is the recipient.
+model Notification {
+  id          String    @id @default(uuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        String
+  message     String
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
 }
