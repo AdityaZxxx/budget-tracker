@@ -25,7 +25,7 @@ import { DataTableColumnHeader } from "@/components/datatable/ColumnHeader";
 import { DataTableViewOptions } from "@/components/datatable/Columntoggle";
 import { DataTableFacetedFilter } from "@/components/datatable/FacetedFilters";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,7 +45,6 @@ import {
 } from "@/components/ui/table";
 import { DateToUTCDate } from "@/lib/helpers";
 import { cn } from "@/lib/utils";
-import { CSVLink } from "react-csv";
 import { GetTrasactionsHistoryResponseType } from "../../../api/transaction-history/route";
 import DeleteTransactionDialog from "./DeleteTransactionDialog";
 
@@ -80,7 +79,10 @@ export const columns: ColumnDef<TransactionHistoryRow>[] = [
       <DataTableColumnHeader column={column} title="Description" />
     ),
     cell: ({ row }) => (
-      <div className="max-w-[200px] truncate capitalize md:max-w-none">
+      <div
+        className="max-w-[200px] truncate capitalize md:max-w-none"
+        title={row.original.description}
+      >
         {row.original.description}
       </div>
     ),
@@ -138,9 +140,9 @@ export const columns: ColumnDef<TransactionHistoryRow>[] = [
     cell: ({ row }) => (
       <p
         className={cn(
-          "text-md font-medium",
+          "text-sm font-medium tabular-nums",
           row.original.type === "income"
-            ? "text-emerald-600 dark:text-emerald-400"
+            ? "text-emerald-700 dark:text-emerald-400"
             : "text-rose-600 dark:text-rose-400"
         )}
       >
@@ -240,6 +242,35 @@ const TransactionTable = ({ from, to }: Props) => {
     []
   );
 
+  const downloadCsv = () => {
+    if (csvData.length === 0) return;
+    const escapeCell = (value: unknown) => {
+      const s = String(value ?? "");
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const lines = [
+      csvHeaders.map((h) => escapeCell(h.label)).join(","),
+      ...csvData.map((row) =>
+        csvHeaders
+          .map((h) => escapeCell((row as Record<string, string>)[h.key]))
+          .join(",")
+      ),
+    ];
+    const blob = new Blob(["\uFEFF" + lines.join("\r\n")], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `transactions_${from.toISOString().split("T")[0]}_to_${
+      to.toISOString().split("T")[0]
+    }.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="w-full space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -262,19 +293,18 @@ const TransactionTable = ({ from, to }: Props) => {
 
         <div className="flex items-center gap-2">
           <DataTableViewOptions table={table} />
-          <CSVLink
-            data={csvData}
-            headers={csvHeaders}
-            filename={`transactions_${from.toISOString().split("T")[0]}_to_${
-              to.toISOString().split("T")[0]
-            }.csv`}
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input hover:bg-accent hover:text-accent-foreground h-8 px-3 py-2 gap-1"
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="gap-1"
+            onClick={downloadCsv}
           >
             <DownloadIcon className="h-3.5 w-3.5" />
             <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
               Export CSV
             </span>
-          </CSVLink>
+          </Button>
         </div>
       </div>
 
@@ -322,11 +352,26 @@ const TransactionTable = ({ from, to }: Props) => {
                     className="h-24 text-center"
                   >
                     {history.isError ? (
-                      <div className="text-destructive">
-                        Error loading transactions
+                      <div className="flex flex-col items-center gap-2">
+                        <p className="text-destructive">
+                          Unable to load transactions. Check your connection
+                          and try again.
+                        </p>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => history.refetch()}
+                        >
+                          Retry
+                        </Button>
                       </div>
                     ) : (
-                      "No transactions found"
+                      <div className="flex flex-col items-center gap-1">
+                        <p className="font-medium">No transactions found</p>
+                        <p className="text-sm text-muted-foreground">
+                          Try a different date range or clear the filters.
+                        </p>
+                      </div>
                     )}
                   </TableCell>
                 </TableRow>
@@ -397,7 +442,7 @@ function RowActions({ transaction }: { transaction: TransactionHistoryRow }) {
         <DropdownMenuTrigger
           render={<Button variant={"ghost"} className="h-8 w-8 p-0" />}
         >
-          <span className="sr-only">Open Menu</span>
+          <span className="sr-only">Open actions</span>
           <MoreHorizontal className="h-4 w-4" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
