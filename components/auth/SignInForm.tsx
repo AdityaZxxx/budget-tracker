@@ -16,6 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import GoogleSignInButton from "./GoogleSignInButton";
 import {
   Form,
   FormControl,
@@ -109,6 +110,12 @@ export default function SignInForm() {
             </Button>
           </form>
         </Form>
+        <div className="my-4 flex items-center gap-2">
+          <div className="h-px flex-1 bg-border" />
+          <span className="text-xs text-muted-foreground">or</span>
+          <div className="h-px flex-1 bg-border" />
+        </div>
+        <GoogleSignInButton />
         <p className="mt-4 text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
           <Link href="/sign-up" className="underline underline-offset-4">
