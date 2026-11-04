@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -42,25 +43,29 @@ export default function UserMenu() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          aria-label="Open user menu"
-          className="rounded-full outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-        >
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={session.user.image ?? undefined} />
-            <AvatarFallback>{initials}</AvatarFallback>
-          </Avatar>
-        </button>
+      <DropdownMenuTrigger
+        render={
+          <button
+            type="button"
+            aria-label="Open user menu"
+            className="rounded-full outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          />
+        }
+      >
+        <Avatar className="h-8 w-8">
+          <AvatarImage src={session.user.image ?? undefined} />
+          <AvatarFallback>{initials}</AvatarFallback>
+        </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel className="flex flex-col">
-          <span className="truncate font-medium">{session.user.name}</span>
-          <span className="truncate text-xs font-normal text-muted-foreground">
-            {session.user.email}
-          </span>
-        </DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="flex flex-col">
+            <span className="truncate font-medium">{session.user.name}</span>
+            <span className="truncate text-xs font-normal text-muted-foreground">
+              {session.user.email}
+            </span>
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut}>
           <LogOut className="mr-2 h-4 w-4" />

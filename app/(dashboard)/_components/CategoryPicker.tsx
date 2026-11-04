@@ -56,20 +56,22 @@ const CategoryPicker = ({ type, onChange }: Props) => {
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant={"outline"}
-          role="combobox"
-          aria-expanded={open}
-          className="w-[200px] justify-between"
-        >
-          {selectedCategory ? (
-            <CategoryRow category={selectedCategory} />
-          ) : (
-            "Select Category"
-          )}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
+      <PopoverTrigger
+        render={
+          <Button
+            variant={"outline"}
+            role="combobox"
+            aria-expanded={open}
+            className="w-[200px] justify-between"
+          />
+        }
+      >
+        {selectedCategory ? (
+          <CategoryRow category={selectedCategory} />
+        ) : (
+          "Select Category"
+        )}
+        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
         <Command

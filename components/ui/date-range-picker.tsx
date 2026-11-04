@@ -2,11 +2,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import {
-  CheckIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
-} from "@radix-ui/react-icons";
+import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import { type FC, JSX, useEffect, useRef, useState } from "react";
 import { Button } from "./button";
 import { Calendar } from "./calendar";
@@ -309,7 +305,7 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
     >
       <>
         <span className={cn("pr-2 opacity-0", isSelected && "opacity-70")}>
-          <CheckIcon width={18} height={18} />
+          <Check width={18} height={18} />
         </span>
         {label}
       </>
@@ -343,8 +339,7 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
         setIsOpen(open);
       }}
     >
-      <PopoverTrigger asChild>
-        <Button size={"lg"} variant="outline">
+      <PopoverTrigger render={<Button size={"lg"} variant="outline" />}>
           <div className="text-right">
             <div className="py-1">
               <div>{`${formatDate(range.from, locale)}${
@@ -364,12 +359,11 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
           </div>
           <div className="pl-1 opacity-60 -mr-2 scale-125">
             {isOpen ? (
-              <ChevronUpIcon width={24} />
+              <ChevronUp width={24} />
             ) : (
-              <ChevronDownIcon width={24} />
+              <ChevronDown width={24} />
             )}
           </div>
-        </Button>
       </PopoverTrigger>
       <PopoverContent align={align} className="w-auto">
         <div className="flex py-2">
@@ -490,7 +484,7 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
                 <Select
                   defaultValue={selectedPreset}
                   onValueChange={(value) => {
-                    setPreset(value);
+                    if (value !== null) setPreset(value);
                   }}
                 >
                   <SelectTrigger className="w-[180px] mx-auto mb-2">

@@ -29,6 +29,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -393,14 +394,16 @@ function RowActions({ transaction }: { transaction: TransactionHistoryRow }) {
         transactionId={transaction.id}
       />
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant={"ghost"} className="h-8 w-8 p-0">
-            <span className="sr-only">Open Menu</span>
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
+        <DropdownMenuTrigger
+          render={<Button variant={"ghost"} className="h-8 w-8 p-0" />}
+        >
+          <span className="sr-only">Open Menu</span>
+          <MoreHorizontal className="h-4 w-4" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem
             className="flex items-center gap-2"

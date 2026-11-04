@@ -47,8 +47,8 @@ const page = async () => {
         </CardContent>
       </Card>
       <Separator />
-      <Button className="w-full" asChild>
-        <Link href={"/"}>I &apos;m done! Take me to the dashboard</Link>
+      <Button className="w-full" render={<Link href={"/"} />}>
+        I &apos;m done! Take me to the dashboard
       </Button>
       <div className="mt-8">
         <Logo />
