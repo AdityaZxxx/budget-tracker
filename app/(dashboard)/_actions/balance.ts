@@ -6,6 +6,7 @@ import {
   SETTLEMENT_DESCRIPTION_PREFIX,
 } from "@/lib/constants";
 import { requireHousehold } from "@/lib/household";
+import { notifyHouseholdExcept } from "@/lib/notifications";
 import prisma from "@/lib/prisma";
 import {
   RecordSettlementSchema,
@@ -189,4 +190,11 @@ export async function RecordSettlement(form: RecordSettlementSchemaType) {
       categoryIcon: category.icon,
     },
   });
+
+  await notifyHouseholdExcept(
+    household.id,
+    session.user.id,
+    "settlement",
+    `${session.user.name} recorded a settlement of ${amount} with ${membership.user.name}.`
+  );
 }

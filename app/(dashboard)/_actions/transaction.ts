@@ -1,6 +1,8 @@
 "use server";
 
+import { getMonthSpentByCategory } from "@/lib/budgets";
 import { requireHousehold } from "@/lib/household";
+import { notifyHouseholdExcept } from "@/lib/notifications";
 import prisma from "@/lib/prisma";
 import {
   CreateTransactionSchema,
@@ -44,6 +46,44 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 
     if (!goal) {
       throw new Error("Goal not found");
+    }
+  }
+
+  // Budgets only apply to shared expenses; personal transactions stay out.
+  let thresholdMessage: string | null = null;
+  if (type === "expense" && shared) {
+    const budget = await prisma.budget.findUnique({
+      where: {
+        householdId_category: {
+          householdId: household.id,
+          category: categoryRow.name,
+        },
+      },
+    });
+
+    if (budget) {
+      const spentByCategory = await getMonthSpentByCategory(
+        household.id,
+        date
+      );
+      const before = spentByCategory.get(categoryRow.name) ?? 0;
+      const after = before + amount;
+      const beforePercent = (before / budget.amount) * 100;
+      const afterPercent = (after / budget.amount) * 100;
+
+      if (budget.mode === "hard" && after > budget.amount) {
+        throw new Error(
+          `Hard budget exceeded for ${categoryRow.name}: the monthly limit is ${budget.amount} and ${before} is already spent, so this ${amount} expense would bring the month to ${after}.`
+        );
+      }
+
+      // One notification per transaction: report the highest threshold
+      // crossed (100% covers a jump straight past 80%).
+      if (beforePercent < 100 && afterPercent >= 100) {
+        thresholdMessage = `${categoryRow.name} budget reached 100% of ${budget.amount} this month (${after} spent).`;
+      } else if (beforePercent < 80 && afterPercent >= 80) {
+        thresholdMessage = `${categoryRow.name} budget reached 80% of ${budget.amount} this month (${after} spent).`;
+      }
     }
   }
 
@@ -120,4 +160,15 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
         ]
       : []),
   ]);
+
+  // The actor just made the transaction, so threshold warnings go to the
+  // other members only.
+  if (thresholdMessage) {
+    await notifyHouseholdExcept(
+      household.id,
+      session.user.id,
+      "budget_threshold",
+      thresholdMessage
+    );
+  }
 }

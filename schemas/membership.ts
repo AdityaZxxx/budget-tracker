@@ -5,3 +5,9 @@ export const RemoveMemberSchema = z.object({
 });
 
 export type RemoveMemberSchemaType = z.infer<typeof RemoveMemberSchema>;
+
+export const SetEmailDigestSchema = z.object({
+  emailDigest: z.boolean(),
+});
+
+export type SetEmailDigestSchemaType = z.infer<typeof SetEmailDigestSchema>;

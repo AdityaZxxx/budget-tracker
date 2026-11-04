@@ -1,10 +1,13 @@
 "use server";
 
 import { requireHousehold } from "@/lib/household";
+import { notifyHouseholdExcept } from "@/lib/notifications";
 import prisma from "@/lib/prisma";
 import {
   RemoveMemberSchema,
   RemoveMemberSchemaType,
+  SetEmailDigestSchema,
+  SetEmailDigestSchemaType,
 } from "@/schemas/membership";
 import { redirect } from "next/navigation";
 
@@ -69,6 +72,14 @@ export async function leaveHousehold() {
     }
   });
 
+  // If the household was deleted above there is nobody left to notify.
+  await notifyHouseholdExcept(
+    household.id,
+    session.user.id,
+    "member_left",
+    `${session.user.name} left the household.`
+  );
+
   // The session stays valid; the next requireHousehold() lazily creates a
   // fresh personal household, so solo use keeps working after leaving.
   redirect("/");
@@ -89,6 +100,26 @@ export async function removeMember(form: RemoveMemberSchemaType) {
 
   if (parsedBody.data.userId === session.user.id) {
     throw new Error("Use leave household to remove yourself");
+  }
+
+  const removedMembership = await prisma.householdMembership.findUnique({
+    where: {
+      householdId_userId: {
+        householdId: household.id,
+        userId: parsedBody.data.userId,
+      },
+    },
+    include: {
+      user: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
+
+  if (!removedMembership) {
+    throw new Error("Member not found");
   }
 
   await prisma.$transaction(async (tx) => {
@@ -112,5 +143,41 @@ export async function removeMember(form: RemoveMemberSchemaType) {
         },
       });
     }
+  });
+
+  // The removed member now belongs to a different household, so their bell
+  // would never show this; only the remaining members are notified.
+  await notifyHouseholdExcept(
+    household.id,
+    session.user.id,
+    "member_left",
+    `${removedMembership.user.name} was removed from the household.`
+  );
+}
+
+export async function setEmailDigest(form: SetEmailDigestSchemaType) {
+  const parsedBody = SetEmailDigestSchema.safeParse(form);
+  if (!parsedBody.success) {
+    throw new Error("Bad request");
+  }
+
+  const result = await requireHousehold();
+  if (!result) {
+    redirect("/sign-in");
+  }
+
+  const { session, household } = result;
+
+  // Members can only toggle their own digest preference.
+  return await prisma.householdMembership.update({
+    where: {
+      householdId_userId: {
+        householdId: household.id,
+        userId: session.user.id,
+      },
+    },
+    data: {
+      emailDigest: parsedBody.data.emailDigest,
+    },
   });
 }

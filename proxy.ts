@@ -14,9 +14,12 @@ export function proxy(request: NextRequest) {
   const isAuthPage = authPages.some((page) => pathname.startsWith(page));
   const isPublic = publicPrefixes.some((prefix) => pathname.startsWith(prefix));
   const isAuthApi = pathname.startsWith("/api/auth");
+  // Cron routes authenticate with a bearer secret instead of a session.
+  const isCronApi = pathname.startsWith("/api/cron");
   const isApiRoute = pathname.startsWith("/api");
   const isProtected =
     !isPublic &&
+    !isCronApi &&
     (pathname === "/" ||
       protectedPrefixes.some((prefix) => pathname.startsWith(prefix)) ||
       (isApiRoute && !isAuthApi));
