@@ -17,6 +17,7 @@ import { useForm, type StandardSchemaV1 } from "@tanstack/react-form";
 
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Field,
@@ -52,6 +53,7 @@ type CreateTransactionFormValues = {
   amount: number;
   type: TransactionType;
   date: Date;
+  shared: boolean;
 };
 
 const CreateTransactionDialog = ({ trigger, type }: Props) => {
@@ -111,6 +113,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
       amount: 0,
       type,
       date: new Date(),
+      shared: true,
     },
     validators: {
       // The schema uses z.coerce, so its input type differs from the form
@@ -319,6 +322,33 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
               }}
             />
           </div>
+
+          <form.Field
+            name="shared"
+            children={(field) => (
+              <Field>
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id={field.name}
+                    name={field.name}
+                    checked={field.state.value}
+                    onBlur={field.handleBlur}
+                    onCheckedChange={(checked) => field.handleChange(checked)}
+                  />
+                  <FieldLabel
+                    htmlFor={field.name}
+                    className="text-sm font-normal"
+                  >
+                    Shared with household
+                  </FieldLabel>
+                </div>
+                <FieldDescription className="text-xs sm:text-sm">
+                  Personal transactions are visible only to you and excluded
+                  from household totals and budgets
+                </FieldDescription>
+              </Field>
+            )}
+          />
 
           <DialogFooter className="gap-2 sm:gap-0">
             <DialogClose

@@ -48,6 +48,7 @@ async function getBalanceStats(householdId: string, from: Date, to: Date) {
     by: ["type"],
     where: {
       householdId,
+      shared: true,
       date: {
         gte: from,
         lte: to,

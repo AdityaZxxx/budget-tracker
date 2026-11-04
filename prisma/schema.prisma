@@ -137,6 +137,10 @@ model Transaction {
   addedBy User @relation(fields: [addedById], references: [id], onDelete: Cascade)
   type String @default("income")
 
+  // false = personal: visible only to addedById, excluded from household
+  // totals, budgets, and history rollups (settlements are personal too)
+  shared Boolean @default(true)
+
   category String
   categoryIcon String
 }
