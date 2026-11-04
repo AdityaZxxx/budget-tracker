@@ -8,6 +8,13 @@ export const CreateTransactionSchema = z.object({
   type: z.union([z.literal("income"), z.literal("expense")]),
 });
 
-export type CreateTransactionSchemaType = z.infer<
+export type CreateTransactionSchemaType = {
+  amount: number;
+  description?: string;
+  date: Date;
+  category: string;
+  type: "income" | "expense";
+};
+export type CreateTransactionSchemaOutput = z.output<
   typeof CreateTransactionSchema
 >;

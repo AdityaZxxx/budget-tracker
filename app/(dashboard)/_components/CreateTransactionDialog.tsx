@@ -11,10 +11,8 @@ import {
 } from "@/components/ui/dialog";
 import { TransactionType } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import {
-  CreateTransactionSchema,
-  CreateTransactionSchemaType,
-} from "@/schemas/transaction";
+import { CreateTransactionSchema } from "@/schemas/transaction";
+import type { z } from "zod";
 import { ReactNode, useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -54,7 +52,11 @@ interface Props {
 }
 
 const CreateTransactionDialog = ({ trigger, type }: Props) => {
-  const form = useForm<CreateTransactionSchemaType>({
+  const form = useForm<
+    z.input<typeof CreateTransactionSchema>,
+    any,
+    z.output<typeof CreateTransactionSchema>
+  >({
     resolver: zodResolver(CreateTransactionSchema),
     defaultValues: {
       description: "",
@@ -126,7 +128,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
   });
 
   const onSubmit = useCallback(
-    (values: CreateTransactionSchemaType) => {
+    (values: z.output<typeof CreateTransactionSchema>) => {
       toast.loading("Creating transaction...", {
         id: "create-transaction",
       });
@@ -187,7 +189,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                       <NumericFormat
                         customInput={Input}
                         placeholder="0.00"
-                        value={field.value}
+                        value={field.value as number}
                         onValueChange={(values) => {
                           field.onChange(values.floatValue);
                         }}
@@ -244,7 +246,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                             variant={"outline"}
                           >
                             {field.value ? (
-                              format(field.value, "PPP")
+                              format(field.value as Date, "PPP")
                             ) : (
                               <span>Pick a date</span>
                             )}
@@ -255,12 +257,11 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
-                          selected={field.value}
+                          selected={field.value as Date}
                           onSelect={(value) => {
                             if (!value) return;
                             field.onChange(value);
                           }}
-                          initialFocus
                         />
                       </PopoverContent>
                     </Popover>
