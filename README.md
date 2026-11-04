@@ -57,11 +57,23 @@ Follow these instructions to get a copy of the project up and running on your lo
     BETTER_AUTH_SECRET=
     BETTER_AUTH_URL=http://localhost:3000
 
+    GOOGLE_CLIENT_ID=
+    GOOGLE_CLIENT_SECRET=
+
     POSTGRES_PRISMA_URL=
     POSTGRES_URL_NON_POOLING=
     ```
 
     Generate a secret with `openssl rand -base64 32`.
+
+    For Google sign-in, create an OAuth client in the
+    [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+    and add the authorized redirect URI:
+
+    ```txt
+    http://localhost:3000/api/auth/callback/google
+    https://your-production-domain/api/auth/callback/google
+    ```
 
 4.  **Run database migrations:**
 
