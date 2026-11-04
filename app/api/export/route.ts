@@ -8,7 +8,7 @@ export async function GET() {
     redirect("/sign-in");
   }
 
-  const { household } = result;
+  const { session, household } = result;
 
   const [members, transactions, categories, inviteLinks] = await Promise.all([
     prisma.householdMembership.findMany({
@@ -26,7 +26,10 @@ export async function GET() {
       orderBy: { joinedAt: "asc" },
     }),
     prisma.transaction.findMany({
-      where: { householdId: household.id },
+      where: {
+        householdId: household.id,
+        OR: [{ shared: true }, { addedById: session.user.id }],
+      },
       orderBy: { date: "desc" },
     }),
     prisma.category.findMany({
