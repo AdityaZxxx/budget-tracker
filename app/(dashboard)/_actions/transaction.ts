@@ -22,6 +22,7 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
   const { session, household } = result;
 
   const { amount, category, date, description, type, shared } = parsedBody.data;
+  const goalId = parsedBody.data.goalId || undefined;
   const categoryRow = await prisma.category.findFirst({
     where: {
       householdId: household.id,
@@ -31,6 +32,19 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 
   if (!categoryRow) {
     throw new Error("Category not found");
+  }
+
+  if (goalId) {
+    const goal = await prisma.goal.findFirst({
+      where: {
+        id: goalId,
+        householdId: household.id,
+      },
+    });
+
+    if (!goal) {
+      throw new Error("Goal not found");
+    }
   }
 
   await prisma.$transaction([
@@ -45,6 +59,7 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
         shared,
         category: categoryRow.name,
         categoryIcon: categoryRow.icon,
+        goalId,
       },
     }),
 
