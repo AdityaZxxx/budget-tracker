@@ -1,11 +1,10 @@
 "use client";
 
 import { authClient } from "@/lib/auth-client";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "@tanstack/react-form";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -16,53 +15,45 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import GoogleSignInButton from "./GoogleSignInButton";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import GoogleSignInButton from "./GoogleSignInButton";
 
 const signInSchema = z.object({
   email: z.string().email("Enter a valid email"),
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
-type SignInValues = z.infer<typeof signInSchema>;
-
 export default function SignInForm() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
-  const form = useForm<SignInValues>({
-    resolver: zodResolver(signInSchema),
+  const form = useForm({
     defaultValues: {
       email: "",
       password: "",
     },
+    validators: {
+      onSubmit: signInSchema,
+    },
+    onSubmit: async ({ value }) => {
+      setIsLoading(true);
+      const { error } = await authClient.signIn.email({
+        email: value.email,
+        password: value.password,
+      });
+      setIsLoading(false);
+
+      if (error) {
+        toast.error(error.message || "Failed to sign in");
+        return;
+      }
+
+      toast.success("Signed in successfully");
+      router.push("/");
+      router.refresh();
+    },
   });
-
-  const onSubmit = async (values: SignInValues) => {
-    setIsLoading(true);
-    const { error } = await authClient.signIn.email({
-      email: values.email,
-      password: values.password,
-    });
-    setIsLoading(false);
-
-    if (error) {
-      toast.error(error.message || "Failed to sign in");
-      return;
-    }
-
-    toast.success("Signed in successfully");
-    router.push("/");
-    router.refresh();
-  };
 
   return (
     <Card className="w-[350px] sm:w-[400px]">
@@ -73,43 +64,67 @@ export default function SignInForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="you@example.com"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Signing in..." : "Sign in"}
-            </Button>
-          </form>
-        </Form>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit();
+          }}
+          className="space-y-4"
+        >
+          <form.Field
+            name="email"
+            children={(field) => {
+              const isInvalid =
+                field.state.meta.isTouched && !field.state.meta.isValid;
+              return (
+                <Field data-invalid={isInvalid}>
+                  <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                  <Input
+                    id={field.name}
+                    name={field.name}
+                    type="email"
+                    placeholder="you@example.com"
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    aria-invalid={isInvalid}
+                  />
+                  {isInvalid && (
+                    <FieldError errors={field.state.meta.errors} />
+                  )}
+                </Field>
+              );
+            }}
+          />
+          <form.Field
+            name="password"
+            children={(field) => {
+              const isInvalid =
+                field.state.meta.isTouched && !field.state.meta.isValid;
+              return (
+                <Field data-invalid={isInvalid}>
+                  <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                  <Input
+                    id={field.name}
+                    name={field.name}
+                    type="password"
+                    placeholder="••••••••"
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    aria-invalid={isInvalid}
+                  />
+                  {isInvalid && (
+                    <FieldError errors={field.state.meta.errors} />
+                  )}
+                </Field>
+              );
+            }}
+          />
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? "Signing in..." : "Sign in"}
+          </Button>
+        </form>
         <div className="my-4 flex items-center gap-2">
           <div className="h-px flex-1 bg-border" />
           <span className="text-xs text-muted-foreground">or</span>

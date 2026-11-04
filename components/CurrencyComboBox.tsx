@@ -95,7 +95,7 @@ export function CurrencyComboBox() {
     return (
       <SkeletonWrapper isLoading={userSettings.isFetching}>
         <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>{TriggerButton}</PopoverTrigger>
+          <PopoverTrigger render={TriggerButton} />
           <PopoverContent className="w-full p-0" align="start">
             <CurrencyList
               setOpen={setOpen}

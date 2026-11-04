@@ -12,22 +12,18 @@ import {
 import { TransactionType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { CreateTransactionSchema } from "@/schemas/transaction";
-import type { z } from "zod";
-import { ReactNode, useCallback, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
+import { ReactElement, ReactNode, useMemo, useState } from "react";
+import { useForm, type StandardSchemaV1 } from "@tanstack/react-form";
 
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
   Popover,
@@ -36,7 +32,6 @@ import {
 } from "@/components/ui/popover";
 import { Currencies } from "@/lib/currencies";
 import { DateToUTCDate } from "@/lib/helpers";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { UserSettings } from "@prisma/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -51,22 +46,15 @@ interface Props {
   type: TransactionType;
 }
 
-const CreateTransactionDialog = ({ trigger, type }: Props) => {
-  const form = useForm<
-    z.input<typeof CreateTransactionSchema>,
-    any,
-    z.output<typeof CreateTransactionSchema>
-  >({
-    resolver: zodResolver(CreateTransactionSchema),
-    defaultValues: {
-      description: "",
-      category: undefined,
-      amount: 0,
-      type,
-      date: new Date(),
-    },
-  });
+type CreateTransactionFormValues = {
+  description: string;
+  category: string;
+  amount: number;
+  type: TransactionType;
+  date: Date;
+};
 
+const CreateTransactionDialog = ({ trigger, type }: Props) => {
   const [open, setOpen] = useState(false);
 
   const userSettings = useQuery<UserSettings>({
@@ -91,13 +79,6 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
     };
   }, [currency]);
 
-  const handleCategoryChange = useCallback(
-    (value: string) => {
-      form.setValue("category", value);
-    },
-    [form]
-  );
-
   const queryClient = useQueryClient();
 
   const { mutate, isPending } = useMutation({
@@ -106,13 +87,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
       toast.success("Transaction created successfully", {
         id: "create-transaction",
       });
-      form.reset({
-        type,
-        description: "",
-        amount: 0,
-        date: new Date(),
-        category: undefined,
-      });
+      form.reset();
 
       queryClient.invalidateQueries({
         queryKey: ["overview"],
@@ -127,23 +102,34 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
     },
   });
 
-  const onSubmit = useCallback(
-    (values: z.output<typeof CreateTransactionSchema>) => {
+  const form = useForm({
+    defaultValues: {
+      description: "",
+      category: "",
+      amount: 0,
+      type,
+      date: new Date(),
+    },
+    validators: {
+      // The schema uses z.coerce, so its input type differs from the form
+      // values; the values are already typed correctly client-side.
+      onSubmit: CreateTransactionSchema as unknown as StandardSchemaV1<CreateTransactionFormValues>,
+    },
+    onSubmit: ({ value }) => {
       toast.loading("Creating transaction...", {
         id: "create-transaction",
       });
 
       mutate({
-        ...values,
-        date: DateToUTCDate(values.date),
+        ...value,
+        date: DateToUTCDate(value.date),
       });
     },
-    [mutate]
-  );
+  });
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogTrigger render={trigger as ReactElement} />
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-lg sm:text-xl">
@@ -159,142 +145,174 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
             transaction
           </DialogTitle>
         </DialogHeader>
-        <Form {...form}>
-          <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="e.g. Groceries, Salary" />
-                  </FormControl>
-                  <FormDescription className="text-xs sm:text-sm">
+        <form
+          className="space-y-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit();
+          }}
+        >
+          <form.Field
+            name="description"
+            children={(field) => {
+              const isInvalid =
+                field.state.meta.isTouched && !field.state.meta.isValid;
+              return (
+                <Field data-invalid={isInvalid}>
+                  <FieldLabel htmlFor={field.name}>Description</FieldLabel>
+                  <Input
+                    id={field.name}
+                    name={field.name}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    aria-invalid={isInvalid}
+                    placeholder="e.g. Groceries, Salary"
+                  />
+                  <FieldDescription className="text-xs sm:text-sm">
                     Transaction description (optional)
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                  </FieldDescription>
+                  {isInvalid && (
+                    <FieldError errors={field.state.meta.errors} />
+                  )}
+                </Field>
+              );
+            }}
+          />
 
-            <FormField
-              control={form.control}
-              name="amount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Amount</FormLabel>
-                  <FormControl>
-                    <SkeletonWrapper isLoading={userSettings.isFetching}>
-                      <NumericFormat
-                        customInput={Input}
-                        placeholder="0.00"
-                        value={field.value as number}
-                        onValueChange={(values) => {
-                          field.onChange(values.floatValue);
-                        }}
-                        thousandSeparator={thousandSeparator}
-                        decimalSeparator={decimalSeparator}
-                        decimalScale={2}
-                        allowNegative={false}
-                      />
-                    </SkeletonWrapper>
-                  </FormControl>
-                  <FormDescription className="text-xs sm:text-sm">
+          <form.Field
+            name="amount"
+            children={(field) => {
+              const isInvalid =
+                field.state.meta.isTouched && !field.state.meta.isValid;
+              return (
+                <Field data-invalid={isInvalid}>
+                  <FieldLabel htmlFor={field.name}>Amount</FieldLabel>
+                  <SkeletonWrapper isLoading={userSettings.isFetching}>
+                    <NumericFormat
+                      customInput={Input}
+                      id={field.name}
+                      name={field.name}
+                      placeholder="0.00"
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onValueChange={(values) => {
+                        field.handleChange(values.floatValue ?? 0);
+                      }}
+                      thousandSeparator={thousandSeparator}
+                      decimalSeparator={decimalSeparator}
+                      decimalScale={2}
+                      allowNegative={false}
+                      aria-invalid={isInvalid}
+                    />
+                  </SkeletonWrapper>
+                  <FieldDescription className="text-xs sm:text-sm">
                     Transaction amount (required)
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+                  </FieldDescription>
+                  {isInvalid && (
+                    <FieldError errors={field.state.meta.errors} />
+                  )}
+                </Field>
+              );
+            }}
+          />
+
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <form.Field
+              name="category"
+              children={(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+                return (
+                  <Field data-invalid={isInvalid} className="flex-1">
+                    <FieldLabel>Category</FieldLabel>
+                    <CategoryPicker
+                      type={type}
+                      onChange={(value) => field.handleChange(value)}
+                    />
+                    <FieldDescription className="text-xs sm:text-sm">
+                      Select a category
+                    </FieldDescription>
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                );
+              }}
             />
 
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Category</FormLabel>
-                    <FormControl>
-                      <CategoryPicker
-                        type={type}
-                        onChange={handleCategoryChange}
-                      />
-                    </FormControl>
-                    <FormDescription className="text-xs sm:text-sm">
-                      Select a category
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="date"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Date</FormLabel>
+            <form.Field
+              name="date"
+              children={(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+                return (
+                  <Field data-invalid={isInvalid} className="flex-1">
+                    <FieldLabel htmlFor={field.name}>Date</FieldLabel>
                     <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
+                      <PopoverTrigger
+                        render={
                           <Button
                             className={cn(
                               "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
+                              !field.state.value && "text-muted-foreground"
                             )}
                             variant={"outline"}
-                          >
-                            {field.value ? (
-                              format(field.value as Date, "PPP")
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
+                          />
+                        }
+                      >
+                        {field.state.value ? (
+                          format(field.state.value, "PPP")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
-                          selected={field.value as Date}
+                          selected={field.state.value}
                           onSelect={(value) => {
                             if (!value) return;
-                            field.onChange(value);
+                            field.handleChange(value);
                           }}
                         />
                       </PopoverContent>
                     </Popover>
-                    <FormDescription className="text-xs sm:text-sm">
+                    <FieldDescription className="text-xs sm:text-sm">
                       Transaction date
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                    </FieldDescription>
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                );
+              }}
+            />
+          </div>
 
-            <DialogFooter className="gap-2 sm:gap-0">
-              <DialogClose asChild>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <DialogClose
+              render={
                 <Button
                   type="button"
                   variant="outline"
                   className="w-full sm:w-auto"
                   onClick={() => form.reset()}
-                >
-                  Cancel
-                </Button>
-              </DialogClose>
-              <Button
-                type="submit"
-                disabled={isPending}
-                className="w-full sm:w-auto"
-              >
-                {!isPending ? "Create" : <Loader2 className="animate-spin" />}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+                />
+              }
+            >
+              Cancel
+            </DialogClose>
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="w-full sm:w-auto"
+            >
+              {!isPending ? "Create" : <Loader2 className="animate-spin" />}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

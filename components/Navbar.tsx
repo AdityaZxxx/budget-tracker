@@ -59,14 +59,16 @@ function MobileMenu() {
   return (
     <div className="block md:hidden">
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
-        <SheetTrigger asChild>
-          <Button
-            variant={"ghost"}
-            size={"icon"}
-            aria-label="Toggle navigation menu"
-          >
-            <Menu />
-          </Button>
+        <SheetTrigger
+          render={
+            <Button
+              variant={"ghost"}
+              size={"icon"}
+              aria-label="Toggle navigation menu"
+            />
+          }
+        >
+          <Menu />
         </SheetTrigger>
         <SheetContent className="w-[300px] sm:w-[400px]" side="left">
           <div className="p-4">

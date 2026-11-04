@@ -14,7 +14,7 @@ import {
 import { TransactionType } from "@/lib/types";
 import { Category } from "@prisma/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ReactNode } from "react";
+import { ReactElement, ReactNode } from "react";
 import { toast } from "sonner";
 import { DeleteCategory } from "../_actions/categories";
 
@@ -46,7 +46,7 @@ const DeleteCategoryDialog = ({ trigger, category }: Props) => {
 
   return (
     <AlertDialog>
-      <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
+      <AlertDialogTrigger render={trigger as ReactElement} />
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
