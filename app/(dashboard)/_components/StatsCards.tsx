@@ -57,8 +57,8 @@ const StatsCards = ({ from, to, userSettings }: Props) => {
             trend="up"
             isLoading={statsQuery.isFetching}
             icon={
-              <div className="flex items-center justify-center rounded-lg bg-emerald-400/10 p-3">
-                <TrendingUp className="h-6 w-6 text-emerald-500" />
+              <div className="flex items-center justify-center rounded-lg bg-emerald-500/10 p-3">
+                <TrendingUp className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
               </div>
             }
           />
@@ -69,8 +69,8 @@ const StatsCards = ({ from, to, userSettings }: Props) => {
             trend="down"
             isLoading={statsQuery.isFetching}
             icon={
-              <div className="flex items-center justify-center rounded-lg bg-rose-400/10 p-3">
-                <TrendingDown className="h-6 w-6 text-rose-500" />
+              <div className="flex items-center justify-center rounded-lg bg-rose-500/10 p-3">
+                <TrendingDown className="h-6 w-6 text-rose-600 dark:text-rose-400" />
               </div>
             }
           />
@@ -81,8 +81,8 @@ const StatsCards = ({ from, to, userSettings }: Props) => {
             trend={balance >= 0 ? "up" : "down"}
             isLoading={statsQuery.isFetching}
             icon={
-              <div className="flex items-center justify-center rounded-lg bg-violet-400/10 p-3">
-                <Wallet className="h-6 w-6 text-violet-500" />
+              <div className="flex items-center justify-center rounded-lg bg-violet-500/10 p-3">
+                <Wallet className="h-6 w-6 text-violet-600 dark:text-violet-400" />
               </div>
             }
           />
@@ -111,15 +111,23 @@ function StatCard({
   trend,
   isLoading = false,
 }: StatCardProps) {
-  const trendColor = trend === "up" ? "text-emerald-500" : "text-rose-500";
-  const trendBg = trend === "up" ? "bg-emerald-50" : "bg-rose-50";
+  const trendColor =
+    trend === "up"
+      ? "text-emerald-700 dark:text-emerald-400"
+      : "text-rose-600 dark:text-rose-400";
+  const trendBg =
+    trend === "up"
+      ? "bg-emerald-500/10 dark:bg-emerald-400/10"
+      : "bg-rose-500/10 dark:bg-rose-400/10";
 
   return (
     <Card className="flex h-full flex-col p-6 transition-all hover:shadow-md">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           {icon}
-          <span className="text-sm font-medium text-gray-500">{title}</span>
+          <span className="text-sm font-medium text-muted-foreground">
+            {title}
+          </span>
         </div>
         {trend && (
           <span
@@ -132,7 +140,7 @@ function StatCard({
 
       <div className="mt-4">
         {isLoading ? (
-          <div className="h-8 w-3/4 animate-pulse rounded bg-gray-200" />
+          <div className="h-8 w-3/4 animate-pulse rounded bg-muted" />
         ) : (
           <CountUp
             preserveValue
@@ -140,13 +148,13 @@ function StatCard({
             end={value}
             decimals={2}
             formattingFn={(value: number) => formatter.format(value)}
-            className="text-2xl font-bold text-gray-900 dark:text-gray-100"
+            className="text-2xl font-bold tabular-nums text-foreground"
           />
         )}
       </div>
 
-      <div className="mt-2 text-xs text-gray-400">
-        {new Date().toLocaleDateString("en-US", {
+      <div className="mt-2 text-xs text-muted-foreground">
+        {new Date().toLocaleDateString(undefined, {
           month: "short",
           day: "numeric",
           year: "numeric",

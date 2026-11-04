@@ -60,8 +60,13 @@ export default function UserMenu() {
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuGroup>
           <DropdownMenuLabel className="flex flex-col">
-            <span className="truncate font-medium">{session.user.name}</span>
-            <span className="truncate text-xs font-normal text-muted-foreground">
+            <span className="truncate font-medium" title={session.user.name}>
+              {session.user.name}
+            </span>
+            <span
+              className="truncate text-xs font-normal text-muted-foreground"
+              title={session.user.email}
+            >
               {session.user.email}
             </span>
           </DropdownMenuLabel>

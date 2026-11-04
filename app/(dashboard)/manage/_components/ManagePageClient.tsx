@@ -33,12 +33,12 @@ const ManagePageClient = () => {
         </div>
       </header>
 
-      <main className="container py-8">
+      <div className="container py-8">
         <div className="space-y-8">
           <section>
             <Card className="transition-all hover:shadow-md">
               <CardHeader>
-                <CardTitle className="text-xl">Currency Settings</CardTitle>
+                <CardTitle className="text-xl">Currency settings</CardTitle>
                 <CardDescription>
                   Set your default currency for all transactions
                 </CardDescription>
@@ -53,7 +53,7 @@ const ManagePageClient = () => {
 
           <section className="space-y-6">
             <h2 className="text-2xl font-semibold tracking-tight">
-              Transaction Categories
+              Transaction categories
             </h2>
             <div className="grid gap-6 md:grid-cols-2">
               <CategoryList type="income" />
@@ -61,7 +61,7 @@ const ManagePageClient = () => {
             </div>
           </section>
         </div>
-      </main>
+      </div>
     </div>
   );
 };
@@ -90,15 +90,19 @@ function CategoryList({ type }: { type: TransactionType }) {
   const typeConfig = {
     income: {
       label: "Income",
-      color: "text-emerald-500",
-      bgColor: "bg-emerald-500/10",
-      icon: <TrendingUp className="h-6 w-6 text-emerald-500" />,
+      color: "text-emerald-700 dark:text-emerald-400",
+      bgColor: "bg-emerald-500/10 dark:bg-emerald-400/10",
+      icon: (
+        <TrendingUp className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+      ),
     },
     expense: {
       label: "Expense",
-      color: "text-rose-500",
-      bgColor: "bg-rose-500/10",
-      icon: <TrendingDown className="h-6 w-6 text-rose-500" />,
+      color: "text-rose-600 dark:text-rose-400",
+      bgColor: "bg-rose-500/10 dark:bg-rose-400/10",
+      icon: (
+        <TrendingDown className="h-6 w-6 text-rose-600 dark:text-rose-400" />
+      ),
     },
   }[type];
 
@@ -112,7 +116,7 @@ function CategoryList({ type }: { type: TransactionType }) {
                 {typeConfig.icon}
               </div>
               <div>
-                <CardTitle>{typeConfig.label} Categories</CardTitle>
+                <CardTitle>{typeConfig.label} categories</CardTitle>
                 <CardDescription>
                   {categories.length}{" "}
                   {categories.length === 1 ? "item" : "items"}
@@ -160,11 +164,11 @@ function EmptyState({ type }: { type: TransactionType }) {
   const typeConfig = {
     income: {
       label: "income",
-      color: "text-emerald-500",
+      color: "text-emerald-700 dark:text-emerald-400",
     },
     expense: {
       label: "expense",
-      color: "text-rose-500",
+      color: "text-rose-600 dark:text-rose-400",
     },
   }[type];
 
@@ -232,7 +236,7 @@ function CategoryCard({ category }: { category: Category }) {
           <Button
             variant="ghost"
             size="sm"
-            className="text-destructive opacity-100 hover:bg-destructive/10 md:opacity-0 md:group-hover:opacity-100"
+            className="text-destructive opacity-100 hover:bg-destructive/10 md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100"
             aria-label={`Delete ${category.name} category`}
           >
             <TrashIcon className="h-4 w-4" />

@@ -16,9 +16,7 @@ const TransactionsClient = () => {
     <>
       <div className="border-b bg-card px-6">
         <div className="container flex flex-wrap items-center justify-between gap-6 py-8">
-          <div className="">
-            <p className="text-3xl font-bold">Transactions history</p>
-          </div>
+          <h1 className="text-3xl font-bold">Transactions history</h1>
 
           <DateRangePicker
             initialDateFrom={dateRange.from}
@@ -29,7 +27,7 @@ const TransactionsClient = () => {
               if (!from || !to) return;
               if (differenceInDays(to, from) > MAX_DATE_RANGE) {
                 toast.error(
-                  `The selected date range is too big. Max allowed range is ${MAX_DATE_RANGE} days!`
+                  `The selected date range is too big. Max allowed range is ${MAX_DATE_RANGE} days.`
                 );
                 return;
               }

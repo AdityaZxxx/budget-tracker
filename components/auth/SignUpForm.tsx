@@ -38,6 +38,11 @@ export default function SignUpForm() {
     validators: {
       onSubmit: signUpSchema,
     },
+    onSubmitInvalid: () => {
+      document
+        .querySelector<HTMLElement>('[aria-invalid="true"]')
+        ?.focus();
+    },
     onSubmit: async ({ value }) => {
       setIsLoading(true);
       const { error } = await authClient.signUp.email({
@@ -48,11 +53,13 @@ export default function SignUpForm() {
       setIsLoading(false);
 
       if (error) {
-        toast.error(error.message || "Failed to sign up");
+        toast.error(
+          error.message || "Unable to create your account. Try again."
+        );
         return;
       }
 
-      toast.success("Account created successfully");
+      toast.success("Account created");
       router.push("/wizard");
       router.refresh();
     },
@@ -85,14 +92,19 @@ export default function SignUpForm() {
                   <Input
                     id={field.name}
                     name={field.name}
+                    autoComplete="name"
                     placeholder="Your name"
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     aria-invalid={isInvalid}
+                    aria-describedby={isInvalid ? `${field.name}-error` : undefined}
                   />
                   {isInvalid && (
-                    <FieldError errors={field.state.meta.errors} />
+                    <FieldError
+                      id={`${field.name}-error`}
+                      errors={field.state.meta.errors}
+                    />
                   )}
                 </Field>
               );
@@ -110,14 +122,19 @@ export default function SignUpForm() {
                     id={field.name}
                     name={field.name}
                     type="email"
+                    autoComplete="email"
                     placeholder="you@example.com"
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     aria-invalid={isInvalid}
+                    aria-describedby={isInvalid ? `${field.name}-error` : undefined}
                   />
                   {isInvalid && (
-                    <FieldError errors={field.state.meta.errors} />
+                    <FieldError
+                      id={`${field.name}-error`}
+                      errors={field.state.meta.errors}
+                    />
                   )}
                 </Field>
               );
@@ -135,21 +152,26 @@ export default function SignUpForm() {
                     id={field.name}
                     name={field.name}
                     type="password"
+                    autoComplete="new-password"
                     placeholder="••••••••"
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     aria-invalid={isInvalid}
+                    aria-describedby={isInvalid ? `${field.name}-error` : undefined}
                   />
                   {isInvalid && (
-                    <FieldError errors={field.state.meta.errors} />
+                    <FieldError
+                      id={`${field.name}-error`}
+                      errors={field.state.meta.errors}
+                    />
                   )}
                 </Field>
               );
             }}
           />
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Creating account..." : "Sign up"}
+            {isLoading ? "Creating account…" : "Sign up"}
           </Button>
         </form>
         <div className="my-4 flex items-center gap-2">
