@@ -1,6 +1,5 @@
 "use client";
 
-import { UserButton } from "@clerk/nextjs";
 import { Menu } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -8,6 +7,7 @@ import { useState } from "react";
 import { cn } from "../lib/utils";
 import Logo from "./Logo";
 import { ThemeSwitcherBtn } from "./ThemeSwitcherBtn";
+import UserMenu from "./UserMenu";
 import { Button, buttonVariants } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 
@@ -96,7 +96,7 @@ function NavbarActions() {
   return (
     <>
       <ThemeSwitcherBtn />
-      <UserButton afterSwitchSessionUrl="/sign-in" />
+      <UserMenu />
     </>
   );
 }

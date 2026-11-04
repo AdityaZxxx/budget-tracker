@@ -1,10 +1,31 @@
-import { clerkMiddleware } from "@clerk/nextjs/server";
-import type { NextFetchEvent, NextRequest } from "next/server";
+import { getSessionCookie } from "better-auth/cookies";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-const clerkProxyHandler = clerkMiddleware();
+const authPages = ["/sign-in", "/sign-up"];
+const protectedPrefixes = ["/transactions", "/manage", "/wizard"];
 
-export function proxy(request: NextRequest, event: NextFetchEvent) {
-  return clerkProxyHandler(request, event);
+export function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const sessionCookie = getSessionCookie(request);
+
+  const isAuthPage = authPages.some((page) => pathname.startsWith(page));
+  const isAuthApi = pathname.startsWith("/api/auth");
+  const isApiRoute = pathname.startsWith("/api");
+  const isProtected =
+    pathname === "/" ||
+    protectedPrefixes.some((prefix) => pathname.startsWith(prefix)) ||
+    (isApiRoute && !isAuthApi);
+
+  if (sessionCookie && isAuthPage) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  if (!sessionCookie && isProtected) {
+    return NextResponse.redirect(new URL("/sign-in", request.url));
+  }
+
+  return NextResponse.next();
 }
 
 export const config = {

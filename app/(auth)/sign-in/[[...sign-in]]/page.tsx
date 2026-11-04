@@ -1,7 +1,7 @@
-import { SignIn } from "@clerk/nextjs";
+import SignInForm from "@/components/auth/SignInForm";
 
 const SignInPage = () => {
-  return <SignIn />;
+  return <SignInForm />;
 };
 
 export default SignInPage;
