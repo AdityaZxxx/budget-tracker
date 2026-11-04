@@ -29,6 +29,8 @@ const HistoryPeriodSelector = ({
   const historyPeriods = useQuery<GetHistoryPeriodsResponseType>({
     queryKey: ["overview", "history", "periods"],
     queryFn: () => fetch(`/api/history-periods`).then((res) => res.json()),
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
   });
   return (
     <div className="flex flex-wrap items-center gap-4">

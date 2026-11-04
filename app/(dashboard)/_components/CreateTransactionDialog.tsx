@@ -60,6 +60,8 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
   const household = useQuery<Household>({
     queryKey: ["household"],
     queryFn: () => fetch("/api/user-settings").then((res) => res.json()),
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
   });
 
   const currency = Currencies.find(

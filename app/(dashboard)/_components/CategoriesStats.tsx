@@ -38,6 +38,8 @@ const CategoriesStats = ({ from, to, household }: Props) => {
       }
       return response.json();
     },
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
   });
 
   const formatter = useMemo(() => {

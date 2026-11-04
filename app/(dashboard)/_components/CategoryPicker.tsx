@@ -43,6 +43,8 @@ const CategoryPicker = ({ type, onChange, id, ...ariaProps }: Props) => {
     queryKey: ["categories", type],
     queryFn: () =>
       fetch(`api/categories?type=${type}`).then((res) => res.json()),
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
   });
 
   const selectedCategory = categoriesQuery.data?.find(
