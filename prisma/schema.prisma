@@ -41,6 +41,7 @@ model Household {
   inviteLinks  InviteLink[]
   transactions Transaction[]
   categories   Category[]
+  goals        Goal[]
   monthHistory MonthHistory[]
   yearHistory  YearHistory[]
 }
@@ -143,6 +144,23 @@ model Transaction {
 
   category String
   categoryIcon String
+
+  // Tags the transaction as a contribution to a goal; contributions are
+  // normal transactions, so they still count toward spending stats.
+  goalId String?
+  goal   Goal?   @relation(fields: [goalId], references: [id], onDelete: SetNull)
+}
+
+model Goal {
+  id          String    @id @default(uuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  name        String
+  target      Float
+  deadline    DateTime?
+  createdAt   DateTime  @default(now())
+
+  transactions Transaction[]
 }
 
 model MonthHistory {

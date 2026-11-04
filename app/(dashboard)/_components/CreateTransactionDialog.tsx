@@ -31,6 +31,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Currencies } from "@/lib/currencies";
 import { DateToUTCDate } from "@/lib/helpers";
 import { Household } from "@prisma/client";
@@ -40,6 +47,7 @@ import { CalendarIcon, Loader2 } from "lucide-react";
 import { NumericFormat } from "react-number-format";
 import { toast } from "sonner";
 import { CreateTransaction } from "../_actions/transaction";
+import { listGoals } from "../_actions/goals";
 import CategoryPicker from "./CategoryPicker";
 
 interface Props {
@@ -54,6 +62,7 @@ type CreateTransactionFormValues = {
   type: TransactionType;
   date: Date;
   shared: boolean;
+  goalId: string;
 };
 
 const CreateTransactionDialog = ({ trigger, type }: Props) => {
@@ -83,6 +92,15 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
     };
   }, [currency]);
 
+  const goalsQuery = useQuery({
+    queryKey: ["goals"],
+    queryFn: listGoals,
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
+  });
+
+  const goals = goalsQuery.data ?? [];
+
   const queryClient = useQueryClient();
 
   const { mutate, isPending } = useMutation({
@@ -95,6 +113,9 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
 
       queryClient.invalidateQueries({
         queryKey: ["overview"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["goals"],
       });
 
       setOpen(false);
@@ -114,6 +135,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
       type,
       date: new Date(),
       shared: true,
+      goalId: "",
     },
     validators: {
       // The schema uses z.coerce, so its input type differs from the form
@@ -322,6 +344,39 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
               }}
             />
           </div>
+
+          {type === "expense" && goals.length > 0 && (
+            <form.Field
+              name="goalId"
+              children={(field) => (
+                <Field>
+                  <FieldLabel htmlFor={field.name}>Goal (optional)</FieldLabel>
+                  <Select
+                    value={field.state.value || "none"}
+                    onValueChange={(value) => {
+                      if (value === null) return;
+                      field.handleChange(value === "none" ? "" : value);
+                    }}
+                  >
+                    <SelectTrigger id={field.name} className="w-full">
+                      <SelectValue placeholder="No goal" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">No goal</SelectItem>
+                      {goals.map((goal) => (
+                        <SelectItem key={goal.id} value={goal.id}>
+                          {goal.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FieldDescription className="text-xs sm:text-sm">
+                    Tag this expense as a contribution to a goal
+                  </FieldDescription>
+                </Field>
+              )}
+            />
+          )}
 
           <form.Field
             name="shared"

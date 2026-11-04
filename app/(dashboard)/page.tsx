@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { getHouseholdMemberCount } from "./_actions/household";
 import Balances from "./_components/Balances";
 import CreateTransactionDialog from "./_components/CreateTransactionDialog";
+import Goals from "./_components/Goals";
 import History from "./_components/History";
 import InvitePartnerCta from "./_components/InvitePartnerCta";
 import Overview from "./_components/Overview";
@@ -71,6 +72,7 @@ const DashboardPage = async () => {
       <InvitePartnerCta memberCount={memberCount} />
       <Overview household={household} />
       <Balances household={household} />
+      <Goals household={household} />
       <History household={household} />
     </div>
   );

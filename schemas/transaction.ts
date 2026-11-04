@@ -7,6 +7,8 @@ export const CreateTransactionSchema = z.object({
   category: z.string().min(1, "Select a category"),
   type: z.union([z.literal("income"), z.literal("expense")]),
   shared: z.boolean().default(true),
+  // Empty string means no goal (the form's unset value).
+  goalId: z.string().optional(),
 });
 
 export type CreateTransactionSchemaType = {
@@ -16,6 +18,7 @@ export type CreateTransactionSchemaType = {
   category: string;
   type: "income" | "expense";
   shared: boolean;
+  goalId?: string;
 };
 export type CreateTransactionSchemaOutput = z.output<
   typeof CreateTransactionSchema
