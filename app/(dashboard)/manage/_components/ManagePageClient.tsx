@@ -25,6 +25,7 @@ import {
 import CreateCategoryDialog from "../../_components/CreateCategoryDialog";
 import DeleteCategoryDialog from "../../_components/DeletecategoryDialog";
 import InviteLinkDialog from "./InviteLinkDialog";
+import MembersSection from "./MembersSection";
 
 const ManagePageClient = () => {
   return (
@@ -79,6 +80,8 @@ const ManagePageClient = () => {
               </CardContent>
             </Card>
           </section>
+
+          <MembersSection />
 
           <section className="space-y-6">
             <h2 className="text-2xl font-semibold tracking-tight">
