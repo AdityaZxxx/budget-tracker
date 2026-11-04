@@ -63,101 +63,108 @@ export default function SignInForm({ next }: { next?: string }) {
   });
 
   return (
-    <Card className="w-[350px] sm:w-[400px]">
-      <CardHeader>
-        <CardTitle className="text-2xl">Sign in</CardTitle>
-        <CardDescription>
-          Enter your email and password to access your account
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            form.handleSubmit();
-          }}
-          className="space-y-4"
-        >
-          <form.Field
-            name="email"
-            children={(field) => {
-              const isInvalid =
-                field.state.meta.isTouched && !field.state.meta.isValid;
-              return (
-                <Field data-invalid={isInvalid}>
-                  <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-                  <Input
-                    id={field.name}
-                    name={field.name}
-                    type="email"
-                    autoComplete="email"
-                    placeholder="you@example.com"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    aria-invalid={isInvalid}
-                    aria-describedby={isInvalid ? `${field.name}-error` : undefined}
-                  />
-                  {isInvalid && (
-                    <FieldError
-                      id={`${field.name}-error`}
-                      errors={field.state.meta.errors}
-                    />
-                  )}
-                </Field>
-              );
+    <div className="flex flex-col items-center gap-4">
+      <Card className="w-[350px] sm:w-[400px]">
+        <CardHeader>
+          <CardTitle className="text-2xl">Sign in</CardTitle>
+          <CardDescription>
+            Enter your email and password to access your account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              form.handleSubmit();
             }}
-          />
-          <form.Field
-            name="password"
-            children={(field) => {
-              const isInvalid =
-                field.state.meta.isTouched && !field.state.meta.isValid;
-              return (
-                <Field data-invalid={isInvalid}>
-                  <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                  <Input
-                    id={field.name}
-                    name={field.name}
-                    type="password"
-                    autoComplete="current-password"
-                    placeholder="••••••••"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    aria-invalid={isInvalid}
-                    aria-describedby={isInvalid ? `${field.name}-error` : undefined}
-                  />
-                  {isInvalid && (
-                    <FieldError
-                      id={`${field.name}-error`}
-                      errors={field.state.meta.errors}
-                    />
-                  )}
-                </Field>
-              );
-            }}
-          />
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Signing in…" : "Sign in"}
-          </Button>
-        </form>
-        <div className="my-4 flex items-center gap-2">
-          <div className="h-px flex-1 bg-border" />
-          <span className="text-xs text-muted-foreground">or</span>
-          <div className="h-px flex-1 bg-border" />
-        </div>
-        <GoogleSignInButton callbackURL={next ?? "/"} />
-        <p className="mt-4 text-center text-sm text-muted-foreground">
-          Don&apos;t have an account?{" "}
-          <Link
-            href={next ? `/sign-up?next=${encodeURIComponent(next)}` : "/sign-up"}
-            className="underline underline-offset-4"
+            className="space-y-4"
           >
-            Sign up
-          </Link>
-        </p>
-      </CardContent>
-    </Card>
+            <form.Field
+              name="email"
+              children={(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      type="email"
+                      autoComplete="email"
+                      placeholder="you@example.com"
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      aria-invalid={isInvalid}
+                      aria-describedby={isInvalid ? `${field.name}-error` : undefined}
+                    />
+                    {isInvalid && (
+                      <FieldError
+                        id={`${field.name}-error`}
+                        errors={field.state.meta.errors}
+                      />
+                    )}
+                  </Field>
+                );
+              }}
+            />
+            <form.Field
+              name="password"
+              children={(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      type="password"
+                      autoComplete="current-password"
+                      placeholder="••••••••"
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      aria-invalid={isInvalid}
+                      aria-describedby={isInvalid ? `${field.name}-error` : undefined}
+                    />
+                    {isInvalid && (
+                      <FieldError
+                        id={`${field.name}-error`}
+                        errors={field.state.meta.errors}
+                      />
+                    )}
+                  </Field>
+                );
+              }}
+            />
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Signing in…" : "Sign in"}
+            </Button>
+          </form>
+          <div className="my-4 flex items-center gap-2">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-xs text-muted-foreground">or</span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+          <GoogleSignInButton callbackURL={next ?? "/"} />
+          <p className="mt-4 text-center text-sm text-muted-foreground">
+            Don&apos;t have an account?{" "}
+            <Link
+              href={next ? `/sign-up?next=${encodeURIComponent(next)}` : "/sign-up"}
+              className="underline underline-offset-4"
+            >
+              Sign up
+            </Link>
+          </p>
+        </CardContent>
+      </Card>
+      <p className="text-center text-sm text-muted-foreground">
+        <Link href="/privacy" className="underline underline-offset-4">
+          Privacy policy
+        </Link>
+      </p>
+    </div>
   );
 }
