@@ -2,8 +2,10 @@ import { Button } from "@/components/ui/button";
 import { requireHousehold } from "@/lib/household";
 import { type Metadata } from "next";
 import { redirect } from "next/navigation";
+import { getHouseholdMemberCount } from "./_actions/household";
 import CreateTransactionDialog from "./_components/CreateTransactionDialog";
 import History from "./_components/History";
+import InvitePartnerCta from "./_components/InvitePartnerCta";
 import Overview from "./_components/Overview";
 
 export const metadata: Metadata = {
@@ -28,6 +30,9 @@ const DashboardPage = async () => {
   if (!household.currency) {
     redirect("/wizard");
   }
+
+  const memberCount = await getHouseholdMemberCount();
+
   return (
     <div className="h-full bg-background px-6">
       <div className="border-b bg-card">
@@ -62,6 +67,7 @@ const DashboardPage = async () => {
           </div>
         </div>
       </div>
+      <InvitePartnerCta memberCount={memberCount} />
       <Overview household={household} />
       <History household={household} />
     </div>

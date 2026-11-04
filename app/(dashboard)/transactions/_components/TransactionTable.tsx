@@ -43,6 +43,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useSession } from "@/lib/auth-client";
 import { DateToUTCDate } from "@/lib/helpers";
 import { cn } from "@/lib/utils";
 import { GetTrasactionsHistoryResponseType } from "../../../api/transaction-history/route";
@@ -86,6 +87,14 @@ export const columns: ColumnDef<TransactionHistoryRow>[] = [
         {row.original.description}
       </div>
     ),
+  },
+  {
+    id: "addedBy",
+    accessorKey: "addedByName",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Added by" />
+    ),
+    cell: ({ row }) => <AddedByCell transaction={row.original} />,
   },
   {
     accessorKey: "date",
@@ -173,6 +182,8 @@ const TransactionTable = ({ from, to }: Props) => {
       if (!response.ok) throw new Error("Failed to fetch transaction history");
       return response.json();
     },
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
   });
 
   const table = useReactTable({
@@ -427,6 +438,16 @@ const TransactionTable = ({ from, to }: Props) => {
 };
 
 export default TransactionTable;
+
+function AddedByCell({ transaction }: { transaction: TransactionHistoryRow }) {
+  const { data: session } = useSession();
+  const isSelf = session?.user.id === transaction.addedById;
+  return (
+    <div className="text-sm whitespace-nowrap text-muted-foreground">
+      {isSelf ? "You" : `added by ${transaction.addedByName}`}
+    </div>
+  );
+}
 
 function RowActions({ transaction }: { transaction: TransactionHistoryRow }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);

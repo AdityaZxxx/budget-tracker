@@ -44,6 +44,8 @@ const History = ({ household }: { household: Household }) => {
       }
       return response.json();
     },
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
   });
 
   const dataAvailable =
