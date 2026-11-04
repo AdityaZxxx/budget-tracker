@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import CreateCategoryDialog from "../../_components/CreateCategoryDialog";
 import DeleteCategoryDialog from "../../_components/DeletecategoryDialog";
+import AccountSection from "./AccountSection";
 import InviteLinkDialog from "./InviteLinkDialog";
 import MembersSection from "./MembersSection";
 
@@ -82,6 +83,8 @@ const ManagePageClient = () => {
           </section>
 
           <MembersSection />
+
+          <AccountSection />
 
           <section className="space-y-6">
             <h2 className="text-2xl font-semibold tracking-tight">
