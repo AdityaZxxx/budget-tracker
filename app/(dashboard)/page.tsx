@@ -37,16 +37,16 @@ const DashboardPage = async () => {
     <div className="h-full bg-background px-6">
       <div className="border-b bg-card">
         <div className="container flex flex-wrap items-center justify-between gap-6 py-8">
-          <p className="text-3xl font-bold">
+          <h1 className="text-3xl font-bold">
             Hello, {session.user.name.split(" ")[0]}! 👋
-          </p>
+          </h1>
 
           <div className="flex items-center gap-3">
             <CreateTransactionDialog
               trigger={
                 <Button
                   variant="default"
-                  className="bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-800"
+                  className="bg-emerald-700 text-white hover:bg-emerald-800 dark:bg-emerald-700 dark:hover:bg-emerald-800"
                 >
                   New income
                 </Button>

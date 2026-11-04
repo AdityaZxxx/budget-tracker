@@ -41,7 +41,9 @@ export default function GoogleSignInButton() {
     });
     if (error) {
       setIsLoading(false);
-      toast.error(error.message || "Failed to sign in with Google");
+      toast.error(
+        error.message || "Unable to sign in with Google. Try again."
+      );
     }
   };
 
@@ -54,7 +56,7 @@ export default function GoogleSignInButton() {
       onClick={handleGoogleSignIn}
     >
       <GoogleIcon />
-      {isLoading ? "Redirecting to Google..." : "Continue with Google"}
+      {isLoading ? "Redirecting to Google…" : "Continue with Google"}
     </Button>
   );
 }

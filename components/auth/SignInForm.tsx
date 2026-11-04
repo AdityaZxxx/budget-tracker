@@ -36,6 +36,11 @@ export default function SignInForm() {
     validators: {
       onSubmit: signInSchema,
     },
+    onSubmitInvalid: () => {
+      document
+        .querySelector<HTMLElement>('[aria-invalid="true"]')
+        ?.focus();
+    },
     onSubmit: async ({ value }) => {
       setIsLoading(true);
       const { error } = await authClient.signIn.email({
@@ -45,11 +50,13 @@ export default function SignInForm() {
       setIsLoading(false);
 
       if (error) {
-        toast.error(error.message || "Failed to sign in");
+        toast.error(
+          error.message || "Unable to sign in. Check your credentials and try again."
+        );
         return;
       }
 
-      toast.success("Signed in successfully");
+      toast.success("Signed in");
       router.push("/");
       router.refresh();
     },
@@ -83,14 +90,19 @@ export default function SignInForm() {
                     id={field.name}
                     name={field.name}
                     type="email"
+                    autoComplete="email"
                     placeholder="you@example.com"
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     aria-invalid={isInvalid}
+                    aria-describedby={isInvalid ? `${field.name}-error` : undefined}
                   />
                   {isInvalid && (
-                    <FieldError errors={field.state.meta.errors} />
+                    <FieldError
+                      id={`${field.name}-error`}
+                      errors={field.state.meta.errors}
+                    />
                   )}
                 </Field>
               );
@@ -108,21 +120,26 @@ export default function SignInForm() {
                     id={field.name}
                     name={field.name}
                     type="password"
+                    autoComplete="current-password"
                     placeholder="••••••••"
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     aria-invalid={isInvalid}
+                    aria-describedby={isInvalid ? `${field.name}-error` : undefined}
                   />
                   {isInvalid && (
-                    <FieldError errors={field.state.meta.errors} />
+                    <FieldError
+                      id={`${field.name}-error`}
+                      errors={field.state.meta.errors}
+                    />
                   )}
                 </Field>
               );
             }}
           />
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Signing in..." : "Sign in"}
+            {isLoading ? "Signing in…" : "Sign in"}
           </Button>
         </form>
         <div className="my-4 flex items-center gap-2">

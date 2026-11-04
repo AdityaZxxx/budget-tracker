@@ -84,7 +84,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
   const { mutate, isPending } = useMutation({
     mutationFn: CreateTransaction,
     onSuccess: () => {
-      toast.success("Transaction created successfully", {
+      toast.success("Transaction created", {
         id: "create-transaction",
       });
       form.reset();
@@ -96,7 +96,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
       setOpen(false);
     },
     onError: () => {
-      toast.error("Failed to create transaction", {
+      toast.error("Unable to create transaction. Try again.", {
         id: "create-transaction",
       });
     },
@@ -115,8 +115,13 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
       // values; the values are already typed correctly client-side.
       onSubmit: CreateTransactionSchema as unknown as StandardSchemaV1<CreateTransactionFormValues>,
     },
+    onSubmitInvalid: () => {
+      document
+        .querySelector<HTMLElement>('[aria-invalid="true"]')
+        ?.focus();
+    },
     onSubmit: ({ value }) => {
-      toast.loading("Creating transaction...", {
+      toast.loading("Creating transaction…", {
         id: "create-transaction",
       });
 
@@ -130,14 +135,16 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={trigger as ReactElement} />
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[425px]">
+      <DialogContent className="max-h-[90vh] overscroll-contain overflow-y-auto sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-lg sm:text-xl">
             Create a new{" "}
             <span
               className={cn(
                 "m-1",
-                type === "income" ? "text-teal-500" : "text-rose-500"
+                type === "income"
+                  ? "text-teal-700 dark:text-teal-400"
+                  : "text-rose-600 dark:text-rose-400"
               )}
             >
               {type}
@@ -167,13 +174,17 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     aria-invalid={isInvalid}
+                    aria-describedby={isInvalid ? `${field.name}-error` : undefined}
                     placeholder="e.g. Groceries, Salary"
                   />
                   <FieldDescription className="text-xs sm:text-sm">
                     Transaction description (optional)
                   </FieldDescription>
                   {isInvalid && (
-                    <FieldError errors={field.state.meta.errors} />
+                    <FieldError
+                      id={`${field.name}-error`}
+                      errors={field.state.meta.errors}
+                    />
                   )}
                 </Field>
               );
@@ -204,13 +215,17 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                       decimalScale={2}
                       allowNegative={false}
                       aria-invalid={isInvalid}
+                      aria-describedby={isInvalid ? `${field.name}-error` : undefined}
                     />
                   </SkeletonWrapper>
                   <FieldDescription className="text-xs sm:text-sm">
                     Transaction amount (required)
                   </FieldDescription>
                   {isInvalid && (
-                    <FieldError errors={field.state.meta.errors} />
+                    <FieldError
+                      id={`${field.name}-error`}
+                      errors={field.state.meta.errors}
+                    />
                   )}
                 </Field>
               );
@@ -225,16 +240,22 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                   field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <Field data-invalid={isInvalid} className="flex-1">
-                    <FieldLabel>Category</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>Category</FieldLabel>
                     <CategoryPicker
+                      id={field.name}
                       type={type}
                       onChange={(value) => field.handleChange(value)}
+                      aria-invalid={isInvalid}
+                      aria-describedby={isInvalid ? `${field.name}-error` : undefined}
                     />
                     <FieldDescription className="text-xs sm:text-sm">
                       Select a category
                     </FieldDescription>
                     {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
+                      <FieldError
+                        id={`${field.name}-error`}
+                        errors={field.state.meta.errors}
+                      />
                     )}
                   </Field>
                 );
@@ -253,6 +274,9 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                       <PopoverTrigger
                         render={
                           <Button
+                            id={field.name}
+                            aria-invalid={isInvalid}
+                            aria-describedby={isInvalid ? `${field.name}-error` : undefined}
                             className={cn(
                               "w-full pl-3 text-left font-normal",
                               !field.state.value && "text-muted-foreground"
@@ -283,7 +307,10 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                       Transaction date
                     </FieldDescription>
                     {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
+                      <FieldError
+                        id={`${field.name}-error`}
+                        errors={field.state.meta.errors}
+                      />
                     )}
                   </Field>
                 );

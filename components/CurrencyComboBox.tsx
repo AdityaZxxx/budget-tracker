@@ -48,7 +48,7 @@ export function CurrencyComboBox() {
   const mutation = useMutation({
     mutationFn: UpdateUserCurrency,
     onSuccess: (data: UserSettings) => {
-      toast.success("Currency update successfully", {
+      toast.success("Currency updated", {
         id: "update-currency",
       });
       setSelectedCurrency(
@@ -56,7 +56,7 @@ export function CurrencyComboBox() {
       );
     },
     onError: (e) => {
-      toast.error("Something wnet wrong", {
+      toast.error("Unable to update currency. Try again.", {
         id: "update-currency",
       });
     },
@@ -65,10 +65,10 @@ export function CurrencyComboBox() {
   const selectOption = React.useCallback(
     (currency: Currency | null) => {
       if (!currency) {
-        toast.error("Please select a currency");
+        toast.error("Select a currency to continue");
         return;
       }
-      toast.loading("Updating Currency...", {
+      toast.loading("Updating currency…", {
         id: "update-currency",
       });
       mutation.mutate(currency.value);
@@ -85,7 +85,7 @@ export function CurrencyComboBox() {
       {selectedCurrency ? (
         <>{selectedCurrency.label}</>
       ) : (
-        <>Select currency...</>
+        <>Select currency…</>
       )}
       <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
     </Button>
@@ -133,7 +133,7 @@ function CurrencyList({
 }) {
   return (
     <Command>
-      <CommandInput placeholder="Filter currency..." />
+      <CommandInput placeholder="Filter currency…" />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
         <CommandGroup>

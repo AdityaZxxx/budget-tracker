@@ -63,7 +63,7 @@ export const metadata: Metadata = {
     apple: "/apple-icon.png",
   },
 
-  manifest: "/site.webmanifest",
+  manifest: "/manifest.json",
   appleWebApp: {
     title: "Budget Tracker",
     statusBarStyle: "default",

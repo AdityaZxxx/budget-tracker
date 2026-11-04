@@ -9,12 +9,12 @@ import Logo from "./Logo";
 import { ThemeSwitcherBtn } from "./ThemeSwitcherBtn";
 import UserMenu from "./UserMenu";
 import { Button, buttonVariants } from "./ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "./ui/sheet";
 
 export default function Navbar() {
   return (
     <div className="border-b bg-background">
-      <nav className="container flex items-center justify-between px-4 sm:px-8">
+      <nav className="container flex items-center justify-between">
         <div className="flex h-[80px] min-h-[60px] items-center gap-x-4">
           <span className="hidden md:block">
             <Logo />
@@ -71,6 +71,7 @@ function MobileMenu() {
           <Menu />
         </SheetTrigger>
         <SheetContent className="w-[300px] sm:w-[400px]" side="left">
+          <SheetTitle className="sr-only">Navigation menu</SheetTitle>
           <div className="p-4">
             <Logo />
           </div>

@@ -30,7 +30,7 @@ const DeleteCategoryDialog = ({ trigger, category }: Props) => {
   const deleteMutation = useMutation({
     mutationFn: DeleteCategory,
     onSuccess: async () => {
-      toast.success("Category deleted successfully", {
+      toast.success("Category deleted", {
         id: categoryIdentifier,
       });
       await queryClient.invalidateQueries({
@@ -38,7 +38,7 @@ const DeleteCategoryDialog = ({ trigger, category }: Props) => {
       });
     },
     onError: () => {
-      toast.error("Something went wrong", {
+      toast.error("Unable to delete category. Try again.", {
         id: categoryIdentifier,
       });
     },
@@ -49,24 +49,27 @@ const DeleteCategoryDialog = ({ trigger, category }: Props) => {
       <AlertDialogTrigger render={trigger as ReactElement} />
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogTitle>
+            Delete category &quot;{category.name}&quot;?
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete your
-            category
+            This permanently deletes the &quot;{category.name}&quot;{" "}
+            {category.type} category. This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
+            variant="destructive"
             onClick={() => {
-              toast.loading("Deleting category...", { id: categoryIdentifier });
+              toast.loading("Deleting category…", { id: categoryIdentifier });
               deleteMutation.mutate({
                 name: category.name,
                 type: category.type as TransactionType,
               });
             }}
           >
-            Continue
+            Delete category
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

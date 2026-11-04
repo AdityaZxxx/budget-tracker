@@ -50,7 +50,7 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
     mutationFn: CreateCategory,
     onSuccess: async (data: Category) => {
       form.reset();
-      toast.success(`Category ${data.name} created successfully`, {
+      toast.success(`Category "${data.name}" created`, {
         id: "create-category",
       });
 
@@ -63,7 +63,7 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
       setOpen(false);
     },
     onError: () => {
-      toast.error("Something went wrong", {
+      toast.error("Unable to create category. Try again.", {
         id: "create-category",
       });
     },
@@ -78,8 +78,13 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
     validators: {
       onSubmit: CreateCategorySchema,
     },
+    onSubmitInvalid: () => {
+      document
+        .querySelector<HTMLElement>('[aria-invalid="true"]')
+        ?.focus();
+    },
     onSubmit: ({ value }) => {
-      toast.loading("Creating category...", {
+      toast.loading("Creating category…", {
         id: "create-category",
       });
       mutate(value);
@@ -106,7 +111,9 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
             <span
               className={cn(
                 "m-1",
-                type === "income" ? "text-emerald-500" : "text-red-500"
+                type === "income"
+                  ? "text-emerald-700 dark:text-emerald-400"
+                  : "text-red-600 dark:text-red-400"
               )}
             >
               {type}
@@ -136,13 +143,17 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     aria-invalid={isInvalid}
+                    aria-describedby={isInvalid ? `${field.name}-error` : undefined}
                     placeholder="Category name"
                   />
                   <FieldDescription>
                     This is how your category will appear in the app.
                   </FieldDescription>
                   {isInvalid && (
-                    <FieldError errors={field.state.meta.errors} />
+                    <FieldError
+                      id={`${field.name}-error`}
+                      errors={field.state.meta.errors}
+                    />
                   )}
                 </Field>
               );
@@ -156,11 +167,14 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
                 field.state.meta.isTouched && !field.state.meta.isValid;
               return (
                 <Field data-invalid={isInvalid}>
-                  <FieldLabel>Icon</FieldLabel>
+                  <FieldLabel htmlFor={field.name}>Icon</FieldLabel>
                   <Popover>
                     <PopoverTrigger
                       render={
                         <Button
+                          id={field.name}
+                          aria-invalid={isInvalid}
+                          aria-describedby={isInvalid ? `${field.name}-error` : undefined}
                           variant={"outline"}
                           className="h-[100px] w-full"
                         />
@@ -195,7 +209,10 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
                     </PopoverContent>
                   </Popover>
                   {isInvalid && (
-                    <FieldError errors={field.state.meta.errors} />
+                    <FieldError
+                      id={`${field.name}-error`}
+                      errors={field.state.meta.errors}
+                    />
                   )}
                 </Field>
               );
