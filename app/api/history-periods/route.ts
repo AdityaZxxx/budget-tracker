@@ -1,15 +1,15 @@
-import { getSession } from "@/lib/auth";
+import { requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 
 export async function GET() {
-  const session = await getSession();
+  const result = await requireHousehold();
 
-  if (!session) {
+  if (!result) {
     redirect("/sign-in");
   }
 
-  const periods = await getHistoryPeriods(session.user.id);
+  const periods = await getHistoryPeriods(result.household.id);
   return Response.json(periods);
 }
 
@@ -17,10 +17,10 @@ export type GetHistoryPeriodsResponseType = Awaited<
   ReturnType<typeof getHistoryPeriods>
 >;
 
-async function getHistoryPeriods(userId: string) {
+async function getHistoryPeriods(householdId: string) {
   const result = await prisma.monthHistory.findMany({
     where: {
-      userId,
+      householdId,
     },
     select: {
       year: true,

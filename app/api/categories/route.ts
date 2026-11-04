@@ -1,12 +1,12 @@
-import { getSession } from "@/lib/auth";
+import { requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { NextRequest } from "next/server";
 import { z } from "zod";
 export async function GET(request: NextRequest) {
-  const session = await getSession();
+  const result = await requireHousehold();
 
-  if (!session) {
+  if (!result) {
     redirect("/sign-in");
   }
 
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
   const type = queryParams.data;
   const categories = await prisma.category.findMany({
     where: {
-      userId: session.user.id,
+      householdId: result.household.id,
       ...(type && { type }),
     },
     orderBy: {

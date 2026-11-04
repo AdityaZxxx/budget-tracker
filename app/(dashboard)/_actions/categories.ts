@@ -1,6 +1,6 @@
 "use server";
 
-import { getSession } from "@/lib/auth";
+import { requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 import {
   CreateCategorySchema,
@@ -16,15 +16,17 @@ export async function CreateCategory(form: CreateCategorySchemaType) {
     throw new Error("Bad request");
   }
 
-  const session = await getSession();
-  if (!session) {
+  const result = await requireHousehold();
+  if (!result) {
     redirect("/sign-in");
   }
+
+  const { household } = result;
 
   const { name, icon, type } = parsedBody.data;
   return await prisma.category.create({
     data: {
-      userId: session.user.id,
+      householdId: household.id,
       name,
       icon,
       type,
@@ -38,15 +40,17 @@ export async function DeleteCategory(form: DeleteCategorySchemaType) {
     throw new Error("Bad request");
   }
 
-  const session = await getSession();
-  if (!session) {
+  const result = await requireHousehold();
+  if (!result) {
     redirect("/sign-in");
   }
 
+  const { household } = result;
+
   return await prisma.category.delete({
     where: {
-      name_userId_type: {
-        userId: session.user.id,
+      name_householdId_type: {
+        householdId: household.id,
         name: parsedBody.data.name,
         type: parsedBody.data.type,
       },

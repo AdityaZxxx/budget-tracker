@@ -3,7 +3,7 @@
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Card } from "@/components/ui/card";
 import { DateToUTCDate, GetFormatterForCurrency } from "@/lib/helpers";
-import { UserSettings } from "@prisma/client";
+import { Household } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { ReactNode, useMemo } from "react";
@@ -13,10 +13,10 @@ import { type GetBalanceStatsResponseType } from "../../api/stats/balance/route"
 interface Props {
   from: Date;
   to: Date;
-  userSettings: UserSettings;
+  household: Household;
 }
 
-const StatsCards = ({ from, to, userSettings }: Props) => {
+const StatsCards = ({ from, to, household }: Props) => {
   const statsQuery = useQuery<GetBalanceStatsResponseType>({
     queryKey: ["overview", "stats", from, to],
     queryFn: async () => {
@@ -40,8 +40,8 @@ const StatsCards = ({ from, to, userSettings }: Props) => {
   });
 
   const formatter = useMemo(() => {
-    return GetFormatterForCurrency(userSettings.currency);
-  }, [userSettings.currency]);
+    return GetFormatterForCurrency(household.currency ?? "USD");
+  }, [household.currency]);
 
   const { income = 0, expense = 0 } = statsQuery.data || {};
   const balance = income - expense;

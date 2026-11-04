@@ -2,14 +2,14 @@
 
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { MAX_DATE_RANGE } from "@/lib/constants";
-import { UserSettings } from "@prisma/client";
+import { Household } from "@prisma/client";
 import { differenceInDays, startOfMonth } from "date-fns";
 import { useState } from "react";
 import { toast } from "sonner";
 import CategoriesStats from "./CategoriesStats";
 import StatsCards from "./StatsCards";
 
-const Overview = ({ userSettings }: { userSettings: UserSettings }) => {
+const Overview = ({ household }: { household: Household }) => {
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
     from: startOfMonth(new Date()),
     to: new Date(),
@@ -39,13 +39,13 @@ const Overview = ({ userSettings }: { userSettings: UserSettings }) => {
 
       <div className="container flex w-full flex-col gap-4">
         <StatsCards
-          userSettings={userSettings}
+          household={household}
           from={dateRange.from}
           to={dateRange.to}
         />
 
         <CategoriesStats
-          userSettings={userSettings}
+          household={household}
           from={dateRange.from}
           to={dateRange.to}
         />

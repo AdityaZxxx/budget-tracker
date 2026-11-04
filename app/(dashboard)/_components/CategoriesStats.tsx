@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DateToUTCDate, GetFormatterForCurrency } from "@/lib/helpers";
 import { TransactionType } from "@/lib/types";
-import { UserSettings } from "@prisma/client";
+import { Household } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { type GetCategoriesStatsResponseType } from "../../api/stats/categories/route";
@@ -21,10 +21,10 @@ interface CategoriesCardProps {
 interface Props {
   from: Date;
   to: Date;
-  userSettings: UserSettings;
+  household: Household;
 }
 
-const CategoriesStats = ({ from, to, userSettings }: Props) => {
+const CategoriesStats = ({ from, to, household }: Props) => {
   const statsQuery = useQuery<GetCategoriesStatsResponseType>({
     queryKey: ["overview", "stats", "categories", from, to],
     queryFn: async () => {
@@ -41,8 +41,8 @@ const CategoriesStats = ({ from, to, userSettings }: Props) => {
   });
 
   const formatter = useMemo(() => {
-    return GetFormatterForCurrency(userSettings.currency);
-  }, [userSettings.currency]);
+    return GetFormatterForCurrency(household.currency ?? "USD");
+  }, [household.currency]);
 
   const { incomeStats, expenseStats } = useMemo(() => {
     const stats = statsQuery.data || [];
