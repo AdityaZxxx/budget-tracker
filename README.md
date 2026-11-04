@@ -4,7 +4,7 @@ A modern, full-stack web application designed to help users track their income a
 
 ## ✨ Features
 
-- **Secure Authentication**: Handled by Clerk for easy and secure sign-up and sign-in.
+- **Secure Authentication**: Handled by [Better Auth](https://better-auth.com/) for easy and secure sign-up and sign-in.
 - **Dashboard Overview**: A comprehensive summary of your financial status, including income, expenses, and net balance.
 - **Transaction Management**: Easily create, view, and manage your income and expense transactions.
 - **Category Management**: Organize your transactions by creating and managing custom categories.
@@ -18,7 +18,7 @@ A modern, full-stack web application designed to help users track their income a
 - **Framework**: [Next.js](https://nextjs.org/) (App Router)
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
 - **Database**: PostgreSQL (via [Prisma](https://www.prisma.io/))
-- **Authentication**: [Clerk](https://clerk.com/)
+- **Authentication**: [Better Auth](https://better-auth.com/)
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/) & [shadcn/ui](https://ui.shadcn.com/)
 - **Data Fetching**: [TanStack Query (React Query)](https://tanstack.com/query/latest)
 - **Charting**: [Recharts](https://recharts.org/)
@@ -54,17 +54,14 @@ Follow these instructions to get a copy of the project up and running on your lo
     Create a `.env` file in the root of your project and add the following variables. You can copy the `.env.example` file.
 
     ```env
-    NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-    NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-    NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/
-    NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=/wizard
-
-    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
-    CLERK_SECRET_KEY=
+    BETTER_AUTH_SECRET=
+    BETTER_AUTH_URL=http://localhost:3000
 
     POSTGRES_PRISMA_URL=
     POSTGRES_URL_NON_POOLING=
     ```
+
+    Generate a secret with `openssl rand -base64 32`.
 
 4.  **Run database migrations:**
 
