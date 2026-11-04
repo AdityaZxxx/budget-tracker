@@ -28,6 +28,7 @@ const AccountSection = () => {
             <Button
               variant="outline"
               className="gap-2"
+              nativeButton={false}
               render={<a href="/api/export" download="sora-export.json" />}
             >
               <Download className="h-4 w-4" />
@@ -36,6 +37,7 @@ const AccountSection = () => {
             <Button
               variant="ghost"
               className="gap-2"
+              nativeButton={false}
               render={<Link href="/privacy" />}
             >
               Privacy policy

@@ -113,7 +113,11 @@ const InvalidInviteLink = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button className="w-full" render={<Link href="/" />}>
+          <Button
+            className="w-full"
+            nativeButton={false}
+            render={<Link href="/" />}
+          >
             Go to Sora
           </Button>
         </CardContent>
