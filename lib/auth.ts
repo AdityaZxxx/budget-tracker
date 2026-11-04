@@ -10,12 +10,16 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
-    // Clerk hashes passwords with bcrypt; keep verifying with bcrypt so
-    // migrated users can sign in with their existing passwords.
     password: {
       hash: async (password) => await bcrypt.hash(password, 10),
       verify: async ({ hash, password }) =>
         await bcrypt.compare(password, hash),
+    },
+  },
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     },
   },
 });
