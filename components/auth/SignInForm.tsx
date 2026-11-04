@@ -24,7 +24,7 @@ const signInSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
-export default function SignInForm() {
+export default function SignInForm({ next }: { next?: string }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -57,7 +57,7 @@ export default function SignInForm() {
       }
 
       toast.success("Signed in");
-      router.push("/");
+      router.push(next ?? "/");
       router.refresh();
     },
   });
@@ -147,10 +147,13 @@ export default function SignInForm() {
           <span className="text-xs text-muted-foreground">or</span>
           <div className="h-px flex-1 bg-border" />
         </div>
-        <GoogleSignInButton />
+        <GoogleSignInButton callbackURL={next ?? "/"} />
         <p className="mt-4 text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
-          <Link href="/sign-up" className="underline underline-offset-4">
+          <Link
+            href={next ? `/sign-up?next=${encodeURIComponent(next)}` : "/sign-up"}
+            className="underline underline-offset-4"
+          >
             Sign up
           </Link>
         </p>

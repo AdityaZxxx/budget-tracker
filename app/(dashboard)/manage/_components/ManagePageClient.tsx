@@ -15,9 +15,16 @@ import { TransactionType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Category } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
-import { PlusSquare, TrashIcon, TrendingDown, TrendingUp } from "lucide-react";
+import {
+  Link2,
+  PlusSquare,
+  TrashIcon,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react";
 import CreateCategoryDialog from "../../_components/CreateCategoryDialog";
 import DeleteCategoryDialog from "../../_components/DeletecategoryDialog";
+import InviteLinkDialog from "./InviteLinkDialog";
 
 const ManagePageClient = () => {
   return (
@@ -47,6 +54,28 @@ const ManagePageClient = () => {
                 <div className="max-w-xs">
                   <CurrencyComboBox />
                 </div>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section>
+            <Card className="transition-all hover:shadow-md">
+              <CardHeader>
+                <CardTitle className="text-xl">Invite link</CardTitle>
+                <CardDescription>
+                  Share a revocable link or QR code to add another member to
+                  your household
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <InviteLinkDialog
+                  trigger={
+                    <Button className="gap-2">
+                      <Link2 className="h-4 w-4" />
+                      Manage invite link
+                    </Button>
+                  }
+                />
               </CardContent>
             </Card>
           </section>
