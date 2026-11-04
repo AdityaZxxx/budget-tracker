@@ -10,7 +10,8 @@ export async function GET() {
 
   const { session, household } = result;
 
-  const [members, transactions, categories, inviteLinks] = await Promise.all([
+  const [members, transactions, categories, goals, inviteLinks] =
+    await Promise.all([
     prisma.householdMembership.findMany({
       where: { householdId: household.id },
       select: {
@@ -35,6 +36,10 @@ export async function GET() {
     prisma.category.findMany({
       where: { householdId: household.id },
       orderBy: { name: "asc" },
+    }),
+    prisma.goal.findMany({
+      where: { householdId: household.id },
+      orderBy: { createdAt: "asc" },
     }),
     // Tokens are bearer credentials, so only metadata is exported.
     prisma.inviteLink.findMany({
@@ -64,6 +69,7 @@ export async function GET() {
     })),
     transactions,
     categories,
+    goals,
     inviteLinks,
   };
 
