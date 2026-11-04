@@ -1,6 +1,6 @@
 "use server";
 
-import { getSession } from "@/lib/auth";
+import { requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 import {
   CreateTransactionSchema,
@@ -14,15 +14,17 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
     throw new Error(parsedBody.error.message);
   }
 
-  const session = await getSession();
-  if (!session) {
+  const result = await requireHousehold();
+  if (!result) {
     redirect("/sign-in");
   }
+
+  const { session, household } = result;
 
   const { amount, category, date, description, type } = parsedBody.data;
   const categoryRow = await prisma.category.findFirst({
     where: {
-      userId: session.user.id,
+      householdId: household.id,
       name: category,
     },
   });
@@ -34,7 +36,8 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
   await prisma.$transaction([
     prisma.transaction.create({
       data: {
-        userId: session.user.id,
+        householdId: household.id,
+        addedById: session.user.id,
         amount,
         date,
         description: description || "",
@@ -46,15 +49,15 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 
     prisma.monthHistory.upsert({
       where: {
-        day_month_year_userId: {
-          userId: session.user.id,
+        day_month_year_householdId: {
+          householdId: household.id,
           day: date.getUTCDate(),
           month: date.getUTCMonth(),
           year: date.getUTCFullYear(),
         },
       },
       create: {
-        userId: session.user.id,
+        householdId: household.id,
         day: date.getUTCDate(),
         month: date.getUTCMonth(),
         year: date.getUTCFullYear(),
@@ -73,14 +76,14 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 
     prisma.yearHistory.upsert({
       where: {
-        month_year_userId: {
-          userId: session.user.id,
+        month_year_householdId: {
+          householdId: household.id,
           month: date.getUTCMonth(),
           year: date.getUTCFullYear(),
         },
       },
       create: {
-        userId: session.user.id,
+        householdId: household.id,
         month: date.getUTCMonth(),
         year: date.getUTCFullYear(),
         expense: type === "expense" ? amount : 0,

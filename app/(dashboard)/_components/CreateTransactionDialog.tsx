@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/popover";
 import { Currencies } from "@/lib/currencies";
 import { DateToUTCDate } from "@/lib/helpers";
-import { UserSettings } from "@prisma/client";
+import { Household } from "@prisma/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
@@ -57,13 +57,13 @@ type CreateTransactionFormValues = {
 const CreateTransactionDialog = ({ trigger, type }: Props) => {
   const [open, setOpen] = useState(false);
 
-  const userSettings = useQuery<UserSettings>({
-    queryKey: ["userSettings"],
+  const household = useQuery<Household>({
+    queryKey: ["household"],
     queryFn: () => fetch("/api/user-settings").then((res) => res.json()),
   });
 
   const currency = Currencies.find(
-    (c) => c.value === userSettings.data?.currency
+    (c) => c.value === household.data?.currency
   );
 
   const { thousandSeparator, decimalSeparator } = useMemo(() => {
@@ -199,7 +199,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
               return (
                 <Field data-invalid={isInvalid}>
                   <FieldLabel htmlFor={field.name}>Amount</FieldLabel>
-                  <SkeletonWrapper isLoading={userSettings.isFetching}>
+                  <SkeletonWrapper isLoading={household.isFetching}>
                     <NumericFormat
                       customInput={Input}
                       id={field.name}

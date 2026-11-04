@@ -16,7 +16,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { UserSettings } from "@prisma/client";
+import { Household } from "@prisma/client";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ChevronsUpDown } from "lucide-react";
 import * as React from "react";
@@ -32,22 +32,22 @@ export function CurrencyComboBox() {
   const [selectedCurrency, setSelectedCurrency] =
     React.useState<Currency | null>(null);
 
-  const userSettings = useQuery<UserSettings>({
-    queryKey: ["userSettings"],
+  const household = useQuery<Household>({
+    queryKey: ["household"],
     queryFn: () => fetch("/api/user-settings").then((res) => res.json()),
   });
 
   React.useEffect(() => {
-    if (!userSettings.data) return;
+    if (!household.data) return;
     const userCurrency = Currencies.find(
-      (currency) => currency.value === userSettings.data.currency
+      (currency) => currency.value === household.data.currency
     );
     if (userCurrency) setSelectedCurrency(userCurrency);
-  }, [userSettings.data]);
+  }, [household.data]);
 
   const mutation = useMutation({
     mutationFn: UpdateUserCurrency,
-    onSuccess: (data: UserSettings) => {
+    onSuccess: (data: Household) => {
       toast.success("Currency updated", {
         id: "update-currency",
       });
@@ -93,7 +93,7 @@ export function CurrencyComboBox() {
 
   if (isDesktop) {
     return (
-      <SkeletonWrapper isLoading={userSettings.isFetching}>
+      <SkeletonWrapper isLoading={household.isFetching}>
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger render={TriggerButton} />
           <PopoverContent className="w-full p-0" align="start">
@@ -108,7 +108,7 @@ export function CurrencyComboBox() {
   }
 
   return (
-    <SkeletonWrapper isLoading={userSettings.isFetching}>
+    <SkeletonWrapper isLoading={household.isFetching}>
       <Drawer open={open} onOpenChange={setOpen}>
         <DrawerTrigger asChild>{TriggerButton}</DrawerTrigger>
         <DrawerContent>

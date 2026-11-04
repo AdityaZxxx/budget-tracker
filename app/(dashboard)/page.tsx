@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { getSession } from "@/lib/auth";
-import prisma from "@/lib/prisma";
+import { requireHousehold } from "@/lib/household";
 import { type Metadata } from "next";
 import { redirect } from "next/navigation";
 import CreateTransactionDialog from "./_components/CreateTransactionDialog";
@@ -19,18 +18,14 @@ export const metadata: Metadata = {
 };
 
 const DashboardPage = async () => {
-  const session = await getSession();
-  if (!session) {
+  const result = await requireHousehold();
+  if (!result) {
     redirect("/sign-in");
   }
 
-  const userSettings = await prisma.userSettings.findUnique({
-    where: {
-      userId: session.user.id,
-    },
-  });
+  const { session, household } = result;
 
-  if (!userSettings) {
+  if (!household.currency) {
     redirect("/wizard");
   }
   return (
@@ -67,8 +62,8 @@ const DashboardPage = async () => {
           </div>
         </div>
       </div>
-      <Overview userSettings={userSettings} />
-      <History userSettings={userSettings} />
+      <Overview household={household} />
+      <History household={household} />
     </div>
   );
 };
