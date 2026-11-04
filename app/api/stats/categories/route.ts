@@ -1,3 +1,4 @@
+import { SETTLEMENT_CATEGORY_NAME } from "@/lib/constants";
 import { requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 import { OverviewQuerySchema } from "@/schemas/overview";
@@ -47,6 +48,11 @@ async function getCategoriesStats(householdId: string, from: Date, to: Date) {
     by: ["type", "category", "categoryIcon"],
     where: {
       householdId,
+      shared: true,
+      // Settlements are not spending.
+      category: {
+        not: SETTLEMENT_CATEGORY_NAME,
+      },
       date: {
         gte: from,
         lte: to,

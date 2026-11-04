@@ -1,3 +1,4 @@
+import { SETTLEMENT_CATEGORY_NAME } from "@/lib/constants";
 import { requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
@@ -25,6 +26,10 @@ export async function GET(request: NextRequest) {
   const categories = await prisma.category.findMany({
     where: {
       householdId: result.household.id,
+      // The system Settlement category is hidden from pickers and lists.
+      name: {
+        not: SETTLEMENT_CATEGORY_NAME,
+      },
       ...(type && { type }),
     },
     orderBy: {

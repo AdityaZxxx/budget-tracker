@@ -6,6 +6,7 @@ export const CreateTransactionSchema = z.object({
   date: z.coerce.date(),
   category: z.string().min(1, "Select a category"),
   type: z.union([z.literal("income"), z.literal("expense")]),
+  shared: z.boolean().default(true),
 });
 
 export type CreateTransactionSchemaType = {
@@ -14,6 +15,7 @@ export type CreateTransactionSchemaType = {
   date: Date;
   category: string;
   type: "income" | "expense";
+  shared: boolean;
 };
 export type CreateTransactionSchemaOutput = z.output<
   typeof CreateTransactionSchema

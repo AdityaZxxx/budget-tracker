@@ -25,6 +25,7 @@ import { DataTableColumnHeader } from "@/components/datatable/ColumnHeader";
 import { DataTableViewOptions } from "@/components/datatable/Columntoggle";
 import { DataTableFacetedFilter } from "@/components/datatable/FacetedFilters";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
+import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -443,8 +444,13 @@ function AddedByCell({ transaction }: { transaction: TransactionHistoryRow }) {
   const { data: session } = useSession();
   const isSelf = session?.user.id === transaction.addedById;
   return (
-    <div className="text-sm whitespace-nowrap text-muted-foreground">
-      {isSelf ? "You" : `added by ${transaction.addedByName}`}
+    <div className="flex items-center gap-2 text-sm whitespace-nowrap text-muted-foreground">
+      <span>{isSelf ? "You" : `added by ${transaction.addedByName}`}</span>
+      {!transaction.shared && (
+        <Badge variant="outline" className="text-xs">
+          Personal
+        </Badge>
+      )}
     </div>
   );
 }

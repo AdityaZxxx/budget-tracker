@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
 
   const transactions = await getTrasactionsHistory(
     result.household.id,
+    result.session.user.id,
     queryParams.data.from,
     queryParams.data.to
   );
@@ -40,7 +41,12 @@ export type GetTrasactionsHistoryResponseType = Awaited<
   ReturnType<typeof getTrasactionsHistory>
 >;
 
-async function getTrasactionsHistory(householdId: string, from: Date, to: Date) {
+async function getTrasactionsHistory(
+  householdId: string,
+  userId: string,
+  from: Date,
+  to: Date
+) {
   const household = await prisma.household.findUnique({
     where: {
       id: householdId,
@@ -60,6 +66,8 @@ async function getTrasactionsHistory(householdId: string, from: Date, to: Date) 
         gte: from,
         lte: to,
       },
+      // Members see shared transactions plus their own personal ones.
+      OR: [{ shared: true }, { addedById: userId }],
     },
     orderBy: {
       date: "asc",
