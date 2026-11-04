@@ -25,9 +25,12 @@ import CreateCategoryDialog from "./CreateCategoryDialog";
 interface Props {
   type: TransactionType;
   onChange: (value: string) => void;
+  id?: string;
+  "aria-invalid"?: boolean;
+  "aria-describedby"?: string;
 }
 
-const CategoryPicker = ({ type, onChange }: Props) => {
+const CategoryPicker = ({ type, onChange, id, ...ariaProps }: Props) => {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
 
@@ -59,17 +62,19 @@ const CategoryPicker = ({ type, onChange }: Props) => {
       <PopoverTrigger
         render={
           <Button
+            id={id}
             variant={"outline"}
             role="combobox"
             aria-expanded={open}
             className="w-[200px] justify-between"
+            {...ariaProps}
           />
         }
       >
         {selectedCategory ? (
           <CategoryRow category={selectedCategory} />
         ) : (
-          "Select Category"
+          "Select category"
         )}
         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
       </PopoverTrigger>
@@ -79,7 +84,7 @@ const CategoryPicker = ({ type, onChange }: Props) => {
             e.preventDefault();
           }}
         >
-          <CommandInput placeholder="Search category..." />
+          <CommandInput placeholder="Search category…" />
           <CreateCategoryDialog type={type} successCallback={SuccessCallback} />
           <CommandEmpty>
             <p>Category not found</p>

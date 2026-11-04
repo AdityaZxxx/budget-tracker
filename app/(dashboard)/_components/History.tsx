@@ -68,14 +68,14 @@ const History = ({ userSettings }: { userSettings: UserSettings }) => {
                 variant={"outline"}
                 className="flex items-center gap-2 text-sm"
               >
-                <div className="h-4 w-4 rounded-full bg-emerald-500"></div>
+                <div className="h-4 w-4 rounded-full bg-emerald-600 dark:bg-emerald-500"></div>
                 Income
               </Badge>
               <Badge
                 variant={"outline"}
                 className="flex items-center gap-2 text-sm"
               >
-                <div className="h-4 w-4 rounded-full bg-red-500"></div>
+                <div className="h-4 w-4 rounded-full bg-red-600 dark:bg-red-500"></div>
                 Expense
               </Badge>
             </div>
@@ -88,12 +88,12 @@ const History = ({ userSettings }: { userSettings: UserSettings }) => {
                 <BarChart data={historyDataQuery.data} barCategoryGap={5}>
                   <defs>
                     <linearGradient id="incomeBar" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0" stopColor="#10b981" stopOpacity="1" />
-                      <stop offset="1" stopColor="#10b981" stopOpacity="0.4" />
+                      <stop offset="0" stopColor="#059669" stopOpacity="1" />
+                      <stop offset="1" stopColor="#059669" stopOpacity="0.4" />
                     </linearGradient>
                     <linearGradient id="expenseBar" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0" stopColor="#ef4444" stopOpacity="1" />
-                      <stop offset="1" stopColor="#ef4444" stopOpacity="0.4" />
+                      <stop offset="0" stopColor="#dc2626" stopOpacity="1" />
+                      <stop offset="1" stopColor="#dc2626" stopOpacity="0.4" />
                     </linearGradient>
                   </defs>
                   <CartesianGrid
@@ -169,21 +169,21 @@ function CustomTooltip({ active, payload, formatter }: any) {
   const data = payload[0].payload;
   const { expense, income } = data;
   return (
-    <div className="min-w-[300px] rounded berder bg-background p-4">
+    <div className="w-[300px] max-w-[calc(100vw-2rem)] rounded-md border bg-background p-4">
       <TooltipRow
         formatter={formatter}
         label="Expense"
         value={expense}
-        bgColor="bg-red-500"
-        textColor="text-red-500"
+        bgColor="bg-red-600 dark:bg-red-500"
+        textColor="text-red-600 dark:text-red-400"
       />
 
       <TooltipRow
         formatter={formatter}
         label="Income"
         value={income}
-        bgColor="bg-emerald-500"
-        textColor="text-emerald-500"
+        bgColor="bg-emerald-600 dark:bg-emerald-500"
+        textColor="text-emerald-700 dark:text-emerald-400"
       />
 
       <TooltipRow
@@ -221,13 +221,13 @@ function TooltipRow({
       <div className={cn("h-4 w-4 rounded-full", bgColor)} />
       <div className="flex w-full justify-between">
         <p className="text-sm font-bold">{label}</p>
-        <div className={cn("text-sm font-bold", textColor)}>
+        <div className={cn("text-sm font-bold tabular-nums", textColor)}>
           <CountUp
             duration={0.5}
             preserveValue
             end={value}
             decimals={0}
-            className="text-sm"
+            className="text-sm tabular-nums"
             formattingFn={formattingFn}
           />
         </div>

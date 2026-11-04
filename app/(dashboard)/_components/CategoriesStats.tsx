@@ -116,17 +116,19 @@ function CategoriesCard({ data, type, formatter, total }: CategoriesCardProps) {
                 return (
                   <div key={item.category} className="flex flex-col gap-1.5">
                     <div className="flex items-center justify-between">
-                      <span className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                      <span className="flex items-center gap-2 text-sm text-muted-foreground">
                         {item.categoryIcon} {item.category}
                       </span>
-                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                      <span className="text-sm font-semibold tabular-nums text-foreground">
                         {formatter.format(amount)}
                       </span>
                     </div>
                     <Progress
                       value={percentage}
                       indicatorClassName={
-                        type === "income" ? "bg-emerald-500" : "bg-red-500"
+                        type === "income"
+                          ? "bg-emerald-600 dark:bg-emerald-400"
+                          : "bg-red-600 dark:bg-red-400"
                       }
                     />
                   </div>

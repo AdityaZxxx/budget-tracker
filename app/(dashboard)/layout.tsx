@@ -3,9 +3,17 @@ import { ReactNode } from "react";
 
 const Layout = ({ children }: { children: ReactNode }) => {
   return (
-    <div className="w-full relative flex flex-col h-screen">
+    <div className="relative flex h-dvh w-full flex-col">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[60] focus:rounded-md focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:ring-2 focus:ring-ring"
+      >
+        Skip to content
+      </a>
       <Navbar />
-      <div className="w-full">{children}</div>
+      <main id="main-content" className="w-full flex-1">
+        {children}
+      </main>
     </div>
   );
 };

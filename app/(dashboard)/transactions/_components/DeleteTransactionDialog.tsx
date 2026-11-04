@@ -25,7 +25,7 @@ const DeleteTransactionDialog = ({ open, setOpen, transactionId }: Props) => {
   const deleteMutation = useMutation({
     mutationFn: DeleteTransaction,
     onSuccess: async () => {
-      toast.success("Transaction deleted successfully", {
+      toast.success("Transaction deleted", {
         id: transactionId,
       });
       await queryClient.invalidateQueries({
@@ -33,7 +33,7 @@ const DeleteTransactionDialog = ({ open, setOpen, transactionId }: Props) => {
       });
     },
     onError: () => {
-      toast.error("Something went wrong", {
+      toast.error("Unable to delete transaction. Try again.", {
         id: transactionId,
       });
     },
@@ -43,23 +43,24 @@ const DeleteTransactionDialog = ({ open, setOpen, transactionId }: Props) => {
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogTitle>Delete transaction?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete your
-            category
+            This permanently deletes the transaction. This action cannot be
+            undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
+            variant="destructive"
             onClick={() => {
-              toast.loading("Deleting transaction...", {
+              toast.loading("Deleting transaction…", {
                 id: transactionId,
               });
               deleteMutation.mutate(transactionId);
             }}
           >
-            Continue
+            Delete transaction
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
