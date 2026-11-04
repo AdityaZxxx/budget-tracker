@@ -1,17 +1,16 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { flexRender } from "@tanstack/react-table";
 import {
-  ColumnDef,
-  ColumnFiltersState,
-  flexRender,
+  LegacyColumnDef as ColumnDef,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  SortingState,
-  useReactTable,
-} from "@tanstack/react-table";
+  useLegacyTable as useReactTable,
+} from "@tanstack/react-table/legacy";
+import type { ColumnFiltersState, SortingState } from "@tanstack/react-table";
 import {
   ChevronLeft,
   ChevronRight,
@@ -104,7 +103,7 @@ export const columns: ColumnDef<TransactionHistoryRow>[] = [
         </div>
       );
     },
-    sortingFn: (rowA, rowB) => {
+    sortFn: (rowA, rowB) => {
       const dateA = new Date(rowA.original.date).getTime();
       const dateB = new Date(rowB.original.date).getTime();
       return dateA - dateB;
