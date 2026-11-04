@@ -1,6 +1,6 @@
+import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { Period, Timeframe } from "@/lib/types";
-import { currentUser } from "@clerk/nextjs/server";
 import { getDaysInMonth } from "date-fns";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -20,8 +20,8 @@ const getHistoryDataSchema = z.object({
 });
 
 export async function GET(request: Request) {
-  const user = await currentUser();
-  if (!user) {
+  const session = await getSession();
+  if (!session) {
     redirect("/sign-in");
   }
 
@@ -40,7 +40,7 @@ export async function GET(request: Request) {
     return Response.json(queryParams.error.message, { status: 400 });
   }
 
-  const data = await getHistoryData(user.id, queryParams.data.timeframe, {
+  const data = await getHistoryData(session.user.id, queryParams.data.timeframe, {
     month: queryParams.data.month,
     year: queryParams.data.year,
   });

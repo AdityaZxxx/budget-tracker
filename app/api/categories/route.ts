@@ -1,12 +1,12 @@
+import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { NextRequest } from "next/server";
 import { z } from "zod";
 export async function GET(request: NextRequest) {
-  const user = await currentUser();
+  const session = await getSession();
 
-  if (!user) {
+  if (!session) {
     redirect("/sign-in");
   }
 
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
   const type = queryParams.data;
   const categories = await prisma.category.findMany({
     where: {
-      userId: user.id,
+      userId: session.user.id,
       ...(type && { type }),
     },
     orderBy: {

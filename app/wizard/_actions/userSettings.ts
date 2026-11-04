@@ -1,8 +1,8 @@
 "use server";
 
+import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { UpdateUserCurrencySchema } from "@/schemas/userSetting";
-import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 export async function UpdateUserCurrency(currency: string) {
@@ -12,13 +12,13 @@ export async function UpdateUserCurrency(currency: string) {
   if (!parsedBody.success) {
     throw parsedBody.error;
   }
-  const user = await currentUser();
-  if (!user) {
+  const session = await getSession();
+  if (!session) {
     redirect("/sign-in");
   }
   const userSettings = await prisma.userSettings.update({
     where: {
-      userId: user.id,
+      userId: session.user.id,
     },
     data: {
       currency,

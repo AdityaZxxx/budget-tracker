@@ -1,18 +1,18 @@
 "use server";
 
+import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 export async function DeleteTransaction(id: string) {
-  const user = await currentUser();
-  if (!user) {
+  const session = await getSession();
+  if (!session) {
     redirect("/sign-in");
   }
 
   const transaction = await prisma.transaction.findUnique({
     where: {
-      userId: user.id,
+      userId: session.user.id,
       id,
     },
   });
@@ -25,13 +25,13 @@ export async function DeleteTransaction(id: string) {
     prisma.transaction.delete({
       where: {
         id,
-        userId: user.id,
+        userId: session.user.id,
       },
     }),
     prisma.monthHistory.update({
       where: {
         day_month_year_userId: {
-          userId: user.id,
+          userId: session.user.id,
           day: transaction.date.getUTCDate(),
           month: transaction.date.getUTCMonth(),
           year: transaction.date.getUTCFullYear(),
@@ -54,7 +54,7 @@ export async function DeleteTransaction(id: string) {
     prisma.yearHistory.update({
       where: {
         month_year_userId: {
-          userId: user.id,
+          userId: session.user.id,
           month: transaction.date.getUTCMonth(),
           year: transaction.date.getUTCFullYear(),
         },
