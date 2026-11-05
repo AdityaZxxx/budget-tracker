@@ -10,7 +10,7 @@ export default function Logo({ className }: LogoProps) {
     <Link href="/" aria-label="Sora" className={cn("flex items-center", className)}>
       <svg
         viewBox="35.5 -24 304 304"
-        className="h-11 w-11 fill-current text-foreground"
+        className="h-8 w-8 fill-current text-foreground"
         aria-hidden="true"
         focusable="false"
       >

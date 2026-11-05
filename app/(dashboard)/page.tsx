@@ -8,7 +8,6 @@ import CreateTransactionDialog from "./_components/CreateTransactionDialog";
 import Goals from "./_components/Goals";
 import History from "./_components/History";
 import InvitePartnerCta from "./_components/InvitePartnerCta";
-import NotificationBell from "./_components/NotificationBell";
 import Overview from "./_components/Overview";
 
 export const metadata: Metadata = {
@@ -45,7 +44,6 @@ const DashboardPage = async () => {
           </h1>
 
           <div className="flex items-center gap-3">
-            <NotificationBell />
             <CreateTransactionDialog
               trigger={
                 <Button

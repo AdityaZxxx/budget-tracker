@@ -15,7 +15,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { Bell, CheckCheck } from "lucide-react";
 import { toast } from "sonner";
-import { listNotifications, markAllRead } from "../_actions/notifications";
+import { listNotifications, markAllRead } from "@/app/(dashboard)/_actions/notifications";
 
 const NotificationBell = () => {
   const queryClient = useQueryClient();
@@ -59,7 +59,7 @@ const NotificationBell = () => {
       >
         <Bell />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
+          <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-white">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
