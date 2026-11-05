@@ -63,7 +63,10 @@ const NotificationBell = () => {
           </span>
         )}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80">
+      <DropdownMenuContent
+        align="end"
+        className="w-[min(20rem,calc(100vw-2rem))]"
+      >
         <div className="flex items-center justify-between px-2 py-1.5">
           <DropdownMenuLabel className="p-0">Notifications</DropdownMenuLabel>
           <DropdownMenuItem

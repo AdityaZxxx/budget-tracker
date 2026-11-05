@@ -70,7 +70,10 @@ function MobileMenu() {
         >
           <Menu />
         </SheetTrigger>
-        <SheetContent className="w-[300px] sm:w-[400px]" side="left">
+        <SheetContent
+          className="w-[300px] max-w-[calc(100vw-2rem)] sm:w-[400px]"
+          side="left"
+        >
           <SheetTitle className="sr-only">Navigation menu</SheetTitle>
           <div className="p-4">
             <Logo />
