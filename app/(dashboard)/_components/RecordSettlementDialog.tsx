@@ -107,7 +107,7 @@ const RecordSettlementDialog = ({ trigger, members, household }: Props) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={trigger as ReactElement} />
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle className="text-lg sm:text-xl">
             Record a settlement
