@@ -57,7 +57,7 @@ const Balances = ({ household }: { household: Household }) => {
           </div>
         </CardHeader>
         <CardContent>
-          <SkeletonWrapper isLoading={balancesQuery.isFetching}>
+          <SkeletonWrapper isLoading={balancesQuery.isLoading}>
             {balances.length === 0 ? (
               <p className="py-4 text-center text-sm text-muted-foreground">
                 No other members yet. Invite someone to start splitting

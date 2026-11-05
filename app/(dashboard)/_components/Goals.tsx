@@ -55,7 +55,7 @@ const Goals = ({ household }: { household: Household }) => {
           </div>
         </CardHeader>
         <CardContent>
-          <SkeletonWrapper isLoading={goalsQuery.isFetching}>
+          <SkeletonWrapper isLoading={goalsQuery.isLoading}>
             {goals.length === 0 ? (
               <p className="py-4 text-center text-sm text-muted-foreground">
                 No goals yet. Create one to start saving together.

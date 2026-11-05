@@ -95,7 +95,7 @@ export function CurrencyComboBox() {
 
   if (isDesktop) {
     return (
-      <SkeletonWrapper isLoading={household.isFetching}>
+      <SkeletonWrapper isLoading={household.isLoading}>
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger render={TriggerButton} />
           <PopoverContent className="w-full p-0" align="start">
@@ -110,7 +110,7 @@ export function CurrencyComboBox() {
   }
 
   return (
-    <SkeletonWrapper isLoading={household.isFetching}>
+    <SkeletonWrapper isLoading={household.isLoading}>
       <Drawer open={open} onOpenChange={setOpen}>
         <DrawerTrigger asChild>{TriggerButton}</DrawerTrigger>
         <DrawerContent>

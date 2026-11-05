@@ -233,7 +233,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
               return (
                 <Field data-invalid={isInvalid}>
                   <FieldLabel htmlFor={field.name}>Amount</FieldLabel>
-                  <SkeletonWrapper isLoading={household.isFetching}>
+                  <SkeletonWrapper isLoading={household.isLoading}>
                     <NumericFormat
                       customInput={Input}
                       id={field.name}
