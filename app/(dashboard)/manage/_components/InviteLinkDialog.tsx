@@ -11,9 +11,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
 import { InviteLink } from "@prisma/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Copy, Loader2, PlusSquare, TrashIcon } from "lucide-react";
+import { Check, Copy, Loader2, PlusSquare, TrashIcon } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { ReactElement, ReactNode, useState } from "react";
 import { toast } from "sonner";
@@ -32,6 +33,8 @@ const inviteUrl = (token: string) =>
 
 const InviteLinkDialog = ({ trigger }: Props) => {
   const [open, setOpen] = useState(false);
+  const [showQr, setShowQr] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const queryClient = useQueryClient();
 
@@ -67,13 +70,11 @@ const InviteLinkDialog = ({ trigger }: Props) => {
     },
   });
 
-  const copyLink = async (url: string) => {
+  const copyLink = async (url: string, id: string) => {
     await navigator.clipboard.writeText(url);
-    toast.success("Invite link copied to clipboard", { id: "copy-invite-link" });
+    setCopiedId(id);
+    window.setTimeout(() => setCopiedId(null), 1500);
   };
-
-  const primaryLink = inviteLinks[0];
-  const primaryUrl = primaryLink ? inviteUrl(primaryLink.token) : null;
 
   const triggerElement = (trigger ?? (
     <Button>Invite</Button>
@@ -100,41 +101,58 @@ const InviteLinkDialog = ({ trigger }: Props) => {
           </p>
         ) : (
           <div className="space-y-4">
-            <div className="flex justify-center">
-              <div className="rounded-lg bg-white p-3">
-                <QRCodeSVG value={primaryUrl ?? ""} size={168} />
-              </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">
+                Show QR codes
+              </span>
+              <Switch
+                checked={showQr}
+                onCheckedChange={setShowQr}
+                aria-label="Show QR codes"
+              />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {inviteLinks.map((link) => {
                 const url = inviteUrl(link.token);
                 return (
                   <div
                     key={link.id}
-                    className="flex items-center justify-between gap-2 rounded-lg border p-2"
+                    className="flex flex-col items-center gap-3 rounded-lg border p-3 sm:flex-row sm:items-center"
                   >
-                    <span className="truncate text-xs text-muted-foreground">
-                      {url}
-                    </span>
-                    <div className="flex shrink-0 gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={() => copyLink(url)}
-                        aria-label="Copy invite link"
+                    {showQr && (
+                      <div className="shrink-0 rounded-md bg-white p-2 outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10">
+                        <QRCodeSVG value={url} size={112} />
+                      </div>
+                    )}
+                    <div className="w-full min-w-0 flex-1 space-y-2">
+                      <span
+                        className="block truncate text-xs text-muted-foreground"
+                        title={url}
                       >
-                        <Copy />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        className="text-destructive hover:bg-destructive/10"
-                        disabled={revokeMutation.isPending}
-                        onClick={() => revokeMutation.mutate({ id: link.id })}
-                        aria-label="Revoke invite link"
-                      >
-                        <TrashIcon />
-                      </Button>
+                        {url}
+                      </span>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() => copyLink(url, link.id)}
+                          aria-label={
+                            copiedId === link.id ? "Copied" : "Copy invite link"
+                          }
+                        >
+                          {copiedId === link.id ? <Check /> : <Copy />}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          className="text-destructive hover:bg-destructive/10"
+                          disabled={revokeMutation.isPending}
+                          onClick={() => revokeMutation.mutate({ id: link.id })}
+                          aria-label="Revoke invite link"
+                        >
+                          <TrashIcon />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 );
