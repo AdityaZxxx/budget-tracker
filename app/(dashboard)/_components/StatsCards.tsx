@@ -48,14 +48,14 @@ const StatsCards = ({ from, to, household }: Props) => {
 
   return (
     <div className="space-y-4">
-      <SkeletonWrapper isLoading={statsQuery.isFetching}>
+      <SkeletonWrapper isLoading={statsQuery.isLoading}>
         <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           <StatCard
             formatter={formatter}
             value={income}
             title="Income"
             trend="up"
-            isLoading={statsQuery.isFetching}
+            isLoading={statsQuery.isLoading}
             icon={
               <div className="flex items-center justify-center rounded-lg bg-emerald-500/10 p-3">
                 <TrendingUp className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
@@ -67,7 +67,7 @@ const StatsCards = ({ from, to, household }: Props) => {
             value={expense}
             title="Expense"
             trend="down"
-            isLoading={statsQuery.isFetching}
+            isLoading={statsQuery.isLoading}
             icon={
               <div className="flex items-center justify-center rounded-lg bg-rose-500/10 p-3">
                 <TrendingDown className="h-6 w-6 text-rose-600 dark:text-rose-400" />
@@ -79,7 +79,7 @@ const StatsCards = ({ from, to, household }: Props) => {
             value={balance}
             title="Balance"
             trend={balance >= 0 ? "up" : "down"}
-            isLoading={statsQuery.isFetching}
+            isLoading={statsQuery.isLoading}
             icon={
               <div className="flex items-center justify-center rounded-lg bg-violet-500/10 p-3">
                 <Wallet className="h-6 w-6 text-violet-600 dark:text-violet-400" />

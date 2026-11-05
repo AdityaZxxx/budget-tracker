@@ -320,7 +320,7 @@ const TransactionTable = ({ from, to }: Props) => {
         </div>
       </div>
 
-      <SkeletonWrapper isLoading={history.isFetching}>
+      <SkeletonWrapper isLoading={history.isLoading}>
         <div className="rounded-lg border">
           <Table>
             <TableHeader className="bg-muted/50">

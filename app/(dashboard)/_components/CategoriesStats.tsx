@@ -68,7 +68,7 @@ const CategoriesStats = ({ from, to, household }: Props) => {
 
   return (
     <div className="grid w-full grid-cols-1 gap-4 lg:grid-cols-2">
-      <SkeletonWrapper isLoading={statsQuery.isFetching}>
+      <SkeletonWrapper isLoading={statsQuery.isLoading}>
         <CategoriesCard
           formatter={formatter}
           type="income"
@@ -76,7 +76,7 @@ const CategoriesStats = ({ from, to, household }: Props) => {
           total={incomeStats.total}
         />
       </SkeletonWrapper>
-      <SkeletonWrapper isLoading={statsQuery.isFetching}>
+      <SkeletonWrapper isLoading={statsQuery.isLoading}>
         <CategoriesCard
           formatter={formatter}
           type="expense"
