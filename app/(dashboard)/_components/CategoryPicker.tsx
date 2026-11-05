@@ -68,7 +68,7 @@ const CategoryPicker = ({ type, onChange, id, ...ariaProps }: Props) => {
             variant={"outline"}
             role="combobox"
             aria-expanded={open}
-            className="w-[200px] justify-between"
+            className="w-full justify-between"
             {...ariaProps}
           />
         }
