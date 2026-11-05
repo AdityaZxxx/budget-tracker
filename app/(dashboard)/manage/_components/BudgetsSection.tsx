@@ -10,6 +10,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -21,7 +30,14 @@ import { GetFormatterForCurrency } from "@/lib/helpers";
 import { cn } from "@/lib/utils";
 import { Household } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
-import { Pencil, PlusSquare, Target, TrashIcon } from "lucide-react";
+import {
+  MoreHorizontal,
+  Pencil,
+  PlusSquare,
+  Target,
+  TrashIcon,
+} from "lucide-react";
+import { useState } from "react";
 import { listBudgets, type BudgetWithProgress } from "../../_actions/budgets";
 import BudgetDialog from "./BudgetDialog";
 import DeleteBudgetDialog from "./DeleteBudgetDialog";
@@ -142,72 +158,87 @@ function BudgetCard({
 }) {
   const overLimit = budget.percent >= 100;
   const nearLimit = budget.percent >= 80 && !overLimit;
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   return (
-    <div className="group relative flex flex-col gap-2 rounded-lg border p-4 transition-all hover:shadow-md">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <span className="font-medium">{budget.category}</span>
-          <Badge variant={budget.mode === "hard" ? "destructive" : "secondary"}>
-            {budget.mode}
-          </Badge>
-        </div>
-        <div className="flex items-center">
+    <>
+      <div className="group relative flex flex-col gap-2 rounded-lg border p-4 transition-all hover:shadow-md">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="font-medium">{budget.category}</span>
+            <Badge
+              variant={budget.mode === "hard" ? "destructive" : "secondary"}
+            >
+              {budget.mode}
+            </Badge>
+          </div>
           <Tooltip>
-            <BudgetDialog
-              budget={budget}
-              household={household}
-              trigger={
-                <TooltipTrigger
-                  render={
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-muted-foreground opacity-100 hover:bg-muted md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100"
-                      aria-label={`Edit ${budget.category} budget`}
-                    />
-                  }
+            <DropdownMenu>
+              <TooltipTrigger
+                render={
+                  <DropdownMenuTrigger
+                    render={
+                      <Button
+                        variant="ghost"
+                        className="h-8 w-8 p-0 text-muted-foreground opacity-100 hover:bg-muted md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100"
+                        aria-label={`Open actions for ${budget.category} budget`}
+                      />
+                    }
+                  />
+                }
+              >
+                <span className="sr-only">Open actions</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </TooltipTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="flex items-center gap-2"
+                  onClick={() => setEditOpen(true)}
                 >
-                  <Pencil className="h-4 w-4" />
-                </TooltipTrigger>
-              }
-            />
-            <TooltipContent>Edit {budget.category} budget</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <DeleteBudgetDialog
-              budget={budget}
-              trigger={
-                <TooltipTrigger
-                  render={
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-destructive opacity-100 hover:bg-destructive/10 md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100"
-                      aria-label={`Delete ${budget.category} budget`}
-                    />
-                  }
+                  <Pencil className="h-4 w-4 text-muted-foreground" />
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="flex items-center gap-2"
+                  onClick={() => setDeleteOpen(true)}
                 >
-                  <TrashIcon className="h-4 w-4" />
-                </TooltipTrigger>
-              }
-            />
-            <TooltipContent>Delete {budget.category} budget</TooltipContent>
+                  <TrashIcon className="h-4 w-4 text-muted-foreground" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <TooltipContent>Actions</TooltipContent>
           </Tooltip>
         </div>
+        <Progress
+          value={Math.min(budget.percent, 100)}
+          indicatorClassName={cn(
+            overLimit && "bg-rose-500",
+            nearLimit && "bg-amber-500",
+          )}
+        />
+        <p className="text-xs text-muted-foreground">
+          {format(budget.spent)} of {format(budget.amount)} spent ·{" "}
+          {format(Math.max(budget.remaining, 0))} remaining ·{" "}
+          {Math.round(budget.percent)}%
+        </p>
       </div>
-      <Progress
-        value={Math.min(budget.percent, 100)}
-        indicatorClassName={cn(
-          overLimit && "bg-rose-500",
-          nearLimit && "bg-amber-500",
-        )}
+      <BudgetDialog
+        budget={budget}
+        household={household}
+        open={editOpen}
+        onOpenChange={setEditOpen}
       />
-      <p className="text-xs text-muted-foreground">
-        {format(budget.spent)} of {format(budget.amount)} spent ·{" "}
-        {format(Math.max(budget.remaining, 0))} remaining ·{" "}
-        {Math.round(budget.percent)}%
-      </p>
-    </div>
+      <DeleteBudgetDialog
+        budget={budget}
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+      />
+    </>
   );
 }

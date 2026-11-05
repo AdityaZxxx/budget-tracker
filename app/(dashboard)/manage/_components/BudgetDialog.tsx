@@ -38,18 +38,30 @@ import {
 } from "../../_actions/budgets";
 
 interface Props {
-  trigger: ReactNode;
+  trigger?: ReactNode;
   household?: Household;
   budget?: BudgetWithProgress;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-const BudgetDialog = ({ trigger, household, budget }: Props) => {
-  const [open, setOpen] = useState(false);
+const BudgetDialog = ({
+  trigger,
+  household,
+  budget,
+  open: openProp,
+  onOpenChange,
+}: Props) => {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = openProp ?? internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
   const [category, setCategory] = useState(budget?.category ?? "");
   const [amount, setAmount] = useState(budget?.amount ?? 0);
-  const [mode, setMode] = useState<"soft" | "hard">(budget?.mode === "hard" ? "hard" : "soft");
+  const [mode, setMode] = useState<"soft" | "hard">(
+    budget?.mode === "hard" ? "hard" : "soft",
+  );
   const [errors, setErrors] = useState<{ category?: string; amount?: string }>(
-    {}
+    {},
   );
 
   const queryClient = useQueryClient();
@@ -125,7 +137,7 @@ const BudgetDialog = ({ trigger, household, budget }: Props) => {
           : `Unable to ${isEditing ? "update" : "create"} budget. Try again.`,
         {
           id: "budget-dialog",
-        }
+        },
       );
     },
   });
@@ -147,13 +159,13 @@ const BudgetDialog = ({ trigger, household, budget }: Props) => {
     mutate(
       isEditing && budget
         ? { id: budget.id, category, amount, mode }
-        : { category, amount, mode }
+        : { category, amount, mode },
     );
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={trigger as ReactElement} />
+      {trigger ? <DialogTrigger render={trigger as ReactElement} /> : null}
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="text-lg sm:text-xl">
@@ -263,7 +275,11 @@ const BudgetDialog = ({ trigger, household, budget }: Props) => {
               className="w-full sm:w-auto"
             >
               {!isPending ? (
-                isEditing ? "Save" : "Create"
+                isEditing ? (
+                  "Save"
+                ) : (
+                  "Create"
+                )
               ) : (
                 <Loader2 className="animate-spin" />
               )}

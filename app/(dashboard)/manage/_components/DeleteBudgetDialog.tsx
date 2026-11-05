@@ -12,16 +12,26 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ReactElement, ReactNode } from "react";
+import { ReactElement, ReactNode, useState } from "react";
 import { toast } from "sonner";
 import { deleteBudget, type BudgetWithProgress } from "../../_actions/budgets";
 
 interface Props {
-  trigger: ReactNode;
+  trigger?: ReactNode;
   budget: BudgetWithProgress;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-const DeleteBudgetDialog = ({ trigger, budget }: Props) => {
+const DeleteBudgetDialog = ({
+  trigger,
+  budget,
+  open: openProp,
+  onOpenChange,
+}: Props) => {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = openProp ?? internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
   const budgetIdentifier = `delete-budget-${budget.id}`;
 
   const queryClient = useQueryClient();
@@ -43,8 +53,8 @@ const DeleteBudgetDialog = ({ trigger, budget }: Props) => {
   });
 
   return (
-    <AlertDialog>
-      <AlertDialogTrigger render={trigger as ReactElement} />
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      {trigger ? <AlertDialogTrigger render={trigger as ReactElement} /> : null}
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
