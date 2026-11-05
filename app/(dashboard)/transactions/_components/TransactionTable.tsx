@@ -44,6 +44,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useSession } from "@/lib/auth-client";
 import { DateToUTCDate } from "@/lib/helpers";
 import { cn } from "@/lib/utils";
@@ -81,12 +86,19 @@ export const columns: ColumnDef<TransactionHistoryRow>[] = [
       <DataTableColumnHeader column={column} title="Description" />
     ),
     cell: ({ row }) => (
-      <div
-        className="max-w-[200px] truncate capitalize md:max-w-none"
-        title={row.original.description}
-      >
-        {row.original.description}
-      </div>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <div
+              className="max-w-[200px] truncate capitalize md:max-w-none"
+              tabIndex={0}
+            />
+          }
+        >
+          {row.original.description}
+        </TooltipTrigger>
+        <TooltipContent>{row.original.description}</TooltipContent>
+      </Tooltip>
     ),
   },
   {
@@ -135,7 +147,7 @@ export const columns: ColumnDef<TransactionHistoryRow>[] = [
           "w-fit rounded-full px-4 py-1 text-sm font-medium capitalize",
           row.original.type === "income"
             ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400"
-            : "bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-400"
+            : "bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-400",
         )}
       >
         {row.original.type}
@@ -153,7 +165,7 @@ export const columns: ColumnDef<TransactionHistoryRow>[] = [
           "text-sm font-medium tabular-nums",
           row.original.type === "income"
             ? "text-emerald-700 dark:text-emerald-400"
-            : "text-rose-600 dark:text-rose-400"
+            : "text-rose-600 dark:text-rose-400",
         )}
       >
         {row.original.type === "expense" ? "-" : "+"}
@@ -177,8 +189,8 @@ const TransactionTable = ({ from, to }: Props) => {
     queryFn: async () => {
       const response = await fetch(
         `/api/transaction-history?from=${DateToUTCDate(
-          from
-        )}&to=${DateToUTCDate(to)}`
+          from,
+        )}&to=${DateToUTCDate(to)}`,
       );
       if (!response.ok) throw new Error("Failed to fetch transaction history");
       return response.json();
@@ -220,7 +232,7 @@ const TransactionTable = ({ from, to }: Props) => {
             ? `-${transaction.formattedAmount}`
             : transaction.formattedAmount,
         Currency: transaction.formattedAmount.replace(/[^a-zA-Z]/g, ""),
-      })
+      }),
     );
   }, [history.data]);
 
@@ -241,7 +253,7 @@ const TransactionTable = ({ from, to }: Props) => {
           value: transaction.category,
           label: `${transaction.categoryIcon} ${transaction.category}`,
         });
-      }
+      },
     );
     return Array.from(categoriesMap.values());
   }, [history.data]);
@@ -251,7 +263,7 @@ const TransactionTable = ({ from, to }: Props) => {
       { label: "Income", value: "income" },
       { label: "Expense", value: "expense" },
     ],
-    []
+    [],
   );
 
   const downloadCsv = () => {
@@ -265,7 +277,7 @@ const TransactionTable = ({ from, to }: Props) => {
       ...csvData.map((row) =>
         csvHeaders
           .map((h) => escapeCell((row as Record<string, string>)[h.key]))
-          .join(",")
+          .join(","),
       ),
     ];
     const blob = new Blob(["\uFEFF" + lines.join("\r\n")], {
@@ -305,18 +317,25 @@ const TransactionTable = ({ from, to }: Props) => {
 
         <div className="flex items-center gap-2">
           <DataTableViewOptions table={table} />
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="gap-1"
-            onClick={downloadCsv}
-          >
-            <DownloadIcon className="h-3.5 w-3.5" />
-            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-              Export CSV
-            </span>
-          </Button>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="gap-1"
+                  onClick={downloadCsv}
+                />
+              }
+            >
+              <DownloadIcon className="h-3.5 w-3.5" />
+              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                Export CSV
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>Export CSV</TooltipContent>
+          </Tooltip>
         </div>
       </div>
 
@@ -332,7 +351,7 @@ const TransactionTable = ({ from, to }: Props) => {
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   ))}
@@ -351,7 +370,7 @@ const TransactionTable = ({ from, to }: Props) => {
                       <TableCell key={cell.id}>
                         {flexRender(
                           cell.column.columnDef.cell,
-                          cell.getContext()
+                          cell.getContext(),
                         )}
                       </TableCell>
                     ))}
@@ -366,8 +385,8 @@ const TransactionTable = ({ from, to }: Props) => {
                     {history.isError ? (
                       <div className="flex flex-col items-center gap-2">
                         <p className="text-destructive">
-                          Unable to load transactions. Check your connection
-                          and try again.
+                          Unable to load transactions. Check your connection and
+                          try again.
                         </p>
                         <Button
                           variant="outline"
@@ -392,46 +411,66 @@ const TransactionTable = ({ from, to }: Props) => {
           </Table>
         </div>
         <div className="flex items-center justify-end space-x-2">
-          <Button
-            variant="outline"
-            size="icon"
-            className="hidden size-8 lg:flex"
-            onClick={() => table.setPageIndex(0)}
-            disabled={!table.getCanPreviousPage()}
-          >
-            <span className="sr-only">Go to first page</span>
-            <ChevronLeft />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="size-8"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            <span className="sr-only">Go to previous page</span>
-            <ChevronLeft />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="size-8"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            <span className="sr-only">Go to next page</span>
-            <ChevronRight />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="hidden size-8 lg:flex"
-            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-            disabled={!table.getCanNextPage()}
-          >
-            <span className="sr-only">Go to last page</span>
-            <ChevronsRight />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger render={<span className="hidden lg:inline-flex" />}>
+              <Button
+                variant="outline"
+                size="icon"
+                className="size-8"
+                onClick={() => table.setPageIndex(0)}
+                disabled={!table.getCanPreviousPage()}
+              >
+                <span className="sr-only">Go to first page</span>
+                <ChevronLeft />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Go to first page</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger render={<span className="inline-flex" />}>
+              <Button
+                variant="outline"
+                size="icon"
+                className="size-8"
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+              >
+                <span className="sr-only">Go to previous page</span>
+                <ChevronLeft />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Go to previous page</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger render={<span className="inline-flex" />}>
+              <Button
+                variant="outline"
+                size="icon"
+                className="size-8"
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+              >
+                <span className="sr-only">Go to next page</span>
+                <ChevronRight />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Go to next page</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger render={<span className="hidden lg:inline-flex" />}>
+              <Button
+                variant="outline"
+                size="icon"
+                className="size-8"
+                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                disabled={!table.getCanNextPage()}
+              >
+                <span className="sr-only">Go to last page</span>
+                <ChevronsRight />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Go to last page</TooltipContent>
+          </Tooltip>
         </div>
       </SkeletonWrapper>
     </div>
@@ -465,29 +504,36 @@ function RowActions({ transaction }: { transaction: TransactionHistoryRow }) {
         open={showDeleteDialog}
         transactionId={transaction.id}
       />
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          render={<Button variant={"ghost"} className="h-8 w-8 p-0" />}
-        >
-          <span className="sr-only">Open actions</span>
-          <MoreHorizontal className="h-4 w-4" />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuGroup>
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          </DropdownMenuGroup>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            className="flex items-center gap-2"
-            onSelect={() => {
-              setShowDeleteDialog((prev) => !prev);
-            }}
+      <Tooltip>
+        <DropdownMenu>
+          <TooltipTrigger
+            render={
+              <DropdownMenuTrigger
+                render={<Button variant={"ghost"} className="h-8 w-8 p-0" />}
+              />
+            }
           >
-            <TrashIcon className="h-4 w-4 text-muted-foreground" />
-            Delete
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+            <span className="sr-only">Open actions</span>
+            <MoreHorizontal className="h-4 w-4" />
+          </TooltipTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="flex items-center gap-2"
+              onSelect={() => {
+                setShowDeleteDialog((prev) => !prev);
+              }}
+            >
+              <TrashIcon className="h-4 w-4 text-muted-foreground" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <TooltipContent>Actions</TooltipContent>
+      </Tooltip>
     </>
   );
 }
