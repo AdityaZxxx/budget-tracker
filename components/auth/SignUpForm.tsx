@@ -66,7 +66,7 @@ export default function SignUpForm({ next }: { next?: string }) {
   });
 
   return (
-    <Card className="w-[350px] sm:w-[400px]">
+    <Card className="w-[min(400px,calc(100vw-2rem))]">
       <CardHeader>
         <CardTitle className="text-2xl">Sign up</CardTitle>
         <CardDescription>

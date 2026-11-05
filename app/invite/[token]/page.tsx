@@ -104,7 +104,7 @@ const InvalidInviteLink = () => {
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center px-4 py-12">
       <Logo />
-      <Card className="mt-12 w-[350px] sm:w-[400px]">
+      <Card className="mt-12 w-[min(400px,calc(100vw-2rem))]">
         <CardHeader>
           <CardTitle className="text-2xl">Invite link unavailable</CardTitle>
           <CardDescription>

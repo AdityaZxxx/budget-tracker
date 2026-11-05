@@ -71,13 +71,13 @@ const MembersSection = () => {
                     key={member.userId}
                     className="flex items-center justify-between gap-2 rounded-lg border p-3"
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex min-w-0 items-center gap-3">
                       <Avatar>
                         <AvatarImage src={member.user.image ?? undefined} />
                         <AvatarFallback>{initials}</AvatarFallback>
                       </Avatar>
-                      <div>
-                        <p className="text-sm font-medium">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium">
                           {member.user.name}
                           {isSelf ? " (you)" : ""}
                         </p>

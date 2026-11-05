@@ -64,7 +64,7 @@ export default function SignInForm({ next }: { next?: string }) {
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <Card className="w-[350px] sm:w-[400px]">
+      <Card className="w-[min(400px,calc(100vw-2rem))]">
         <CardHeader>
           <CardTitle className="text-2xl">Sign in</CardTitle>
           <CardDescription>
