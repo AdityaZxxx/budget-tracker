@@ -6,6 +6,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -58,11 +59,12 @@ const MembersSection = () => {
             Everyone in your household can add, edit, and remove transactions
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <Separator />
+        <CardContent className="p-6">
           {isLoading ? (
             <Skeleton className="h-24 w-full" />
           ) : (
-            <div className="space-y-2">
+            <div className="divide-y">
               {members.map((member) => {
                 const isSelf = member.user.id === session?.user.id;
                 const initials = member.user.name
@@ -74,9 +76,9 @@ const MembersSection = () => {
                 return (
                   <div
                     key={member.userId}
-                    className="flex items-center justify-between gap-2 rounded-lg border p-3"
+                    className="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
                   >
-                    <div className="flex min-w-0 items-center gap-3">
+                    <div className="flex min-w-0 flex-1 items-center gap-3">
                       <Avatar>
                         <AvatarImage src={member.user.image ?? undefined} />
                         <AvatarFallback>{initials}</AvatarFallback>
@@ -92,9 +94,9 @@ const MembersSection = () => {
                       </div>
                     </div>
                     {isSelf ? (
-                      <div className="flex items-center gap-2">
-                        <Mail className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">
+                      <div className="flex shrink-0 items-center gap-2">
+                        <Mail className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        <span className="hidden whitespace-nowrap text-xs text-muted-foreground sm:inline">
                           Email digest
                         </span>
                         <Switch
@@ -135,19 +137,21 @@ const MembersSection = () => {
               })}
             </div>
           )}
-          <Separator />
+        </CardContent>
+        <Separator />
+        <CardFooter>
           <LeaveHouseholdDialog
             trigger={
               <Button
                 variant="outline"
-                className="gap-2 text-destructive hover:text-destructive"
+                className="w-full gap-2 text-destructive hover:text-destructive sm:w-auto"
               >
                 <LogOut className="h-4 w-4" />
                 Leave household
               </Button>
             }
           />
-        </CardContent>
+        </CardFooter>
       </Card>
     </section>
   );
