@@ -11,6 +11,7 @@ import { ThemeSwitcherBtn } from "./ThemeSwitcherBtn";
 import UserMenu from "./UserMenu";
 import { Button, buttonVariants } from "./ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "./ui/sheet";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export default function Navbar() {
   return (
@@ -56,17 +57,24 @@ function MobileMenu() {
   return (
     <div className="block md:hidden">
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
-        <SheetTrigger
-          render={
-            <Button
-              variant={"ghost"}
-              size={"icon"}
-              aria-label="Toggle navigation menu"
-            />
-          }
-        >
-          <Menu />
-        </SheetTrigger>
+        <Tooltip>
+          <SheetTrigger
+            render={
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant={"ghost"}
+                    size={"icon"}
+                    aria-label="Toggle navigation menu"
+                  />
+                }
+              />
+            }
+          >
+            <Menu />
+          </SheetTrigger>
+          <TooltipContent>Menu</TooltipContent>
+        </Tooltip>
         <SheetContent
           className="w-[300px] max-w-[calc(100vw-2rem)] sm:w-[400px]"
           side="left"
@@ -123,7 +131,7 @@ function NavbarItem({
         className={cn(
           buttonVariants({ variant: "ghost" }),
           "w-full justify-start text-lg text-muted-foreground hover:text-foreground md:text-sm",
-          isActive && "font-semibold text-foreground"
+          isActive && "font-semibold text-foreground",
         )}
         onClick={() => {
           if (clickCallback) clickCallback();

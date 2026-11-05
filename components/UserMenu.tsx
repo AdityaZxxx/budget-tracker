@@ -14,6 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export default function UserMenu() {
   const router = useRouter();
@@ -42,41 +43,52 @@ export default function UserMenu() {
   };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <button
-            type="button"
-            aria-label="Open user menu"
-            className="rounded-full outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          />
-        }
-      >
-        <Avatar className="h-8 w-8">
-          <AvatarImage src={session.user.image ?? undefined} />
-          <AvatarFallback>{initials}</AvatarFallback>
-        </Avatar>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuGroup>
-          <DropdownMenuLabel className="flex flex-col">
-            <span className="truncate font-medium" title={session.user.name}>
-              {session.user.name}
-            </span>
-            <span
-              className="truncate text-xs font-normal text-muted-foreground"
-              title={session.user.email}
-            >
-              {session.user.email}
-            </span>
-          </DropdownMenuLabel>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSignOut}>
-          <LogOut className="mr-2 h-4 w-4" />
-          Sign out
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Tooltip>
+      <DropdownMenu>
+        <TooltipTrigger
+          render={
+            <DropdownMenuTrigger
+              render={
+                <button
+                  type="button"
+                  aria-label="Open user menu"
+                  className="rounded-full outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                />
+              }
+            />
+          }
+        >
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={session.user.image ?? undefined} />
+            <AvatarFallback>{initials}</AvatarFallback>
+          </Avatar>
+        </TooltipTrigger>
+        <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuGroup>
+            <DropdownMenuLabel className="flex flex-col">
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <span className="truncate font-medium" tabIndex={0} />
+                  }
+                >
+                  {session.user.name}
+                </TooltipTrigger>
+                <TooltipContent>{session.user.name}</TooltipContent>
+              </Tooltip>
+              <span className="truncate text-xs font-normal text-muted-foreground">
+                {session.user.email}
+              </span>
+            </DropdownMenuLabel>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleSignOut}>
+            <LogOut className="mr-2 h-4 w-4" />
+            Sign out
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <TooltipContent>Account</TooltipContent>
+    </Tooltip>
   );
 }

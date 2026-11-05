@@ -12,6 +12,11 @@ import {
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { GetFormatterForCurrency } from "@/lib/helpers";
 import { cn } from "@/lib/utils";
 import { Household } from "@prisma/client";
@@ -56,19 +61,26 @@ const BudgetsSection = () => {
                 Monthly spending limits per category for shared expenses
               </CardDescription>
             </div>
-            <BudgetDialog
-              household={household.data}
-              trigger={
-                <Button
-                  size="sm"
-                  className="gap-2"
-                  aria-label="Create budget"
-                >
-                  <PlusSquare className="h-4 w-4" />
-                  <span className="sr-only md:not-sr-only">Create</span>
-                </Button>
-              }
-            />
+            <Tooltip>
+              <BudgetDialog
+                household={household.data}
+                trigger={
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        size="sm"
+                        className="gap-2"
+                        aria-label="Create budget"
+                      />
+                    }
+                  >
+                    <PlusSquare className="h-4 w-4" />
+                    <span className="sr-only md:not-sr-only">Create</span>
+                  </TooltipTrigger>
+                }
+              />
+              <TooltipContent>Create budget</TooltipContent>
+            </Tooltip>
           </div>
         </CardHeader>
         <Separator />
@@ -93,9 +105,7 @@ const BudgetsSection = () => {
                 <div className="mb-2 rounded-full bg-muted p-3">
                   <Target className="h-6 w-6 text-muted-foreground" />
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  No budgets yet
-                </p>
+                <p className="text-sm text-muted-foreground">No budgets yet</p>
                 <p className="text-sm text-muted-foreground">
                   Create one to track spending per category
                 </p>
@@ -143,40 +153,54 @@ function BudgetCard({
           </Badge>
         </div>
         <div className="flex items-center">
-          <BudgetDialog
-            budget={budget}
-            household={household}
-            trigger={
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground opacity-100 hover:bg-muted md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100"
-                aria-label={`Edit ${budget.category} budget`}
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
-            }
-          />
-          <DeleteBudgetDialog
-            budget={budget}
-            trigger={
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-destructive opacity-100 hover:bg-destructive/10 md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100"
-                aria-label={`Delete ${budget.category} budget`}
-              >
-                <TrashIcon className="h-4 w-4" />
-              </Button>
-            }
-          />
+          <Tooltip>
+            <BudgetDialog
+              budget={budget}
+              household={household}
+              trigger={
+                <TooltipTrigger
+                  render={
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-muted-foreground opacity-100 hover:bg-muted md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100"
+                      aria-label={`Edit ${budget.category} budget`}
+                    />
+                  }
+                >
+                  <Pencil className="h-4 w-4" />
+                </TooltipTrigger>
+              }
+            />
+            <TooltipContent>Edit {budget.category} budget</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <DeleteBudgetDialog
+              budget={budget}
+              trigger={
+                <TooltipTrigger
+                  render={
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive opacity-100 hover:bg-destructive/10 md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100"
+                      aria-label={`Delete ${budget.category} budget`}
+                    />
+                  }
+                >
+                  <TrashIcon className="h-4 w-4" />
+                </TooltipTrigger>
+              }
+            />
+            <TooltipContent>Delete {budget.category} budget</TooltipContent>
+          </Tooltip>
         </div>
       </div>
       <Progress
         value={Math.min(budget.percent, 100)}
         indicatorClassName={cn(
           overLimit && "bg-rose-500",
-          nearLimit && "bg-amber-500"
+          nearLimit && "bg-amber-500",
         )}
       />
       <p className="text-xs text-muted-foreground">

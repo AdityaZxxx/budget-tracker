@@ -12,6 +12,11 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useSession } from "@/lib/auth-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { LogOut, Mail, UserMinus } from "lucide-react";
@@ -81,10 +86,7 @@ const MembersSection = () => {
                           {member.user.name}
                           {isSelf ? " (you)" : ""}
                         </p>
-                        <p
-                          className="truncate text-xs text-muted-foreground"
-                          title={member.user.email}
-                        >
+                        <p className="truncate text-xs text-muted-foreground">
                           {member.user.email}
                         </p>
                       </div>
@@ -105,19 +107,28 @@ const MembersSection = () => {
                         />
                       </div>
                     ) : (
-                      <RemoveMemberDialog
-                        member={member}
-                        trigger={
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            className="text-destructive hover:bg-destructive/10"
-                            aria-label={`Remove ${member.user.name} from household`}
-                          >
-                            <UserMinus />
-                          </Button>
-                        }
-                      />
+                      <Tooltip>
+                        <RemoveMemberDialog
+                          member={member}
+                          trigger={
+                            <TooltipTrigger
+                              render={
+                                <Button
+                                  variant="ghost"
+                                  size="icon-sm"
+                                  className="text-destructive hover:bg-destructive/10"
+                                  aria-label={`Remove ${member.user.name} from household`}
+                                />
+                              }
+                            >
+                              <UserMinus />
+                            </TooltipTrigger>
+                          }
+                        />
+                        <TooltipContent>
+                          Remove {member.user.name} from household
+                        </TooltipContent>
+                      </Tooltip>
                     )}
                   </div>
                 );

@@ -12,6 +12,11 @@ import {
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { InviteLink } from "@prisma/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Copy, Loader2, PlusSquare, TrashIcon } from "lucide-react";
@@ -76,9 +81,7 @@ const InviteLinkDialog = ({ trigger }: Props) => {
     window.setTimeout(() => setCopiedId(null), 1500);
   };
 
-  const triggerElement = (trigger ?? (
-    <Button>Invite</Button>
-  )) as ReactElement;
+  const triggerElement = (trigger ?? <Button>Invite</Button>) as ReactElement;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -132,26 +135,48 @@ const InviteLinkDialog = ({ trigger }: Props) => {
                         {url}
                       </span>
                       <div className="flex gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => copyLink(url, link.id)}
-                          aria-label={
-                            copiedId === link.id ? "Copied" : "Copy invite link"
-                          }
-                        >
-                          {copiedId === link.id ? <Check /> : <Copy />}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          className="text-destructive hover:bg-destructive/10"
-                          disabled={revokeMutation.isPending}
-                          onClick={() => revokeMutation.mutate({ id: link.id })}
-                          aria-label="Revoke invite link"
-                        >
-                          <TrashIcon />
-                        </Button>
+                        <Tooltip>
+                          <TooltipTrigger
+                            render={
+                              <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                onClick={() => copyLink(url, link.id)}
+                                aria-label={
+                                  copiedId === link.id
+                                    ? "Copied"
+                                    : "Copy invite link"
+                                }
+                              />
+                            }
+                          >
+                            {copiedId === link.id ? <Check /> : <Copy />}
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {copiedId === link.id
+                              ? "Copied"
+                              : "Copy invite link"}
+                          </TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger
+                            render={<span className="inline-flex" />}
+                          >
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              className="text-destructive hover:bg-destructive/10"
+                              disabled={revokeMutation.isPending}
+                              onClick={() =>
+                                revokeMutation.mutate({ id: link.id })
+                              }
+                              aria-label="Revoke invite link"
+                            >
+                              <TrashIcon />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Revoke invite link</TooltipContent>
+                        </Tooltip>
                       </div>
                     </div>
                   </div>
