@@ -21,7 +21,7 @@ const TransactionsClient = () => {
           <DateRangePicker
             initialDateFrom={dateRange.from}
             initialDateTo={dateRange.to}
-            showCompare={false}
+            maxRangeDays={MAX_DATE_RANGE}
             onUpdate={(values) => {
               const { from, to } = values.range;
               if (!from || !to) return;
