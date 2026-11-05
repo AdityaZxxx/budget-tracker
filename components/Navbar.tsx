@@ -16,13 +16,7 @@ export default function Navbar() {
     <div className="border-b bg-background">
       <nav className="container flex items-center justify-between">
         <div className="flex h-[80px] min-h-[60px] items-center gap-x-4">
-          <span className="hidden md:block">
-            <Logo />
-          </span>
-
-          <span className="block md:hidden">
-            <Logo showIcon={false} />
-          </span>
+          <Logo />
 
           <div className="hidden h-full md:flex">
             {items.map((item) => (

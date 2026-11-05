@@ -15,12 +15,10 @@ export const metadata: Metadata = {
   ],
 
   openGraph: {
-    title: "Transaction History | Budget Tracker",
     description: "Keep a detailed record of your income and expenses.",
     url: "/transactions",
   },
   twitter: {
-    title: "Transaction History | Budget Tracker",
     description: "Keep a detailed record of your income and expenses.",
   },
 };
