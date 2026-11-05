@@ -14,16 +14,26 @@ import {
 import { TransactionType } from "@/lib/types";
 import { Category } from "@prisma/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ReactElement, ReactNode } from "react";
+import { ReactElement, ReactNode, useState } from "react";
 import { toast } from "sonner";
 import { DeleteCategory } from "../_actions/categories";
 
 interface Props {
-  trigger: ReactNode;
+  trigger?: ReactNode;
   category: Category;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-const DeleteCategoryDialog = ({ trigger, category }: Props) => {
+const DeleteCategoryDialog = ({
+  trigger,
+  category,
+  open: openProp,
+  onOpenChange,
+}: Props) => {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = openProp ?? internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
   const categoryIdentifier = `${category.name}-${category.type}`;
 
   const queryClient = useQueryClient();
@@ -45,8 +55,8 @@ const DeleteCategoryDialog = ({ trigger, category }: Props) => {
   });
 
   return (
-    <AlertDialog>
-      <AlertDialogTrigger render={trigger as ReactElement} />
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      {trigger ? <AlertDialogTrigger render={trigger as ReactElement} /> : null}
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
