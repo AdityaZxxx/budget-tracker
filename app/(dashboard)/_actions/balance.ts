@@ -5,8 +5,9 @@ import {
   SETTLEMENT_CATEGORY_NAME,
   SETTLEMENT_DESCRIPTION_PREFIX,
 } from "@/lib/constants";
+import { GetFormatterForCurrency } from "@/lib/helpers";
 import { requireHousehold } from "@/lib/household";
-import { notifyHouseholdExcept } from "@/lib/notifications";
+import { notify } from "@/lib/notifications";
 import prisma from "@/lib/prisma";
 import {
   RecordSettlementSchema,
@@ -191,10 +192,32 @@ export async function RecordSettlement(form: RecordSettlementSchemaType) {
     },
   });
 
-  await notifyHouseholdExcept(
-    household.id,
-    session.user.id,
-    "settlement",
-    `${session.user.name} recorded a settlement of ${amount} with ${membership.user.name}.`
+  const amountText = GetFormatterForCurrency(
+    household.currency ?? "USD"
+  ).format(amount);
+
+  // The payee reads "with you"; other members see the payee's name.
+  const otherMembers = await prisma.householdMembership.findMany({
+    where: {
+      householdId: household.id,
+      userId: {
+        not: session.user.id,
+      },
+    },
+    select: {
+      userId: true,
+    },
+  });
+  await Promise.all(
+    otherMembers.map((other) =>
+      notify(
+        household.id,
+        other.userId,
+        "settlement",
+        other.userId === memberId
+          ? `${session.user.name} recorded a settlement of ${amountText} with you.`
+          : `${session.user.name} recorded a settlement of ${amountText} with ${membership.user.name}.`
+      )
+    )
   );
 }
