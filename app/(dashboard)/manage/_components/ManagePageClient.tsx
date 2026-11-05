@@ -37,7 +37,7 @@ const ManagePageClient = () => {
           <div className="space-y-1">
             <h1 className="text-3xl font-bold tracking-tight">Manage</h1>
             <p className="text-muted-foreground">
-              Manage your account settings and categories
+              Manage your household, categories, budgets, and account
             </p>
           </div>
         </div>
@@ -45,22 +45,6 @@ const ManagePageClient = () => {
 
       <div className="container py-8">
         <div className="space-y-8">
-          <section>
-            <Card className="transition-all hover:shadow-md">
-              <CardHeader>
-                <CardTitle className="text-xl">Currency settings</CardTitle>
-                <CardDescription>
-                  Set your default currency for all transactions
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="max-w-xs">
-                  <CurrencyComboBox />
-                </div>
-              </CardContent>
-            </Card>
-          </section>
-
           <section>
             <Card className="transition-all hover:shadow-md">
               <CardHeader>
@@ -85,9 +69,21 @@ const ManagePageClient = () => {
 
           <MembersSection />
 
-          <BudgetsSection />
-
-          <AccountSection />
+          <section>
+            <Card className="transition-all hover:shadow-md">
+              <CardHeader>
+                <CardTitle className="text-xl">Currency settings</CardTitle>
+                <CardDescription>
+                  Set the currency for all household transactions
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="max-w-xs">
+                  <CurrencyComboBox />
+                </div>
+              </CardContent>
+            </Card>
+          </section>
 
           <section className="space-y-6">
             <h2 className="text-2xl font-semibold tracking-tight">
@@ -98,6 +94,10 @@ const ManagePageClient = () => {
               <CategoryList type="expense" />
             </div>
           </section>
+
+          <BudgetsSection />
+
+          <AccountSection />
         </div>
       </div>
     </div>
