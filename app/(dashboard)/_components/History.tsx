@@ -84,7 +84,7 @@ const History = ({ household }: { household: Household }) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <SkeletonWrapper isLoading={historyDataQuery.isFetching}>
+          <SkeletonWrapper isLoading={historyDataQuery.isLoading}>
             {dataAvailable ? (
               <ResponsiveContainer width={"100%"} height={300}>
                 <BarChart data={historyDataQuery.data} barCategoryGap={5}>
