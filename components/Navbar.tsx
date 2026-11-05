@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { cn } from "../lib/utils";
 import Logo from "./Logo";
+import NotificationBell from "./NotificationBell";
 import { ThemeSwitcherBtn } from "./ThemeSwitcherBtn";
 import UserMenu from "./UserMenu";
 import { Button, buttonVariants } from "./ui/button";
@@ -14,7 +15,7 @@ import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "./ui/sheet";
 export default function Navbar() {
   return (
     <div className="border-b bg-background">
-      <nav className="container flex items-center justify-between">
+      <nav className="container flex items-center justify-between px-6">
         <div className="flex h-[80px] min-h-[60px] items-center gap-x-4">
           <Logo />
 
@@ -30,6 +31,8 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-x-2">
+          <NotificationBell />
+
           <div className="hidden md:flex md:items-center md:gap-x-2">
             <NavbarActions />
           </div>
