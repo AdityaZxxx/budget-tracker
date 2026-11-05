@@ -10,6 +10,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
@@ -22,13 +31,17 @@ import { Category } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import {
   Link2,
+  MoreHorizontal,
+  Pencil,
   PlusSquare,
   TrashIcon,
   TrendingDown,
   TrendingUp,
 } from "lucide-react";
+import { useState } from "react";
 import CreateCategoryDialog from "../../_components/CreateCategoryDialog";
 import DeleteCategoryDialog from "../../_components/DeletecategoryDialog";
+import EditCategoryDialog from "../../_components/EditCategoryDialog";
 import AccountSection from "./AccountSection";
 import BudgetsSection from "./BudgetsSection";
 import InviteLinkDialog from "./InviteLinkDialog";
@@ -273,35 +286,71 @@ function ErrorState({
 }
 
 function CategoryCard({ category }: { category: Category }) {
-  return (
-    <div className="group relative flex items-center justify-between rounded-lg border p-4 transition-all hover:shadow-md">
-      <div className="flex items-center gap-4">
-        <span className="text-2xl" role="img" aria-label={category.name}>
-          {category.icon}
-        </span>
-        <span className="font-medium">{category.name}</span>
-      </div>
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
-      <Tooltip>
-        <DeleteCategoryDialog
-          category={category}
-          trigger={
+  return (
+    <>
+      <div className="group relative flex items-center justify-between rounded-lg border p-4 transition-all hover:shadow-md">
+        <div className="flex min-w-0 items-center gap-4">
+          <span className="text-2xl" role="img" aria-label={category.name}>
+            {category.icon}
+          </span>
+          <span className="truncate font-medium">{category.name}</span>
+        </div>
+
+        <Tooltip>
+          <DropdownMenu>
             <TooltipTrigger
               render={
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-destructive opacity-100 hover:bg-destructive/10 md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100"
-                  aria-label={`Delete ${category.name} category`}
+                <DropdownMenuTrigger
+                  render={
+                    <Button
+                      variant="ghost"
+                      className="h-8 w-8 p-0 text-muted-foreground opacity-100 hover:bg-muted md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100"
+                      aria-label={`Open actions for ${category.name} category`}
+                    />
+                  }
                 />
               }
             >
-              <TrashIcon className="h-4 w-4" />
+              <span className="sr-only">Open actions</span>
+              <MoreHorizontal className="h-4 w-4" />
             </TooltipTrigger>
-          }
-        />
-        <TooltipContent>Delete {category.name} category</TooltipContent>
-      </Tooltip>
-    </div>
+            <DropdownMenuContent align="end">
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="flex items-center gap-2"
+                onClick={() => setEditOpen(true)}
+              >
+                <Pencil className="h-4 w-4 text-muted-foreground" />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="flex items-center gap-2"
+                onClick={() => setDeleteOpen(true)}
+              >
+                <TrashIcon className="h-4 w-4 text-muted-foreground" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <TooltipContent>Actions</TooltipContent>
+        </Tooltip>
+      </div>
+      <EditCategoryDialog
+        category={category}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+      />
+      <DeleteCategoryDialog
+        category={category}
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+      />
+    </>
   );
 }
