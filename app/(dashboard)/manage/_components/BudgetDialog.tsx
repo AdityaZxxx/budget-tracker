@@ -154,7 +154,7 @@ const BudgetDialog = ({ trigger, household, budget }: Props) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={trigger as ReactElement} />
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle className="text-lg sm:text-xl">
             {isEditing && budget

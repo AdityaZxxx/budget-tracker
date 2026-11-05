@@ -114,7 +114,7 @@ const CreateGoalDialog = ({ trigger, household }: Props) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={trigger as ReactElement} />
-      <DialogContent className="max-h-[90vh] overscroll-contain overflow-y-auto sm:max-w-[425px]">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle className="text-lg sm:text-xl">
             Create a new goal
