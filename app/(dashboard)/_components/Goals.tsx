@@ -10,6 +10,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { GetFormatterForCurrency } from "@/lib/helpers";
 import { Household } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
@@ -65,7 +70,7 @@ const Goals = ({ household }: { household: Household }) => {
                 {goals.map((goal) => {
                   const progress = Math.min(
                     (goal.contributed / goal.target) * 100,
-                    100
+                    100,
                   );
                   return (
                     <div
@@ -80,21 +85,30 @@ const Goals = ({ household }: { household: Household }) => {
                               by {format(new Date(goal.deadline), "PPP")}
                             </span>
                           )}
-                          <DeleteGoalDialog
-                            goal={goal}
-                            trigger={
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8"
-                              >
-                                <span className="sr-only">
-                                  Delete goal {goal.name}
-                                </span>
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            }
-                          />
+                          <Tooltip>
+                            <DeleteGoalDialog
+                              goal={goal}
+                              trigger={
+                                <TooltipTrigger
+                                  render={
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8"
+                                    />
+                                  }
+                                >
+                                  <span className="sr-only">
+                                    Delete goal {goal.name}
+                                  </span>
+                                  <Trash2 className="h-4 w-4" />
+                                </TooltipTrigger>
+                              }
+                            />
+                            <TooltipContent>
+                              Delete goal {goal.name}
+                            </TooltipContent>
+                          </Tooltip>
                         </div>
                       </div>
                       <Progress value={progress} />

@@ -11,6 +11,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { TransactionType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Category } from "@prisma/client";
@@ -163,20 +168,27 @@ function CategoryList({ type }: { type: TransactionType }) {
                 </CardDescription>
               </div>
             </div>
-            <CreateCategoryDialog
-              type={type}
-              successCallback={() => refetch()}
-              trigger={
-                <Button
-                  size="sm"
-                  className="gap-2"
-                  aria-label={`Create ${type} category`}
-                >
-                  <PlusSquare className="h-4 w-4" />
-                  <span className="sr-only md:not-sr-only">Create</span>
-                </Button>
-              }
-            />
+            <Tooltip>
+              <CreateCategoryDialog
+                type={type}
+                successCallback={() => refetch()}
+                trigger={
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        size="sm"
+                        className="gap-2"
+                        aria-label={`Create ${type} category`}
+                      />
+                    }
+                  >
+                    <PlusSquare className="h-4 w-4" />
+                    <span className="sr-only md:not-sr-only">Create</span>
+                  </TooltipTrigger>
+                }
+              />
+              <TooltipContent>Create {type} category</TooltipContent>
+            </Tooltip>
           </div>
         </CardHeader>
 
@@ -270,19 +282,26 @@ function CategoryCard({ category }: { category: Category }) {
         <span className="font-medium">{category.name}</span>
       </div>
 
-      <DeleteCategoryDialog
-        category={category}
-        trigger={
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-destructive opacity-100 hover:bg-destructive/10 md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100"
-            aria-label={`Delete ${category.name} category`}
-          >
-            <TrashIcon className="h-4 w-4" />
-          </Button>
-        }
-      />
+      <Tooltip>
+        <DeleteCategoryDialog
+          category={category}
+          trigger={
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive opacity-100 hover:bg-destructive/10 md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100"
+                  aria-label={`Delete ${category.name} category`}
+                />
+              }
+            >
+              <TrashIcon className="h-4 w-4" />
+            </TooltipTrigger>
+          }
+        />
+        <TooltipContent>Delete {category.name} category</TooltipContent>
+      </Tooltip>
     </div>
   );
 }
