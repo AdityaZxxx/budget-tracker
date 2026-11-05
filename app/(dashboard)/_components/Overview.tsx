@@ -32,7 +32,7 @@ const Overview = ({ household }: { household: Household }) => {
               }
               setDateRange({ from, to });
             }}
-            showCompare={false}
+            maxRangeDays={MAX_DATE_RANGE}
           />
         </div>
       </div>
