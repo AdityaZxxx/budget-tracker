@@ -1,6 +1,7 @@
 "use server";
 
 import { getMonthSpentByCategory } from "@/lib/budgets";
+import { GetFormatterForCurrency } from "@/lib/helpers";
 import { requireHousehold } from "@/lib/household";
 import { notifyHouseholdExcept } from "@/lib/notifications";
 import prisma from "@/lib/prisma";
@@ -22,6 +23,10 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
   }
 
   const { session, household } = result;
+
+  const formatAmount = GetFormatterForCurrency(
+    household.currency ?? "USD"
+  ).format;
 
   const { amount, category, date, description, type, shared } = parsedBody.data;
   const goalId = parsedBody.data.goalId || undefined;
@@ -73,16 +78,16 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 
       if (budget.mode === "hard" && after > budget.amount) {
         throw new Error(
-          `Hard budget exceeded for ${categoryRow.name}: the monthly limit is ${budget.amount} and ${before} is already spent, so this ${amount} expense would bring the month to ${after}.`
+          `Hard budget exceeded for ${categoryRow.name}: the monthly limit is ${formatAmount(budget.amount)} and ${formatAmount(before)} is already spent, so this ${formatAmount(amount)} expense would bring the month to ${formatAmount(after)}.`
         );
       }
 
       // One notification per transaction: report the highest threshold
       // crossed (100% covers a jump straight past 80%).
       if (beforePercent < 100 && afterPercent >= 100) {
-        thresholdMessage = `${categoryRow.name} budget reached 100% of ${budget.amount} this month (${after} spent).`;
+        thresholdMessage = `${categoryRow.name} budget reached 100% of ${formatAmount(budget.amount)} this month (${formatAmount(after)} spent).`;
       } else if (beforePercent < 80 && afterPercent >= 80) {
-        thresholdMessage = `${categoryRow.name} budget reached 80% of ${budget.amount} this month (${after} spent).`;
+        thresholdMessage = `${categoryRow.name} budget reached 80% of ${formatAmount(budget.amount)} this month (${formatAmount(after)} spent).`;
       }
     }
   }
