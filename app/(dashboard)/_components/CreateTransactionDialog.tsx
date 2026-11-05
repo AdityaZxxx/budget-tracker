@@ -169,7 +169,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={trigger as ReactElement} />
-      <DialogContent className="max-h-[90vh] overscroll-contain overflow-y-auto sm:max-w-[425px]">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle className="text-lg sm:text-xl">
             Create a new{" "}
@@ -266,7 +266,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
             }}
           />
 
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4">
             <form.Field
               name="category"
               children={(field) => {
