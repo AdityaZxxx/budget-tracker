@@ -20,7 +20,7 @@ import {
   MoreHorizontal,
   TrashIcon,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import { DataTableColumnHeader } from "@/components/datatable/ColumnHeader";
 import { DataTableViewOptions } from "@/components/datatable/Columntoggle";
@@ -218,30 +218,7 @@ const TransactionTable = ({ from, to }: Props) => {
     getPaginationRowModel: getPaginationRowModel(),
   });
 
-  const csvData = useMemo(() => {
-    if (!history.data) return [];
-
-    return history.data.map(
-      (transaction: {
-        date: string | number | Date;
-        category: any;
-        description: any;
-        type: string;
-        formattedAmount: string;
-      }) => ({
-        Date: new Date(transaction.date).toLocaleDateString(),
-        Category: transaction.category,
-        Description: transaction.description,
-        Type:
-          transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1),
-        Amount:
-          transaction.type === "expense"
-            ? `-${transaction.formattedAmount}`
-            : transaction.formattedAmount,
-        Currency: transaction.formattedAmount.replace(/[^a-zA-Z]/g, ""),
-      }),
-    );
-  }, [history.data]);
+  const csvData = getCsvData(history.data);
 
   const csvHeaders = [
     { label: "Date", key: "Date" },
@@ -467,6 +444,24 @@ const TransactionTable = ({ from, to }: Props) => {
 };
 
 export default TransactionTable;
+
+function getCsvData(
+  transactions: GetTrasactionsHistoryResponseType | undefined,
+) {
+  if (!transactions) return [];
+
+  return transactions.map((transaction) => ({
+    Date: new Date(transaction.date).toLocaleDateString(),
+    Category: transaction.category,
+    Description: transaction.description,
+    Type: transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1),
+    Amount:
+      transaction.type === "expense"
+        ? `-${transaction.formattedAmount}`
+        : transaction.formattedAmount,
+    Currency: transaction.formattedAmount.replace(/[^a-zA-Z]/g, ""),
+  }));
+}
 
 function getCategoryOptions(transactions: GetTrasactionsHistoryResponseType) {
   const categories = new Map<string, { value: string; label: string }>();
