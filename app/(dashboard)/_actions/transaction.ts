@@ -32,28 +32,32 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 
   const { amount, category, date, description, type, shared } = parsedBody.data;
   const goalId = parsedBody.data.goalId || undefined;
-  const categoryRow = await prisma.category.findFirst({
-    where: {
-      householdId: household.id,
-      name: category,
-    },
-  });
+
+  // The category and the goal do not depend on each other, so they are
+  // fetched together.
+  const [categoryRow, goal] = await Promise.all([
+    prisma.category.findFirst({
+      where: {
+        householdId: household.id,
+        name: category,
+      },
+    }),
+    goalId
+      ? prisma.goal.findFirst({
+          where: {
+            id: goalId,
+            householdId: household.id,
+          },
+        })
+      : null,
+  ]);
 
   if (!categoryRow) {
     throw new Error("Category not found");
   }
 
-  if (goalId) {
-    const goal = await prisma.goal.findFirst({
-      where: {
-        id: goalId,
-        householdId: household.id,
-      },
-    });
-
-    if (!goal) {
-      throw new Error("Goal not found");
-    }
+  if (goalId && !goal) {
+    throw new Error("Goal not found");
   }
 
   // Budgets only apply to shared expenses; personal transactions stay out.
