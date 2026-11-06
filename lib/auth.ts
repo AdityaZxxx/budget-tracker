@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { headers } from "next/headers";
+import { cache } from "react";
 
 import { sendEmail } from "@/lib/email";
 import prisma from "@/lib/prisma";
@@ -53,8 +54,11 @@ export const auth = betterAuth({
   },
 });
 
-export async function getSession() {
+// The dashboard resolves the session twice, once directly and once through
+// the household lookup. React caches this per render, so the second read
+// costs nothing.
+export const getSession = cache(async () => {
   return await auth.api.getSession({
     headers: await headers(),
   });
-}
+});
