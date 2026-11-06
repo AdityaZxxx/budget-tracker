@@ -1,5 +1,9 @@
 "use client";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { ReactElement, ReactNode } from "react";
+import { toast } from "sonner";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,9 +15,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ReactElement, ReactNode } from "react";
-import { toast } from "sonner";
+
 import { type listMembers, removeMember } from "../_actions/membership";
 
 type Member = Awaited<ReturnType<typeof listMembers>>[number];

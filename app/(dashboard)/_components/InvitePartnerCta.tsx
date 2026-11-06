@@ -1,5 +1,7 @@
 "use client";
 
+import { UserPlus } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { UserPlus } from "lucide-react";
+
 import InviteLinkDialog from "../manage/_components/InviteLinkDialog";
 
 interface Props {

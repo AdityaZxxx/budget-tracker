@@ -1,5 +1,18 @@
 "use client";
 
+import { Household } from "@prisma/client";
+import { useForm, type StandardSchemaV1 } from "@tanstack/react-form";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { CalendarIcon, Loader2 } from "lucide-react";
+import { ReactElement, ReactNode, useMemo, useState } from "react";
+import { NumericFormat } from "react-number-format";
+import { toast } from "sonner";
+
+import SkeletonWrapper from "@/components/SkeletonWrapper";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogClose,
@@ -9,16 +22,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { TransactionType } from "@/lib/types";
-import { cn } from "@/lib/utils";
-import { CreateTransactionSchema } from "@/schemas/transaction";
-import { ReactElement, ReactNode, useMemo, useState } from "react";
-import { useForm, type StandardSchemaV1 } from "@tanstack/react-form";
-
-import SkeletonWrapper from "@/components/SkeletonWrapper";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Field,
   FieldDescription,
@@ -40,14 +43,12 @@ import {
 } from "@/components/ui/select";
 import { Currencies } from "@/lib/currencies";
 import { DateToUTCDate } from "@/lib/helpers";
-import { Household } from "@prisma/client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
-import { CalendarIcon, Loader2 } from "lucide-react";
-import { NumericFormat } from "react-number-format";
-import { toast } from "sonner";
-import { CreateTransaction } from "../_actions/transaction";
+import { TransactionType } from "@/lib/types";
+import { cn } from "@/lib/utils";
+import { CreateTransactionSchema } from "@/schemas/transaction";
+
 import { listGoals } from "../_actions/goals";
+import { CreateTransaction } from "../_actions/transaction";
 import CategoryPicker from "./CategoryPicker";
 
 interface Props {
@@ -75,9 +76,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
     refetchOnWindowFocus: true,
   });
 
-  const currency = Currencies.find(
-    (c) => c.value === household.data?.currency
-  );
+  const currency = Currencies.find((c) => c.value === household.data?.currency);
 
   const { thousandSeparator, decimalSeparator } = useMemo(() => {
     const formatter = new Intl.NumberFormat(currency?.locale, {
@@ -129,7 +128,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
           : "Unable to create transaction. Try again.",
         {
           id: "create-transaction",
-        }
+        },
       );
     },
   });
@@ -147,12 +146,11 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
     validators: {
       // The schema uses z.coerce, so its input type differs from the form
       // values; the values are already typed correctly client-side.
-      onSubmit: CreateTransactionSchema as unknown as StandardSchemaV1<CreateTransactionFormValues>,
+      onSubmit:
+        CreateTransactionSchema as unknown as StandardSchemaV1<CreateTransactionFormValues>,
     },
     onSubmitInvalid: () => {
-      document
-        .querySelector<HTMLElement>('[aria-invalid="true"]')
-        ?.focus();
+      document.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
     },
     onSubmit: ({ value }) => {
       toast.loading("Creating transaction…", {
@@ -178,7 +176,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                 "m-1",
                 type === "income"
                   ? "text-teal-700 dark:text-teal-400"
-                  : "text-rose-600 dark:text-rose-400"
+                  : "text-rose-600 dark:text-rose-400",
               )}
             >
               {type}
@@ -208,7 +206,9 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     aria-invalid={isInvalid}
-                    aria-describedby={isInvalid ? `${field.name}-error` : undefined}
+                    aria-describedby={
+                      isInvalid ? `${field.name}-error` : undefined
+                    }
                     placeholder="e.g. Groceries, Salary"
                   />
                   <FieldDescription className="text-xs sm:text-sm">
@@ -249,7 +249,9 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                       decimalScale={2}
                       allowNegative={false}
                       aria-invalid={isInvalid}
-                      aria-describedby={isInvalid ? `${field.name}-error` : undefined}
+                      aria-describedby={
+                        isInvalid ? `${field.name}-error` : undefined
+                      }
                     />
                   </SkeletonWrapper>
                   <FieldDescription className="text-xs sm:text-sm">
@@ -280,7 +282,9 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                       type={type}
                       onChange={(value) => field.handleChange(value)}
                       aria-invalid={isInvalid}
-                      aria-describedby={isInvalid ? `${field.name}-error` : undefined}
+                      aria-describedby={
+                        isInvalid ? `${field.name}-error` : undefined
+                      }
                     />
                     <FieldDescription className="text-xs sm:text-sm">
                       Select a category
@@ -310,10 +314,12 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                           <Button
                             id={field.name}
                             aria-invalid={isInvalid}
-                            aria-describedby={isInvalid ? `${field.name}-error` : undefined}
+                            aria-describedby={
+                              isInvalid ? `${field.name}-error` : undefined
+                            }
                             className={cn(
                               "w-full pl-3 text-left font-normal",
-                              !field.state.value && "text-muted-foreground"
+                              !field.state.value && "text-muted-foreground",
                             )}
                             variant={"outline"}
                           />

@@ -1,9 +1,10 @@
 "use server";
 
+import { redirect } from "next/navigation";
+
 import { requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 import { UpdateUserCurrencySchema } from "@/schemas/userSetting";
-import { redirect } from "next/navigation";
 
 export async function UpdateUserCurrency(currency: string) {
   const parsedBody = UpdateUserCurrencySchema.safeParse({

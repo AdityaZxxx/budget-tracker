@@ -1,5 +1,7 @@
 "use client";
 
+import type { ColumnFiltersState, SortingState } from "@tanstack/react-table";
+
 import { useQuery } from "@tanstack/react-query";
 import { flexRender } from "@tanstack/react-table";
 import {
@@ -10,7 +12,6 @@ import {
   getSortedRowModel,
   useLegacyTable as useReactTable,
 } from "@tanstack/react-table/legacy";
-import type { ColumnFiltersState, SortingState } from "@tanstack/react-table";
 import {
   ChevronLeft,
   ChevronRight,
@@ -52,6 +53,7 @@ import {
 import { useSession } from "@/lib/auth-client";
 import { DateToUTCDate } from "@/lib/helpers";
 import { cn } from "@/lib/utils";
+
 import { GetTrasactionsHistoryResponseType } from "../../../api/transaction-history/route";
 import DeleteTransactionDialog from "./DeleteTransactionDialog";
 
@@ -123,7 +125,7 @@ export const columns: ColumnDef<TransactionHistoryRow>[] = [
         day: "2-digit",
       });
       return (
-        <div className="text-muted-foreground whitespace-nowrap">
+        <div className="whitespace-nowrap text-muted-foreground">
           {formattedDate}
         </div>
       );

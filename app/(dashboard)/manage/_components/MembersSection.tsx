@@ -1,5 +1,9 @@
 "use client";
 
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { LogOut, Mail, UserMinus } from "lucide-react";
+import { toast } from "sonner";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,9 +23,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useSession } from "@/lib/auth-client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { LogOut, Mail, UserMinus } from "lucide-react";
-import { toast } from "sonner";
+
 import { listMembers, setEmailDigest } from "../_actions/membership";
 import LeaveHouseholdDialog from "./LeaveHouseholdDialog";
 import RemoveMemberDialog from "./RemoveMemberDialog";
@@ -96,7 +98,7 @@ const MembersSection = () => {
                     {isSelf ? (
                       <div className="flex shrink-0 items-center gap-2">
                         <Mail className="h-4 w-4 shrink-0 text-muted-foreground" />
-                        <span className="hidden whitespace-nowrap text-xs text-muted-foreground sm:inline">
+                        <span className="hidden text-xs whitespace-nowrap text-muted-foreground sm:inline">
                           Email digest
                         </span>
                         <Switch

@@ -17,7 +17,7 @@ export function monthRangeFor(date: Date): { from: Date; to: Date } {
 // `date`. Settlements are excluded: they are not spending.
 export async function getMonthSpentByCategory(
   householdId: string,
-  date: Date
+  date: Date,
 ): Promise<Map<string, number>> {
   const { from, to } = monthRangeFor(date);
   const rows = await prisma.transaction.groupBy({
@@ -38,7 +38,5 @@ export async function getMonthSpentByCategory(
       amount: true,
     },
   });
-  return new Map(
-    rows.map((row) => [row.category, row._sum.amount ?? 0])
-  );
+  return new Map(rows.map((row) => [row.category, row._sum.amount ?? 0]));
 }

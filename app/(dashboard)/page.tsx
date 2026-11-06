@@ -1,7 +1,9 @@
-import { Button } from "@/components/ui/button";
-import { requireHousehold } from "@/lib/household";
 import { type Metadata } from "next";
 import { redirect } from "next/navigation";
+
+import { Button } from "@/components/ui/button";
+import { requireHousehold } from "@/lib/household";
+
 import { getHouseholdMemberCount } from "./_actions/household";
 import Balances from "./_components/Balances";
 import CreateTransactionDialog from "./_components/CreateTransactionDialog";

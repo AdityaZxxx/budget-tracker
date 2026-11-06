@@ -1,13 +1,15 @@
 "use client";
 
-import SkeletonWrapper from "@/components/SkeletonWrapper";
-import { Card } from "@/components/ui/card";
-import { DateToUTCDate, GetFormatterForCurrency } from "@/lib/helpers";
 import { Household } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { ReactNode, useMemo } from "react";
 import CountUp from "react-countup";
+
+import SkeletonWrapper from "@/components/SkeletonWrapper";
+import { Card } from "@/components/ui/card";
+import { DateToUTCDate, GetFormatterForCurrency } from "@/lib/helpers";
+
 import { type GetBalanceStatsResponseType } from "../../api/stats/balance/route";
 
 interface Props {
@@ -23,8 +25,8 @@ const StatsCards = ({ from, to, household }: Props) => {
       try {
         const response = await fetch(
           `/api/stats/balance?from=${DateToUTCDate(from)}&to=${DateToUTCDate(
-            to
-          )}`
+            to,
+          )}`,
         );
         if (!response.ok) {
           throw new Error("Failed to fetch balance stats");
@@ -148,7 +150,7 @@ function StatCard({
             end={value}
             decimals={2}
             formattingFn={(value: number) => formatter.format(value)}
-            className="text-2xl font-bold tabular-nums text-foreground"
+            className="text-2xl font-bold text-foreground tabular-nums"
           />
         )}
       </div>

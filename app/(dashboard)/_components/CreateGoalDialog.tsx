@@ -1,5 +1,16 @@
 "use client";
 
+import { Household } from "@prisma/client";
+import { useForm, type StandardSchemaV1 } from "@tanstack/react-form";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { CalendarIcon, Loader2 } from "lucide-react";
+import { ReactElement, ReactNode, useMemo, useState } from "react";
+import { NumericFormat } from "react-number-format";
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Dialog,
   DialogClose,
@@ -15,8 +26,6 @@ import {
   FieldError,
   FieldLabel,
 } from "@/components/ui/field";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import {
   Popover,
@@ -26,14 +35,7 @@ import {
 import { Currencies } from "@/lib/currencies";
 import { cn } from "@/lib/utils";
 import { CreateGoalSchema } from "@/schemas/goals";
-import { Household } from "@prisma/client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm, type StandardSchemaV1 } from "@tanstack/react-form";
-import { format } from "date-fns";
-import { CalendarIcon, Loader2 } from "lucide-react";
-import { NumericFormat } from "react-number-format";
-import { ReactElement, ReactNode, useMemo, useState } from "react";
-import { toast } from "sonner";
+
 import { createGoal } from "../_actions/goals";
 
 interface Props {
@@ -95,12 +97,11 @@ const CreateGoalDialog = ({ trigger, household }: Props) => {
       deadline: undefined as Date | undefined,
     },
     validators: {
-      onSubmit: CreateGoalSchema as unknown as StandardSchemaV1<CreateGoalFormValues>,
+      onSubmit:
+        CreateGoalSchema as unknown as StandardSchemaV1<CreateGoalFormValues>,
     },
     onSubmitInvalid: () => {
-      document
-        .querySelector<HTMLElement>('[aria-invalid="true"]')
-        ?.focus();
+      document.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
     },
     onSubmit: ({ value }) => {
       toast.loading("Creating goal…", {
@@ -142,7 +143,9 @@ const CreateGoalDialog = ({ trigger, household }: Props) => {
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     aria-invalid={isInvalid}
-                    aria-describedby={isInvalid ? `${field.name}-error` : undefined}
+                    aria-describedby={
+                      isInvalid ? `${field.name}-error` : undefined
+                    }
                     placeholder="e.g. Vacation, New car"
                   />
                   <FieldDescription className="text-xs sm:text-sm">
@@ -182,7 +185,9 @@ const CreateGoalDialog = ({ trigger, household }: Props) => {
                     decimalScale={2}
                     allowNegative={false}
                     aria-invalid={isInvalid}
-                    aria-describedby={isInvalid ? `${field.name}-error` : undefined}
+                    aria-describedby={
+                      isInvalid ? `${field.name}-error` : undefined
+                    }
                   />
                   <FieldDescription className="text-xs sm:text-sm">
                     How much do you want to save?
@@ -205,7 +210,9 @@ const CreateGoalDialog = ({ trigger, household }: Props) => {
                 field.state.meta.isTouched && !field.state.meta.isValid;
               return (
                 <Field data-invalid={isInvalid}>
-                  <FieldLabel htmlFor={field.name}>Deadline (optional)</FieldLabel>
+                  <FieldLabel htmlFor={field.name}>
+                    Deadline (optional)
+                  </FieldLabel>
                   <div className="flex items-center gap-2">
                     <Popover>
                       <PopoverTrigger
@@ -213,10 +220,12 @@ const CreateGoalDialog = ({ trigger, household }: Props) => {
                           <Button
                             id={field.name}
                             aria-invalid={isInvalid}
-                            aria-describedby={isInvalid ? `${field.name}-error` : undefined}
+                            aria-describedby={
+                              isInvalid ? `${field.name}-error` : undefined
+                            }
                             className={cn(
                               "w-full pl-3 text-left font-normal",
-                              !field.state.value && "text-muted-foreground"
+                              !field.state.value && "text-muted-foreground",
                             )}
                             variant={"outline"}
                           />

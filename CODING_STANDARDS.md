@@ -75,6 +75,8 @@ A rule that fires on correct code gets fixed in the code, or, with a stated reas
 
 One commit per ticket, on the current branch. Conventional Commits: a type, a short subject, no body, no implementation chatter. The subject says what changed, not what you did.
 
+Formatting is the one split. The formatter's commit is mechanical and lands on its own, so a reviewer can skip it and read the change underneath.
+
 Work stays local. The remote exists, but pushes are not part of the flow.
 
 A ticket worked in the main session is committed after its review. A ticket worked by a parallel subagent leaves its changes uncommitted for the main session to integrate, because concurrent commits on one branch collide.

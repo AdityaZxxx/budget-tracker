@@ -4,14 +4,15 @@ import { Menu } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+
 import { cn } from "../lib/utils";
 import Logo from "./Logo";
 import NotificationBell from "./NotificationBell";
 import { ThemeSwitcherBtn } from "./ThemeSwitcherBtn";
-import UserMenu from "./UserMenu";
 import { Button, buttonVariants } from "./ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "./ui/sheet";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import UserMenu from "./UserMenu";
 
 export default function Navbar() {
   return (
@@ -93,7 +94,7 @@ function MobileMenu() {
               />
             ))}
           </div>
-          <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
+          <div className="absolute right-4 bottom-4 left-4 flex items-center justify-between">
             <p className="text-sm text-muted-foreground">Theme:</p>
             <ThemeSwitcherBtn />
           </div>

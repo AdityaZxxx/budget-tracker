@@ -4,7 +4,7 @@ export async function notify(
   householdId: string,
   userId: string,
   type: string,
-  message: string
+  message: string,
 ) {
   await prisma.notification.create({
     data: {
@@ -20,7 +20,7 @@ export async function notifyMembers(
   householdId: string,
   userIds: string[],
   type: string,
-  message: string
+  message: string,
 ) {
   if (userIds.length === 0) return;
   await prisma.notification.createMany({
@@ -37,7 +37,7 @@ export async function notifyHouseholdExcept(
   householdId: string,
   exceptUserId: string,
   type: string,
-  message: string
+  message: string,
 ) {
   const memberships = await prisma.householdMembership.findMany({
     where: {
@@ -54,6 +54,6 @@ export async function notifyHouseholdExcept(
     householdId,
     memberships.map((membership) => membership.userId),
     type,
-    message
+    message,
   );
 }

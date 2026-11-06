@@ -1,6 +1,7 @@
 "use client";
 
 import type { RowData } from "@tanstack/react-table";
+
 import { LegacyTable as Table } from "@tanstack/react-table/legacy";
 import { Settings2 } from "lucide-react";
 
@@ -43,7 +44,7 @@ export function DataTableViewOptions<TData extends RowData>({
           .getAllColumns()
           .filter(
             (column) =>
-              typeof column.accessorFn !== "undefined" && column.getCanHide()
+              typeof column.accessorFn !== "undefined" && column.getCanHide(),
           )
           .map((column) => {
             return (

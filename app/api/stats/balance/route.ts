@@ -1,7 +1,8 @@
+import { redirect } from "next/navigation";
+
 import { requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 import { OverviewQuerySchema } from "@/schemas/overview";
-import { redirect } from "next/navigation";
 
 interface GetRequestParams {
   request: Request;
@@ -33,7 +34,7 @@ export async function GET(request: Request): Promise<Response> {
   const stats = await getBalanceStats(
     result.household.id,
     queryParams.data.from,
-    queryParams.data.to
+    queryParams.data.to,
   );
 
   return Response.json(stats);
