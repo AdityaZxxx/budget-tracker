@@ -12,10 +12,10 @@ import CategoriesStats from "./CategoriesStats";
 import StatsCards from "./StatsCards";
 
 const Overview = ({ household }: { household: Household }) => {
-  const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
+  const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>(() => ({
     from: startOfMonth(new Date()),
     to: new Date(),
-  });
+  }));
   return (
     <>
       <div className="container flex flex-wrap items-end justify-between gap-2 py-6">

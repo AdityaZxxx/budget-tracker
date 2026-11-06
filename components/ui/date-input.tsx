@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef, useState } from "react";
 
 interface DateInputProps {
   value?: Date;
@@ -11,40 +11,44 @@ interface DateParts {
   year: number;
 }
 
+/** Splits a date into the editable day/month/year parts shown by the inputs. */
+const toDateParts = (value?: Date): DateParts => {
+  const d = value ? new Date(value) : new Date();
+  return {
+    day: d.getDate(),
+    month: d.getMonth() + 1, // JavaScript months are 0-indexed
+    year: d.getFullYear(),
+  };
+};
+
 const DateInput: React.FC<DateInputProps> = ({ value, onChange }) => {
-  const [date, setDate] = React.useState<DateParts>(() => {
-    const d = value ? new Date(value) : new Date();
-    return {
-      day: d.getDate(),
-      month: d.getMonth() + 1, // JavaScript months are 0-indexed
-      year: d.getFullYear(),
-    };
-  });
+  const [date, setDate] = useState<DateParts>(() => toDateParts(value));
+  const [previousValue, setPreviousValue] = useState(() => value?.getTime());
 
   const monthRef = useRef<HTMLInputElement | null>(null);
   const dayRef = useRef<HTMLInputElement | null>(null);
   const yearRef = useRef<HTMLInputElement | null>(null);
 
-  useEffect(() => {
-    const d = value ? new Date(value) : new Date();
-    setDate({
-      day: d.getDate(),
-      month: d.getMonth() + 1,
-      year: d.getFullYear(),
-    });
-  }, [value]);
+  // Reset the inputs when the selected value changes. Comparing the timestamp
+  // rather than the Date identity means a parent re-render that rebuilds an
+  // equivalent Date does not discard what the user is typing.
+  const valueTime = value?.getTime();
+  if (valueTime !== previousValue) {
+    setPreviousValue(valueTime);
+    setDate(toDateParts(value));
+  }
 
-  const validateDate = (field: keyof DateParts, value: number): boolean => {
+  const validateDate = (field: keyof DateParts, partValue: number): boolean => {
     if (
-      (field === "day" && (value < 1 || value > 31)) ||
-      (field === "month" && (value < 1 || value > 12)) ||
-      (field === "year" && (value < 1000 || value > 9999))
+      (field === "day" && (partValue < 1 || partValue > 31)) ||
+      (field === "month" && (partValue < 1 || partValue > 12)) ||
+      (field === "year" && (partValue < 1000 || partValue > 9999))
     ) {
       return false;
     }
 
     // Validate the day of the month
-    const newDate = { ...date, [field]: value };
+    const newDate = { ...date, [field]: partValue };
     const d = new Date(newDate.year, newDate.month - 1, newDate.day);
     return (
       d.getFullYear() === newDate.year &&

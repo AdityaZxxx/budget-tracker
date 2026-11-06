@@ -10,10 +10,10 @@ import { MAX_DATE_RANGE } from "@/lib/constants";
 import TransactionTable from "./TransactionTable";
 
 const TransactionsClient = () => {
-  const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
+  const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>(() => ({
     from: startOfMonth(new Date()),
     to: new Date(),
-  });
+  }));
   return (
     <>
       <div className="border-b bg-card px-6">

@@ -295,7 +295,7 @@ function CategoryCard({ category }: { category: Category }) {
     <>
       <div className="group relative flex items-center justify-between rounded-lg border p-4 transition-all hover:shadow-md">
         <div className="flex min-w-0 items-center gap-4">
-          <span className="text-2xl" role="img" aria-label={category.name}>
+          <span className="text-2xl" aria-hidden="true">
             {category.icon}
           </span>
           <span className="truncate font-medium">{category.name}</span>

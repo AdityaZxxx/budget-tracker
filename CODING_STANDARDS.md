@@ -33,13 +33,13 @@ A diff that writes a shared transaction without touching the rollups passes ever
 
 ## Dates are UTC
 
-Transaction dates are stored as UTC (`DateToUTCDate`) and rollup buckets use the UTC getters, so a transaction's month is its UTC month. Budget months follow the same calendar (`monthRangeFor`).
+Transaction dates are stored as UTC (`dateToUtcDate`) and rollup buckets use the UTC getters, so a transaction's month is its UTC month. Budget months follow the same calendar (`monthRangeFor`).
 
 Mixing local-time getters into a bucket key files a transaction under a different month than the one the rollups counted. Use the UTC getters for any date that names a bucket.
 
 ## Money is formatted through the household currency
 
-The household holds one currency. Format amounts with `GetFormatterForCurrency(household.currency ?? "USD")`; it picks the locale from the currency and drops the decimals on whole amounts.
+The household holds one currency. Format amounts with `getFormatterForCurrency(household.currency ?? "USD")`; it picks the locale from the currency and drops the decimals on whole amounts.
 
 A diff that formats an amount inline, or hardcodes a currency, breaks a household whose currency is not USD.
 

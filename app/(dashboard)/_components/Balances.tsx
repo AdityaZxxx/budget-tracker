@@ -13,13 +13,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { GetFormatterForCurrency } from "@/lib/helpers";
+import { getFormatterForCurrency } from "@/lib/helpers";
 
 import { getHouseholdBalances } from "../_actions/balance";
 import RecordSettlementDialog from "./RecordSettlementDialog";
 
 const Balances = ({ household }: { household: Household }) => {
-  const formatter = GetFormatterForCurrency(household.currency ?? "USD");
+  const formatter = getFormatterForCurrency(household.currency ?? "USD");
 
   const balancesQuery = useQuery({
     queryKey: ["balances"],

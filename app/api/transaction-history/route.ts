@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { NextRequest } from "next/server";
 
-import { GetFormatterForCurrency } from "@/lib/helpers";
+import { getFormatterForCurrency } from "@/lib/helpers";
 import { requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 import { OverviewQuerySchema } from "@/schemas/overview";
@@ -58,7 +58,7 @@ async function getTrasactionsHistory(
     throw new Error("household currency not set");
   }
 
-  const formatter = GetFormatterForCurrency(household.currency);
+  const formatter = getFormatterForCurrency(household.currency);
 
   const transactions = await prisma.transaction.findMany({
     where: {

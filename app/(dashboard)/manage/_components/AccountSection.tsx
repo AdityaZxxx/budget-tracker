@@ -31,7 +31,13 @@ const AccountSection = () => {
               variant="outline"
               className="gap-2"
               nativeButton={false}
-              render={<a href="/api/export" download="sora-export.json" />}
+              render={
+                <a
+                  href="/api/export"
+                  download="sora-export.json"
+                  aria-label="Download full export (JSON)"
+                />
+              }
             >
               <Download className="h-4 w-4" />
               Download full export (JSON)

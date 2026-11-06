@@ -3,7 +3,7 @@
 import { Category } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useId, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -35,6 +35,7 @@ interface Props {
 const CategoryPicker = ({ type, onChange, id, ...ariaProps }: Props) => {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
+  const listId = useId();
 
   useEffect(() => {
     if (!value) return;
@@ -70,6 +71,7 @@ const CategoryPicker = ({ type, onChange, id, ...ariaProps }: Props) => {
             variant={"outline"}
             role="combobox"
             aria-expanded={open}
+            aria-controls={listId}
             className="w-full justify-between"
             {...ariaProps}
           />
@@ -97,7 +99,7 @@ const CategoryPicker = ({ type, onChange, id, ...ariaProps }: Props) => {
             </p>
           </CommandEmpty>
           <CommandGroup>
-            <CommandList>
+            <CommandList id={listId}>
               {categoriesQuery.data &&
                 categoriesQuery.data.map((category: Category) => (
                   <CommandItem
@@ -129,7 +131,7 @@ export default CategoryPicker;
 function CategoryRow({ category }: { category: Category }) {
   return (
     <div className="flex items-center gap-2">
-      <span role="img">{category.icon}</span>
+      <span aria-hidden="true">{category.icon}</span>
       <span>{category.name}</span>
     </div>
   );

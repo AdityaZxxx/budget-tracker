@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 
 import { getMonthSpentByCategory } from "@/lib/budgets";
-import { GetFormatterForCurrency } from "@/lib/helpers";
+import { getFormatterForCurrency } from "@/lib/helpers";
 import { requireHousehold } from "@/lib/household";
 import { notifyHouseholdExcept } from "@/lib/notifications";
 import prisma from "@/lib/prisma";
@@ -25,7 +25,7 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 
   const { session, household } = result;
 
-  const formatAmount = GetFormatterForCurrency(
+  const formatAmount = getFormatterForCurrency(
     household.currency ?? "USD",
   ).format;
 

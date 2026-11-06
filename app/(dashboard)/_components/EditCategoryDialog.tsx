@@ -137,9 +137,8 @@ const EditCategoryDialog = ({
             form.handleSubmit();
           }}
         >
-          <form.Field
-            name="name"
-            children={(field) => {
+          <form.Field name="name">
+            {(field) => {
               const isInvalid =
                 field.state.meta.isTouched && !field.state.meta.isValid;
               return (
@@ -170,11 +169,10 @@ const EditCategoryDialog = ({
                 </Field>
               );
             }}
-          />
+          </form.Field>
 
-          <form.Field
-            name="icon"
-            children={(field) => {
+          <form.Field name="icon">
+            {(field) => {
               const isInvalid =
                 field.state.meta.isTouched && !field.state.meta.isValid;
               return (
@@ -196,7 +194,7 @@ const EditCategoryDialog = ({
                     >
                       {field.state.value ? (
                         <div className="flex flex-col items-center gap-2">
-                          <span className="text-5xl" role="img">
+                          <span className="text-5xl" aria-hidden="true">
                             {field.state.value}
                           </span>
                           <p className="text-xs text-muted-foreground">
@@ -231,7 +229,7 @@ const EditCategoryDialog = ({
                 </Field>
               );
             }}
-          />
+          </form.Field>
           <DialogFooter>
             <DialogClose
               render={<Button variant={"secondary"} type="button" />}
