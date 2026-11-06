@@ -2,7 +2,7 @@
 
 import { Household } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import CountUp from "react-countup";
 import {
   Bar,
@@ -213,12 +213,9 @@ function TooltipRow({
   textColor: string;
   formatter: Intl.NumberFormat;
 }) {
-  const formattingFn = useCallback(
-    (amount: number) => {
-      return formatter.format(amount);
-    },
-    [formatter],
-  );
+  const formattingFn = (amount: number) => {
+    return formatter.format(amount);
+  };
   return (
     <div className="flex items-center gap-2">
       <div className={cn("h-4 w-4 rounded-full", bgColor)} />
