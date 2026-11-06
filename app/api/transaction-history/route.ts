@@ -31,6 +31,7 @@ export async function GET(request: NextRequest) {
   const transactions = await getTrasactionsHistory(
     result.household.id,
     result.session.user.id,
+    result.household.currency,
     queryParams.data.from,
     queryParams.data.to,
   );
@@ -45,20 +46,15 @@ export type GetTrasactionsHistoryResponseType = Awaited<
 async function getTrasactionsHistory(
   householdId: string,
   userId: string,
+  currency: string | null,
   from: Date,
   to: Date,
 ) {
-  const household = await prisma.household.findUnique({
-    where: {
-      id: householdId,
-    },
-  });
-
-  if (!household?.currency) {
+  if (!currency) {
     throw new Error("household currency not set");
   }
 
-  const formatter = getFormatterForCurrency(household.currency);
+  const formatter = getFormatterForCurrency(currency);
 
   const transactions = await prisma.transaction.findMany({
     where: {
