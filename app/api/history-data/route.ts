@@ -1,9 +1,10 @@
-import { requireHousehold } from "@/lib/household";
-import prisma from "@/lib/prisma";
-import { Period, Timeframe } from "@/lib/types";
 import { getDaysInMonth } from "date-fns";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+
+import { requireHousehold } from "@/lib/household";
+import prisma from "@/lib/prisma";
+import { Period, Timeframe } from "@/lib/types";
 
 type HistoryData = {
   year: number;
@@ -46,7 +47,7 @@ export async function GET(request: Request) {
     {
       month: queryParams.data.month,
       year: queryParams.data.year,
-    }
+    },
   );
 
   return Response.json(data);
@@ -59,7 +60,7 @@ export type GetHistoryDataResponseType = Awaited<
 async function getHistoryData(
   householdId: string,
   timeframe: Timeframe,
-  period: Period
+  period: Period,
 ) {
   switch (timeframe) {
     case "year":
@@ -97,7 +98,7 @@ async function getYearHistoryData(householdId: string, year: number) {
 async function getMonthHistoryData(
   householdId: string,
   year: number,
-  month: number
+  month: number,
 ) {
   const result = await prisma.monthHistory.groupBy({
     by: ["day"],

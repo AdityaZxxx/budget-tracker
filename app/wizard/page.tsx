@@ -1,6 +1,8 @@
-import { getSession } from "@/lib/auth";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+
+import { getSession } from "@/lib/auth";
+
 import { CurrencyComboBox } from "../../components/CurrencyComboBox";
 import Logo from "../../components/Logo";
 import { Button } from "../../components/ui/button";

@@ -1,11 +1,5 @@
 "use client";
 
-import SkeletonWrapper from "@/components/SkeletonWrapper";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { GetFormatterForCurrency } from "@/lib/helpers";
-import { Period, Timeframe } from "@/lib/types";
-import { cn } from "@/lib/utils";
 import { Household } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
@@ -19,6 +13,14 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+
+import SkeletonWrapper from "@/components/SkeletonWrapper";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { GetFormatterForCurrency } from "@/lib/helpers";
+import { Period, Timeframe } from "@/lib/types";
+import { cn } from "@/lib/utils";
+
 import HistoryPeriodSelector from "./HistoryPeriodSelector";
 
 const History = ({ household }: { household: Household }) => {
@@ -36,7 +38,7 @@ const History = ({ household }: { household: Household }) => {
     queryKey: ["overview", "history", timeframe, period],
     queryFn: async () => {
       const response = await fetch(
-        `/api/history-data?timeframe=${timeframe}&year=${period.year}&month=${period.month}`
+        `/api/history-data?timeframe=${timeframe}&year=${period.year}&month=${period.month}`,
       );
       if (!response.ok) {
         const errorText = await response.text();
@@ -216,7 +218,7 @@ function TooltipRow({
     (value: number) => {
       return formatter.format(value);
     },
-    [formatter]
+    [formatter],
   );
   return (
     <div className="flex items-center gap-2">

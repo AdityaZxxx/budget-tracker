@@ -1,9 +1,10 @@
 "use server";
 
-import { auth, getSession } from "@/lib/auth";
-import prisma from "@/lib/prisma";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+
+import { auth, getSession } from "@/lib/auth";
+import prisma from "@/lib/prisma";
 
 export async function deleteAccount() {
   const session = await getSession();

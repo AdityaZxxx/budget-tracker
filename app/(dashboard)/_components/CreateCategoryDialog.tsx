@@ -1,3 +1,13 @@
+import data from "@emoji-mart/data";
+import Picker from "@emoji-mart/react";
+import { Category } from "@prisma/client";
+import { useForm } from "@tanstack/react-form";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { CircleOff, Loader2, PlusSquare } from "lucide-react";
+import { useTheme } from "next-themes";
+import { ReactElement, ReactNode, useState } from "react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -23,15 +33,7 @@ import {
 import { TransactionType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { CreateCategorySchema } from "@/schemas/categories";
-import data from "@emoji-mart/data";
-import Picker from "@emoji-mart/react";
-import { Category } from "@prisma/client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "@tanstack/react-form";
-import { CircleOff, Loader2, PlusSquare } from "lucide-react";
-import { useTheme } from "next-themes";
-import { ReactElement, ReactNode, useState } from "react";
-import { toast } from "sonner";
+
 import { CreateCategory } from "../_actions/categories";
 
 interface Props {
@@ -79,9 +81,7 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
       onSubmit: CreateCategorySchema,
     },
     onSubmitInvalid: () => {
-      document
-        .querySelector<HTMLElement>('[aria-invalid="true"]')
-        ?.focus();
+      document.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
     },
     onSubmit: ({ value }) => {
       toast.loading("Creating category…", {
@@ -113,7 +113,7 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
                 "m-1",
                 type === "income"
                   ? "text-emerald-700 dark:text-emerald-400"
-                  : "text-red-600 dark:text-red-400"
+                  : "text-red-600 dark:text-red-400",
               )}
             >
               {type}
@@ -143,7 +143,9 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     aria-invalid={isInvalid}
-                    aria-describedby={isInvalid ? `${field.name}-error` : undefined}
+                    aria-describedby={
+                      isInvalid ? `${field.name}-error` : undefined
+                    }
                     placeholder="Category name"
                   />
                   <FieldDescription>
@@ -174,7 +176,9 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
                         <Button
                           id={field.name}
                           aria-invalid={isInvalid}
-                          aria-describedby={isInvalid ? `${field.name}-error` : undefined}
+                          aria-describedby={
+                            isInvalid ? `${field.name}-error` : undefined
+                          }
                           variant={"outline"}
                           className="h-[100px] w-full"
                         />

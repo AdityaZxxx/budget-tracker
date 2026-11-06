@@ -1,9 +1,10 @@
-import { SETTLEMENT_CATEGORY_NAME } from "@/lib/constants";
-import { requireHousehold } from "@/lib/household";
-import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { NextRequest } from "next/server";
 import { z } from "zod";
+
+import { SETTLEMENT_CATEGORY_NAME } from "@/lib/constants";
+import { requireHousehold } from "@/lib/household";
+import prisma from "@/lib/prisma";
 export async function GET(request: NextRequest) {
   const result = await requireHousehold();
 

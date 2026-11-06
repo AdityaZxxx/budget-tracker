@@ -1,5 +1,9 @@
 "use client";
 
+import { Household } from "@prisma/client";
+import { useQuery } from "@tanstack/react-query";
+import { Handshake } from "lucide-react";
+
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,9 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { GetFormatterForCurrency } from "@/lib/helpers";
-import { Household } from "@prisma/client";
-import { useQuery } from "@tanstack/react-query";
-import { Handshake } from "lucide-react";
+
 import { getHouseholdBalances } from "../_actions/balance";
 import RecordSettlementDialog from "./RecordSettlementDialog";
 
@@ -36,8 +38,8 @@ const Balances = ({ household }: { household: Household }) => {
             <div>
               <CardTitle className="text-xl">Balances</CardTitle>
               <CardDescription>
-                Net amounts from shared expenses and settlements. No money
-                moves inside the app.
+                Net amounts from shared expenses and settlements. No money moves
+                inside the app.
               </CardDescription>
             </div>
             <RecordSettlementDialog

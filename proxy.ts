@@ -1,6 +1,7 @@
+import type { NextRequest } from "next/server";
+
 import { getSessionCookie } from "better-auth/cookies";
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
 
 const authPages = ["/sign-in", "/sign-up"];
 // Invite pages are public: accepting an invite is what signs a new user in.

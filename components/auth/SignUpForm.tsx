@@ -1,12 +1,12 @@
 "use client";
 
-import { authClient } from "@/lib/auth-client";
 import { useForm } from "@tanstack/react-form";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/card";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
+
 import GoogleSignInButton from "./GoogleSignInButton";
 
 const signUpSchema = z.object({
@@ -39,9 +41,7 @@ export default function SignUpForm({ next }: { next?: string }) {
       onSubmit: signUpSchema,
     },
     onSubmitInvalid: () => {
-      document
-        .querySelector<HTMLElement>('[aria-invalid="true"]')
-        ?.focus();
+      document.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
     },
     onSubmit: async ({ value }) => {
       setIsLoading(true);
@@ -54,7 +54,7 @@ export default function SignUpForm({ next }: { next?: string }) {
 
       if (error) {
         toast.error(
-          error.message || "Unable to create your account. Try again."
+          error.message || "Unable to create your account. Try again.",
         );
         return;
       }
@@ -98,7 +98,9 @@ export default function SignUpForm({ next }: { next?: string }) {
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     aria-invalid={isInvalid}
-                    aria-describedby={isInvalid ? `${field.name}-error` : undefined}
+                    aria-describedby={
+                      isInvalid ? `${field.name}-error` : undefined
+                    }
                   />
                   {isInvalid && (
                     <FieldError
@@ -128,7 +130,9 @@ export default function SignUpForm({ next }: { next?: string }) {
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     aria-invalid={isInvalid}
-                    aria-describedby={isInvalid ? `${field.name}-error` : undefined}
+                    aria-describedby={
+                      isInvalid ? `${field.name}-error` : undefined
+                    }
                   />
                   {isInvalid && (
                     <FieldError
@@ -158,7 +162,9 @@ export default function SignUpForm({ next }: { next?: string }) {
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     aria-invalid={isInvalid}
-                    aria-describedby={isInvalid ? `${field.name}-error` : undefined}
+                    aria-describedby={
+                      isInvalid ? `${field.name}-error` : undefined
+                    }
                   />
                   {isInvalid && (
                     <FieldError
@@ -183,7 +189,9 @@ export default function SignUpForm({ next }: { next?: string }) {
         <p className="mt-4 text-center text-sm text-muted-foreground">
           Already have an account?{" "}
           <Link
-            href={next ? `/sign-in?next=${encodeURIComponent(next)}` : "/sign-in"}
+            href={
+              next ? `/sign-in?next=${encodeURIComponent(next)}` : "/sign-in"
+            }
             className="underline underline-offset-4"
           >
             Sign in

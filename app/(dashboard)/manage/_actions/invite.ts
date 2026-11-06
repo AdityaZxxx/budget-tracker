@@ -1,12 +1,13 @@
 "use server";
 
+import { redirect } from "next/navigation";
+
 import { requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 import {
   RevokeInviteLinkSchema,
   RevokeInviteLinkSchemaType,
 } from "@/schemas/invite";
-import { redirect } from "next/navigation";
 
 export async function createInviteLink() {
   const result = await requireHousehold();

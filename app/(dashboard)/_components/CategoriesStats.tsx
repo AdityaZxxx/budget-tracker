@@ -1,14 +1,16 @@
 "use client";
 
+import { Household } from "@prisma/client";
+import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
+
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DateToUTCDate, GetFormatterForCurrency } from "@/lib/helpers";
 import { TransactionType } from "@/lib/types";
-import { Household } from "@prisma/client";
-import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+
 import { type GetCategoriesStatsResponseType } from "../../api/stats/categories/route";
 
 interface CategoriesCardProps {
@@ -30,8 +32,8 @@ const CategoriesStats = ({ from, to, household }: Props) => {
     queryFn: async () => {
       const response = await fetch(
         `/api/stats/categories?from=${DateToUTCDate(from)}&to=${DateToUTCDate(
-          to
-        )}`
+          to,
+        )}`,
       );
       if (!response.ok) {
         throw new Error("Failed to fetch categories stats");
@@ -53,11 +55,11 @@ const CategoriesStats = ({ from, to, household }: Props) => {
 
     const totalIncome = incomeData.reduce(
       (sum, d) => sum + (d._sum.amount || 0),
-      0
+      0,
     );
     const totalExpense = expenseData.reduce(
       (sum, d) => sum + (d._sum.amount || 0),
-      0
+      0,
     );
 
     return {
@@ -121,7 +123,7 @@ function CategoriesCard({ data, type, formatter, total }: CategoriesCardProps) {
                       <span className="flex items-center gap-2 text-sm text-muted-foreground">
                         {item.categoryIcon} {item.category}
                       </span>
-                      <span className="text-sm font-semibold tabular-nums text-foreground">
+                      <span className="text-sm font-semibold text-foreground tabular-nums">
                         {formatter.format(amount)}
                       </span>
                     </div>

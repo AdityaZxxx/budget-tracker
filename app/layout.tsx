@@ -1,8 +1,11 @@
+import "./globals.css";
+
+import type { Metadata, Viewport } from "next";
+
+import { Geist, Geist_Mono } from "next/font/google";
+
 import RootProvider from "@/components/providers/RootProvider";
 import { Toaster } from "@/components/ui/sonner";
-import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

@@ -9,8 +9,8 @@ export function DateToUTCDate(date: Date) {
       date.getHours(),
       date.getMinutes(),
       date.getSeconds(),
-      date.getMilliseconds()
-    )
+      date.getMilliseconds(),
+    ),
   );
 }
 

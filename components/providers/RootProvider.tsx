@@ -1,10 +1,11 @@
 "use client";
 
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ThemeProvider } from "next-themes";
 import { ReactNode, useState } from "react";
+
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const RootProvider = ({ children }: { children: ReactNode }) => {
   const [queryClient] = useState(() => new QueryClient({}));

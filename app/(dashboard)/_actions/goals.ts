@@ -1,5 +1,7 @@
 "use server";
 
+import { redirect } from "next/navigation";
+
 import { requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 import {
@@ -8,7 +10,6 @@ import {
   DeleteGoalSchema,
   DeleteGoalSchemaType,
 } from "@/schemas/goals";
-import { redirect } from "next/navigation";
 
 export async function listGoals() {
   const result = await requireHousehold();
@@ -42,7 +43,7 @@ export async function listGoals() {
   ]);
 
   const contributedByGoalId = new Map(
-    contributionSums.map((row) => [row.goalId, row._sum.amount ?? 0])
+    contributionSums.map((row) => [row.goalId, row._sum.amount ?? 0]),
   );
 
   return goals.map((goal) => ({

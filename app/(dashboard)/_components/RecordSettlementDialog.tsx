@@ -1,5 +1,13 @@
 "use client";
 
+import { Household } from "@prisma/client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
+import { ReactElement, ReactNode, useMemo, useState } from "react";
+import { NumericFormat } from "react-number-format";
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -9,12 +17,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Field,
-  FieldDescription,
-  FieldLabel,
-} from "@/components/ui/field";
-import { Button } from "@/components/ui/button";
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -24,12 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Currencies } from "@/lib/currencies";
-import { Household } from "@prisma/client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
-import { ReactElement, ReactNode, useMemo, useState } from "react";
-import { NumericFormat } from "react-number-format";
-import { toast } from "sonner";
+
 import { RecordSettlement } from "../_actions/balance";
 
 interface Props {
@@ -45,9 +43,7 @@ const RecordSettlementDialog = ({ trigger, members, household }: Props) => {
 
   const queryClient = useQueryClient();
 
-  const currency = Currencies.find(
-    (c) => c.value === household.currency
-  );
+  const currency = Currencies.find((c) => c.value === household.currency);
 
   const { thousandSeparator, decimalSeparator } = useMemo(() => {
     const formatter = new Intl.NumberFormat(currency?.locale, {

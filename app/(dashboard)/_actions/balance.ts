@@ -1,5 +1,7 @@
 "use server";
 
+import { redirect } from "next/navigation";
+
 import {
   SETTLEMENT_CATEGORY_ICON,
   SETTLEMENT_CATEGORY_NAME,
@@ -13,7 +15,6 @@ import {
   RecordSettlementSchema,
   RecordSettlementSchemaType,
 } from "@/schemas/settlement";
-import { redirect } from "next/navigation";
 
 // balance is the net amount the caller owes the other member:
 // shared expenses added by the other minus shared expenses added by the
@@ -75,7 +76,7 @@ export async function getHouseholdBalances() {
   ]);
 
   const memberIdByName = new Map(
-    memberships.map((membership) => [membership.user.name, membership.user.id])
+    memberships.map((membership) => [membership.user.name, membership.user.id]),
   );
 
   return memberships
@@ -94,10 +95,12 @@ export async function getHouseholdBalances() {
 
       for (const settlement of settlements) {
         const payeeId = settlement.description.startsWith(
-          SETTLEMENT_DESCRIPTION_PREFIX
+          SETTLEMENT_DESCRIPTION_PREFIX,
         )
           ? memberIdByName.get(
-              settlement.description.slice(SETTLEMENT_DESCRIPTION_PREFIX.length)
+              settlement.description.slice(
+                SETTLEMENT_DESCRIPTION_PREFIX.length,
+              ),
             )
           : undefined;
         if (!payeeId) continue;
@@ -193,7 +196,7 @@ export async function RecordSettlement(form: RecordSettlementSchemaType) {
   });
 
   const amountText = GetFormatterForCurrency(
-    household.currency ?? "USD"
+    household.currency ?? "USD",
   ).format(amount);
 
   // The payee reads "with you"; other members see the payee's name.
@@ -216,8 +219,8 @@ export async function RecordSettlement(form: RecordSettlementSchemaType) {
         "settlement",
         other.userId === memberId
           ? `${session.user.name} recorded a settlement of ${amountText} with you.`
-          : `${session.user.name} recorded a settlement of ${amountText} with ${membership.user.name}.`
-      )
-    )
+          : `${session.user.name} recorded a settlement of ${amountText} with ${membership.user.name}.`,
+      ),
+    ),
   );
 }

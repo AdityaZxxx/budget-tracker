@@ -1,5 +1,14 @@
 "use client";
 
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { formatDistanceToNow } from "date-fns";
+import { Bell, CheckCheck } from "lucide-react";
+import { toast } from "sonner";
+
+import {
+  listNotifications,
+  markAllRead,
+} from "@/app/(dashboard)/_actions/notifications";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -16,14 +25,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { formatDistanceToNow } from "date-fns";
-import { Bell, CheckCheck } from "lucide-react";
-import { toast } from "sonner";
-import {
-  listNotifications,
-  markAllRead,
-} from "@/app/(dashboard)/_actions/notifications";
 
 const NotificationBell = () => {
   const queryClient = useQueryClient();

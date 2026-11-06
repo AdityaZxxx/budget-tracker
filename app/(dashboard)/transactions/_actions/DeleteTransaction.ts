@@ -1,8 +1,9 @@
 "use server";
 
+import { redirect } from "next/navigation";
+
 import { requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
-import { redirect } from "next/navigation";
 
 export async function DeleteTransaction(id: string) {
   const result = await requireHousehold();
