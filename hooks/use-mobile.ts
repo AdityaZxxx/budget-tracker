@@ -8,17 +8,14 @@ const MOBILE_MEDIA_QUERY = `(max-width: ${MOBILE_BREAKPOINT - 1}px)`;
 // match it, so the snapshot starts as false and settles after hydration.
 const getServerSnapshot = () => false;
 
+const subscribe = (onStoreChange: () => void) => {
+  const mql = window.matchMedia(MOBILE_MEDIA_QUERY);
+  mql.addEventListener("change", onStoreChange);
+  return () => mql.removeEventListener("change", onStoreChange);
+};
+
+const getSnapshot = () => window.innerWidth < MOBILE_BREAKPOINT;
+
 export function useIsMobile() {
-  const subscribe = React.useCallback((onStoreChange: () => void) => {
-    const mql = window.matchMedia(MOBILE_MEDIA_QUERY);
-    mql.addEventListener("change", onStoreChange);
-    return () => mql.removeEventListener("change", onStoreChange);
-  }, []);
-
-  const getSnapshot = React.useCallback(
-    () => window.innerWidth < MOBILE_BREAKPOINT,
-    [],
-  );
-
   return React.useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
