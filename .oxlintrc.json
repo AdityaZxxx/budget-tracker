@@ -1,0 +1,66 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": [
+    "typescript",
+    "oxc",
+    "unicorn",
+    "react",
+    "jsx-a11y",
+    "nextjs",
+    "import",
+    "promise",
+    "node"
+  ],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "perf": "warn"
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "es2024": true
+  },
+  "settings": {
+    "react": {
+      "version": "19.3"
+    }
+  },
+  "ignorePatterns": [".next/**", "node_modules/**", "next-env.d.ts"],
+  "rules": {
+    // The project compiles JSX with the automatic runtime ("jsx": "react-jsx"),
+    // so React no longer needs to be in scope.
+    "react/react-in-jsx-scope": "off",
+
+    // Prisma's aggregate API names its result field with a leading underscore.
+    "eslint/no-underscore-dangle": ["warn", { "allow": ["_sum"] }],
+
+    // Side-effect imports are the point: the stylesheet and the dotenv
+    // loader are imported for what they do, not for what they export.
+    "import/no-unassigned-import": [
+      "warn",
+      { "allow": ["**/*.css", "dotenv/config"] }
+    ],
+
+    // The rule asks for Object.assign, which mutates the source row. These
+    // arrays are server-owned and their consumers expect immutable objects.
+    "oxc/no-map-spread": "off",
+
+    // The rule prefers a native element, but several of these roles are the
+    // ARIA-recommended pattern rather than an element substitute: role="group"
+    // and role="region" on the carousel, role="status" on a live region,
+    // role="separator" between form controls, role="combobox" on a picker
+    // trigger, and role="img" on an emoji glyph.
+    "jsx-a11y/prefer-tag-over-role": "off"
+  },
+  "overrides": [
+    {
+      // A wrapper around the native label element. The htmlFor association
+      // lives at the call site, so the rule cannot see a matching control.
+      "files": ["components/ui/label.tsx"],
+      "rules": {
+        "jsx-a11y/label-has-associated-control": "off"
+      }
+    }
+  ]
+}
