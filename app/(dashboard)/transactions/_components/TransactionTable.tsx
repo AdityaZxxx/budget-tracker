@@ -252,26 +252,12 @@ const TransactionTable = ({ from, to }: Props) => {
     { label: "Currency", key: "Currency" },
   ];
 
-  const categoriesOptions = useMemo(() => {
-    const categoriesMap = new Map();
-    history.data?.forEach(
-      (transaction: { category: string; categoryIcon: any }) => {
-        categoriesMap.set(transaction.category, {
-          value: transaction.category,
-          label: `${transaction.categoryIcon} ${transaction.category}`,
-        });
-      },
-    );
-    return Array.from(categoriesMap.values());
-  }, [history.data]);
+  const categoriesOptions = getCategoryOptions(history.data ?? []);
 
-  const typeOptions = useMemo(
-    () => [
-      { label: "Income", value: "income" },
-      { label: "Expense", value: "expense" },
-    ],
-    [],
-  );
+  const typeOptions = [
+    { label: "Income", value: "income" },
+    { label: "Expense", value: "expense" },
+  ];
 
   const downloadCsv = () => {
     if (csvData.length === 0) return;
@@ -481,6 +467,17 @@ const TransactionTable = ({ from, to }: Props) => {
 };
 
 export default TransactionTable;
+
+function getCategoryOptions(transactions: GetTrasactionsHistoryResponseType) {
+  const categories = new Map<string, { value: string; label: string }>();
+  for (const transaction of transactions) {
+    categories.set(transaction.category, {
+      value: transaction.category,
+      label: `${transaction.categoryIcon} ${transaction.category}`,
+    });
+  }
+  return Array.from(categories.values());
+}
 
 function escapeCell(value: unknown) {
   const s = String(value ?? "");
