@@ -1,5 +1,15 @@
 "use client";
 
+import data from "@emoji-mart/data";
+import Picker from "@emoji-mart/react";
+import { Category } from "@prisma/client";
+import { useForm } from "@tanstack/react-form";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { CircleOff, Loader2 } from "lucide-react";
+import { useTheme } from "next-themes";
+import { ReactElement, ReactNode, useState } from "react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,15 +34,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { CreateCategorySchema } from "@/schemas/categories";
-import data from "@emoji-mart/data";
-import Picker from "@emoji-mart/react";
-import { Category } from "@prisma/client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "@tanstack/react-form";
-import { CircleOff, Loader2 } from "lucide-react";
-import { useTheme } from "next-themes";
-import { ReactElement, ReactNode, useState } from "react";
-import { toast } from "sonner";
+
 import { UpdateCategory } from "../_actions/categories";
 
 interface Props {

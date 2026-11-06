@@ -1,5 +1,11 @@
 "use client";
 
+import { Household } from "@prisma/client";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { ChevronsUpDown } from "lucide-react";
+import * as React from "react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -16,11 +22,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { Household } from "@prisma/client";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { ChevronsUpDown } from "lucide-react";
-import * as React from "react";
-import { toast } from "sonner";
+
 import { UpdateUserCurrency } from "../app/wizard/_actions/userSettings";
 import { Currencies, Currency } from "../lib/currencies";
 import SkeletonWrapper from "./SkeletonWrapper";
@@ -42,7 +44,7 @@ export function CurrencyComboBox() {
   React.useEffect(() => {
     if (!household.data) return;
     const userCurrency = Currencies.find(
-      (currency) => currency.value === household.data.currency
+      (currency) => currency.value === household.data.currency,
     );
     if (userCurrency) setSelectedCurrency(userCurrency);
   }, [household.data]);
@@ -54,7 +56,7 @@ export function CurrencyComboBox() {
         id: "update-currency",
       });
       setSelectedCurrency(
-        Currencies.find((c) => c.value === data.currency) || null
+        Currencies.find((c) => c.value === data.currency) || null,
       );
     },
     onError: (e) => {
@@ -75,7 +77,7 @@ export function CurrencyComboBox() {
       });
       mutation.mutate(currency.value);
     },
-    [mutation]
+    [mutation],
   );
 
   const TriggerButton = (
@@ -84,11 +86,7 @@ export function CurrencyComboBox() {
       className="w-full justify-start text-left"
       disabled={mutation.isPending}
     >
-      {selectedCurrency ? (
-        <>{selectedCurrency.label}</>
-      ) : (
-        <>Select currency…</>
-      )}
+      {selectedCurrency ? <>{selectedCurrency.label}</> : <>Select currency…</>}
       <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
     </Button>
   );
@@ -146,7 +144,7 @@ function CurrencyList({
               onSelect={(value) => {
                 setSelectedCurrency(
                   Currencies.find((priority) => priority.value === value) ||
-                    null
+                    null,
                 );
                 setOpen(false);
               }}

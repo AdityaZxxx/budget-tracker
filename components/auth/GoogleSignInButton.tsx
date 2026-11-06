@@ -1,9 +1,10 @@
 "use client";
 
-import { authClient } from "@/lib/auth-client";
 import { useState } from "react";
 import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
+import { authClient } from "@/lib/auth-client";
 
 function GoogleIcon() {
   return (
@@ -45,9 +46,7 @@ export default function GoogleSignInButton({
     });
     if (error) {
       setIsLoading(false);
-      toast.error(
-        error.message || "Unable to sign in with Google. Try again."
-      );
+      toast.error(error.message || "Unable to sign in with Google. Try again.");
     }
   };
 

@@ -1,5 +1,7 @@
 "use server";
 
+import { redirect } from "next/navigation";
+
 import { getMonthSpentByCategory } from "@/lib/budgets";
 import { GetFormatterForCurrency } from "@/lib/helpers";
 import { requireHousehold } from "@/lib/household";
@@ -9,7 +11,6 @@ import {
   CreateTransactionSchema,
   CreateTransactionSchemaType,
 } from "@/schemas/transaction";
-import { redirect } from "next/navigation";
 
 export async function CreateTransaction(form: CreateTransactionSchemaType) {
   const parsedBody = CreateTransactionSchema.safeParse(form);
@@ -25,7 +26,7 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
   const { session, household } = result;
 
   const formatAmount = GetFormatterForCurrency(
-    household.currency ?? "USD"
+    household.currency ?? "USD",
   ).format;
 
   const { amount, category, date, description, type, shared } = parsedBody.data;
@@ -67,10 +68,7 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
     });
 
     if (budget) {
-      const spentByCategory = await getMonthSpentByCategory(
-        household.id,
-        date
-      );
+      const spentByCategory = await getMonthSpentByCategory(household.id, date);
       const before = spentByCategory.get(categoryRow.name) ?? 0;
       const after = before + amount;
       const beforePercent = (before / budget.amount) * 100;
@@ -78,7 +76,7 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 
       if (budget.mode === "hard" && after > budget.amount) {
         throw new Error(
-          `Hard budget exceeded for ${categoryRow.name}: the monthly limit is ${formatAmount(budget.amount)} and ${formatAmount(before)} is already spent, so this ${formatAmount(amount)} expense would bring the month to ${formatAmount(after)}.`
+          `Hard budget exceeded for ${categoryRow.name}: the monthly limit is ${formatAmount(budget.amount)} and ${formatAmount(before)} is already spent, so this ${formatAmount(amount)} expense would bring the month to ${formatAmount(after)}.`,
         );
       }
 
@@ -173,7 +171,7 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
       household.id,
       session.user.id,
       "budget_threshold",
-      thresholdMessage
+      thresholdMessage,
     );
   }
 }

@@ -1,5 +1,7 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
+
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import {
   Select,
@@ -10,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Period, Timeframe } from "@/lib/types";
-import { useQuery } from "@tanstack/react-query";
+
 import { GetHistoryPeriodsResponseType } from "../../api/history-periods/route";
 
 interface Props {
@@ -46,10 +48,7 @@ const HistoryPeriodSelector = ({
         </Tabs>
       </SkeletonWrapper>
       <div className="flex flex-wrap items-center gap-2">
-        <SkeletonWrapper
-          isLoading={historyPeriods.isLoading}
-          fullWidth={false}
-        >
+        <SkeletonWrapper isLoading={historyPeriods.isLoading} fullWidth={false}>
           <YearSelector
             period={period}
             setPeriod={setPeriod}

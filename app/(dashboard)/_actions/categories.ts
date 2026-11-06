@@ -1,5 +1,7 @@
 "use server";
 
+import { redirect } from "next/navigation";
+
 import { SETTLEMENT_CATEGORY_NAME } from "@/lib/constants";
 import { requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
@@ -11,7 +13,6 @@ import {
   UpdateCategorySchema,
   UpdateCategorySchemaType,
 } from "@/schemas/categories";
-import { redirect } from "next/navigation";
 
 export async function CreateCategory(form: CreateCategorySchemaType) {
   const parsedBody = CreateCategorySchema.safeParse(form);

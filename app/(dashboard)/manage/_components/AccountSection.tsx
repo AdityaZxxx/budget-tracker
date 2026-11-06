@@ -1,5 +1,8 @@
 "use client";
 
+import { Download, TrashIcon } from "lucide-react";
+import Link from "next/link";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,8 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Download, TrashIcon } from "lucide-react";
-import Link from "next/link";
+
 import DeleteAccountDialog from "./DeleteAccountDialog";
 
 const AccountSection = () => {

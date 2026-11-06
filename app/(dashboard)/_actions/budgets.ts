@@ -1,5 +1,7 @@
 "use server";
 
+import { redirect } from "next/navigation";
+
 import { getMonthSpentByCategory } from "@/lib/budgets";
 import { requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
@@ -11,7 +13,6 @@ import {
   UpdateBudgetSchema,
   UpdateBudgetSchemaType,
 } from "@/schemas/budgets";
-import { redirect } from "next/navigation";
 
 export async function listBudgets() {
   const result = await requireHousehold();
@@ -45,7 +46,9 @@ export async function listBudgets() {
   });
 }
 
-export type BudgetWithProgress = Awaited<ReturnType<typeof listBudgets>>[number];
+export type BudgetWithProgress = Awaited<
+  ReturnType<typeof listBudgets>
+>[number];
 
 export async function createBudget(form: CreateBudgetSchemaType) {
   const parsedBody = CreateBudgetSchema.safeParse(form);

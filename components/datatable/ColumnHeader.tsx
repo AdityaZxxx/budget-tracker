@@ -1,4 +1,5 @@
 import type { RowData } from "@tanstack/react-table";
+
 import { LegacyColumn as Column } from "@tanstack/react-table/legacy";
 import { ArrowDown, ArrowUp, ChevronsUpDown, EyeOff } from "lucide-react";
 
@@ -12,8 +13,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
-interface DataTableColumnHeaderProps<TData extends RowData, TValue>
-  extends React.HTMLAttributes<HTMLDivElement> {
+interface DataTableColumnHeaderProps<
+  TData extends RowData,
+  TValue,
+> extends React.HTMLAttributes<HTMLDivElement> {
   column: Column<TData, TValue>;
   title: string;
 }
@@ -35,7 +38,7 @@ export function DataTableColumnHeader<TData extends RowData, TValue>({
             <Button
               variant="ghost"
               size="sm"
-              className="data-[state=open]:bg-accent -ml-3 h-8"
+              className="-ml-3 h-8 data-[state=open]:bg-accent"
             />
           }
         >

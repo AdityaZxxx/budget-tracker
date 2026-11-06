@@ -1,5 +1,9 @@
 "use client";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { ReactElement, ReactNode } from "react";
+import { toast } from "sonner";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,9 +15,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ReactElement, ReactNode } from "react";
-import { toast } from "sonner";
+
 import { deleteGoal, type GoalWithProgress } from "../_actions/goals";
 
 interface Props {
@@ -52,8 +54,8 @@ const DeleteGoalDialog = ({ trigger, goal }: Props) => {
           </AlertDialogTitle>
           <AlertDialogDescription>
             This permanently deletes the &quot;{goal.name}&quot; goal. Its
-            contribution transactions stay in your ledger. This action cannot
-            be undone.
+            contribution transactions stay in your ledger. This action cannot be
+            undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

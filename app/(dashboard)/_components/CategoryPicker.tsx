@@ -1,5 +1,10 @@
 "use client";
 
+import { Category } from "@prisma/client";
+import { useQuery } from "@tanstack/react-query";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -16,10 +21,7 @@ import {
 } from "@/components/ui/popover";
 import { TransactionType } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { Category } from "@prisma/client";
-import { useQuery } from "@tanstack/react-query";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+
 import CreateCategoryDialog from "./CreateCategoryDialog";
 
 interface Props {
@@ -48,7 +50,7 @@ const CategoryPicker = ({ type, onChange, id, ...ariaProps }: Props) => {
   });
 
   const selectedCategory = categoriesQuery.data?.find(
-    (category: Category) => category.name === value
+    (category: Category) => category.name === value,
   );
 
   const SuccessCallback = useCallback(
@@ -56,7 +58,7 @@ const CategoryPicker = ({ type, onChange, id, ...ariaProps }: Props) => {
       setValue(category.name);
       setOpen((prev) => !prev);
     },
-    [setValue, setOpen]
+    [setValue, setOpen],
   );
 
   return (
@@ -108,8 +110,8 @@ const CategoryPicker = ({ type, onChange, id, ...ariaProps }: Props) => {
                     <CategoryRow category={category} />
                     <Check
                       className={cn(
-                        "mr-2 w-4 h-4 opacity-0",
-                        value === category.name && "opacity-100"
+                        "mr-2 h-4 w-4 opacity-0",
+                        value === category.name && "opacity-100",
                       )}
                     />
                   </CommandItem>

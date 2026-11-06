@@ -19,7 +19,7 @@ export async function sendEmail({
     if (!missingConfigWarningLogged) {
       missingConfigWarningLogged = true;
       console.warn(
-        "RESEND_API_KEY/RESEND_FROM not set; skipping email send (local dev)."
+        "RESEND_API_KEY/RESEND_FROM not set; skipping email send (local dev).",
       );
     }
     return;
@@ -36,7 +36,7 @@ export async function sendEmail({
     });
     if (!response.ok) {
       console.error(
-        `Resend email failed (${response.status}): ${await response.text()}`
+        `Resend email failed (${response.status}): ${await response.text()}`,
       );
     }
   } catch (error) {

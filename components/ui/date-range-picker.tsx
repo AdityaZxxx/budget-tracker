@@ -1,11 +1,13 @@
 "use client";
 
-import { useIsMobile } from "@/hooks/use-mobile";
-import { cn } from "@/lib/utils";
 import { differenceInDays } from "date-fns";
 import { CalendarIcon, ChevronDown, ChevronUp } from "lucide-react";
 import { type FC, JSX, useEffect, useState } from "react";
 import { toast } from "sonner";
+
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
+
 import { Button } from "./button";
 import { Calendar } from "./calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
@@ -99,7 +101,7 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
   });
 
   const [selectedPreset, setSelectedPreset] = useState<string | undefined>(
-    undefined
+    undefined,
   );
 
   // Selections apply live: every committed change goes straight to onUpdate,
@@ -112,7 +114,7 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
 
   const warnRangeTooBig = (): void => {
     toast.error(
-      `The selected date range is too big. Max allowed range is ${maxRangeDays} days.`
+      `The selected date range is too big. Max allowed range is ${maxRangeDays} days.`,
     );
   };
 
@@ -202,13 +204,13 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
       const normalizedRangeFrom = new Date(range.from);
       normalizedRangeFrom.setHours(0, 0, 0, 0);
       const normalizedPresetFrom = new Date(
-        presetRange.from.setHours(0, 0, 0, 0)
+        presetRange.from.setHours(0, 0, 0, 0),
       );
 
       const normalizedRangeTo = new Date(range.to ?? 0);
       normalizedRangeTo.setHours(0, 0, 0, 0);
       const normalizedPresetTo = new Date(
-        presetRange.to?.setHours(0, 0, 0, 0) ?? 0
+        presetRange.to?.setHours(0, 0, 0, 0) ?? 0,
       );
 
       if (
@@ -239,7 +241,7 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
     <Button
       className={cn(
         "h-8 w-full justify-start rounded-md px-2.5 text-[13px] font-normal",
-        isSelected && "pointer-events-none bg-accent text-foreground"
+        isSelected && "pointer-events-none bg-accent text-foreground",
       )}
       variant="ghost"
       onClick={() => {
@@ -251,8 +253,7 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
   );
 
   const sameDay =
-    range.to != null &&
-    range.from.toDateString() === range.to.toDateString();
+    range.to != null && range.from.toDateString() === range.to.toDateString();
 
   const triggerContent = (
     <>
@@ -282,7 +283,7 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
 
   const pickerContent = (
     <div className="flex flex-col md:flex-row">
-      <div className="grid grid-cols-3 gap-0.5 border-b border-border pb-3 md:flex md:w-36 md:flex-col md:flex-nowrap md:border-b-0 md:border-r md:pr-3 md:pb-0">
+      <div className="grid grid-cols-3 gap-0.5 border-b border-border pb-3 md:flex md:w-36 md:flex-col md:flex-nowrap md:border-r md:border-b-0 md:pr-3 md:pb-0">
         {PRESETS.map((preset) => (
           <PresetButton
             key={preset.name}
@@ -292,16 +293,13 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
           />
         ))}
       </div>
-      <div className="pt-3 md:pl-3 md:pt-0">
+      <div className="pt-3 md:pt-0 md:pl-3">
         <Calendar
           className="mx-auto md:mx-0"
           mode="range"
           onSelect={(value: { from?: Date; to?: Date } | undefined) => {
             if (value?.from == null) return;
-            applyRange(
-              { from: value.from, to: value.to },
-              Boolean(value.to)
-            );
+            applyRange({ from: value.from, to: value.to }, Boolean(value.to));
           }}
           selected={range}
           numberOfMonths={1}

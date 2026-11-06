@@ -1,9 +1,10 @@
-import { requireHousehold } from "@/lib/household";
-import { GetFormatterForCurrency } from "@/lib/helpers";
-import prisma from "@/lib/prisma";
-import { OverviewQuerySchema } from "@/schemas/overview";
 import { redirect } from "next/navigation";
 import { NextRequest } from "next/server";
+
+import { GetFormatterForCurrency } from "@/lib/helpers";
+import { requireHousehold } from "@/lib/household";
+import prisma from "@/lib/prisma";
+import { OverviewQuerySchema } from "@/schemas/overview";
 
 export async function GET(request: NextRequest) {
   const result = await requireHousehold();
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
     result.household.id,
     result.session.user.id,
     queryParams.data.from,
-    queryParams.data.to
+    queryParams.data.to,
   );
 
   return Response.json(transactions);
@@ -45,7 +46,7 @@ async function getTrasactionsHistory(
   householdId: string,
   userId: string,
   from: Date,
-  to: Date
+  to: Date,
 ) {
   const household = await prisma.household.findUnique({
     where: {

@@ -1,5 +1,7 @@
 "use server";
 
+import { redirect } from "next/navigation";
+
 import { requireHousehold } from "@/lib/household";
 import { notifyHouseholdExcept } from "@/lib/notifications";
 import prisma from "@/lib/prisma";
@@ -9,7 +11,6 @@ import {
   SetEmailDigestSchema,
   SetEmailDigestSchemaType,
 } from "@/schemas/membership";
-import { redirect } from "next/navigation";
 
 export async function listMembers() {
   const result = await requireHousehold();
@@ -77,7 +78,7 @@ export async function leaveHousehold() {
     household.id,
     session.user.id,
     "member_left",
-    `${session.user.name} left the household.`
+    `${session.user.name} left the household.`,
   );
 
   // The session stays valid; the next requireHousehold() lazily creates a
@@ -151,7 +152,7 @@ export async function removeMember(form: RemoveMemberSchemaType) {
     household.id,
     session.user.id,
     "member_left",
-    `${removedMembership.user.name} was removed from the household.`
+    `${removedMembership.user.name} was removed from the household.`,
   );
 }
 

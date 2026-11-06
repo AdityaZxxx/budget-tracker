@@ -30,10 +30,9 @@ const PrivacyPage = () => {
             <p className="text-muted-foreground">
               To run Sora we store your name and email address (your sign-in),
               your household membership, and the money records you and your
-              household add: transactions and categories. We use your email
-              only for sign-in, email verification, and password reset. Sora
-              has no ads, no third-party analytics, and we never sell your
-              data.
+              household add: transactions and categories. We use your email only
+              for sign-in, email verification, and password reset. Sora has no
+              ads, no third-party analytics, and we never sell your data.
             </p>
           </section>
 
@@ -80,8 +79,8 @@ const PrivacyPage = () => {
               </Link>
               . Deletion removes your sign-in, your sessions, and every
               household where you are the last member, including its
-              transactions and categories. In a household with other members
-              you are removed; transactions added by other members stay.
+              transactions and categories. In a household with other members you
+              are removed; transactions added by other members stay.
             </p>
           </section>
 

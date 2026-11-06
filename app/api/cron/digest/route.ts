@@ -1,6 +1,7 @@
+import { type NextRequest, NextResponse } from "next/server";
+
 import { sendEmail } from "@/lib/email";
 import prisma from "@/lib/prisma";
-import { type NextRequest, NextResponse } from "next/server";
 
 // Vercel Cron hits this daily; the only credential is the shared secret, so
 // an unset CRON_SECRET means the route always answers 401.
@@ -48,7 +49,7 @@ export async function GET(request: NextRequest) {
     if (notifications.length === 0) continue;
 
     const items = notifications.map(
-      (notification) => `<li>${escapeHtml(notification.message)}</li>`
+      (notification) => `<li>${escapeHtml(notification.message)}</li>`,
     );
 
     await sendEmail({
@@ -60,7 +61,7 @@ export async function GET(request: NextRequest) {
         .map((notification) => `- ${notification.message}`)
         .join("\n")}\n`,
       html: `<p>Hi ${escapeHtml(membership.user.name)}, here are your household notifications from the last 24 hours:</p><ul>${items.join(
-        ""
+        "",
       )}</ul><p>Open Sora to see them in the app.</p>`,
     });
     sent += 1;

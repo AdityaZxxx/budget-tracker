@@ -1,3 +1,7 @@
+import { type Metadata } from "next";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+
 import Logo from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,9 +14,6 @@ import {
 import { getSession } from "@/lib/auth";
 import { notify, notifyMembers } from "@/lib/notifications";
 import prisma from "@/lib/prisma";
-import { type Metadata } from "next";
-import Link from "next/link";
-import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Household invite",
@@ -83,14 +84,14 @@ const InvitePage = async ({
       inviteLink.householdId,
       otherMembers.map((membership) => membership.userId),
       "member_joined",
-      `${session.user.name} joined the household.`
+      `${session.user.name} joined the household.`,
     );
     if (inviteLink.createdById !== session.user.id) {
       await notify(
         inviteLink.householdId,
         inviteLink.createdById,
         "invite_accepted",
-        `${session.user.name} accepted your invite and joined the household.`
+        `${session.user.name} accepted your invite and joined the household.`,
       );
     }
   }
@@ -108,8 +109,8 @@ const InvalidInviteLink = () => {
         <CardHeader>
           <CardTitle className="text-2xl">Invite link unavailable</CardTitle>
           <CardDescription>
-            This invite link is invalid or has been revoked. Ask a member of
-            the household for a new one.
+            This invite link is invalid or has been revoked. Ask a member of the
+            household for a new one.
           </CardDescription>
         </CardHeader>
         <CardContent>
