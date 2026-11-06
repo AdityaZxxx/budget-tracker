@@ -33,12 +33,12 @@
     "react/react-in-jsx-scope": "off",
 
     // Prisma's aggregate API names its result field with a leading underscore.
-    "eslint/no-underscore-dangle": ["warn", { "allow": ["_sum"] }],
+    "eslint/no-underscore-dangle": ["error", { "allow": ["_sum"] }],
 
     // Side-effect imports are the point: the stylesheet and the dotenv
     // loader are imported for what they do, not for what they export.
     "import/no-unassigned-import": [
-      "warn",
+      "error",
       { "allow": ["**/*.css", "dotenv/config"] }
     ],
 
@@ -46,11 +46,11 @@
     // arrays are server-owned and their consumers expect immutable objects.
     "oxc/no-map-spread": "off",
 
-    // The rule prefers a native element, but several of these roles are the
-    // ARIA-recommended pattern rather than an element substitute: role="group"
-    // and role="region" on the carousel, role="status" on a live region,
-    // role="separator" between form controls, role="combobox" on a picker
-    // trigger, and role="img" on an emoji glyph.
+    // The rule prefers a native element, but the roles left in the codebase
+    // are the ARIA-recommended pattern rather than an element substitute:
+    // role="group" on a field and on a carousel slide group, role="region"
+    // on the carousel, role="status" on a live region, role="separator"
+    // between form controls, and role="combobox" on a picker trigger.
     "jsx-a11y/prefer-tag-over-role": "off"
   },
   "overrides": [

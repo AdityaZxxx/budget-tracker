@@ -42,7 +42,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Currencies } from "@/lib/currencies";
-import { DateToUTCDate } from "@/lib/helpers";
+import { dateToUtcDate } from "@/lib/helpers";
 import { TransactionType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { CreateTransactionSchema } from "@/schemas/transaction";
@@ -68,6 +68,9 @@ type CreateTransactionFormValues = {
 
 const CreateTransactionDialog = ({ trigger, type }: Props) => {
   const [open, setOpen] = useState(false);
+  // The default transaction date is today. It is read once per component
+  // instance so rendering stays pure and the value cannot drift mid-edit.
+  const [initialDate] = useState(() => new Date());
 
   const household = useQuery<Household>({
     queryKey: ["household"],
@@ -139,7 +142,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
       category: "",
       amount: 0,
       type,
-      date: new Date(),
+      date: initialDate,
       shared: true,
       goalId: "",
     },
@@ -159,7 +162,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
 
       mutate({
         ...value,
-        date: DateToUTCDate(value.date),
+        date: dateToUtcDate(value.date),
       });
     },
   });
@@ -191,9 +194,8 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
             form.handleSubmit();
           }}
         >
-          <form.Field
-            name="description"
-            children={(field) => {
+          <form.Field name="description">
+            {(field) => {
               const isInvalid =
                 field.state.meta.isTouched && !field.state.meta.isValid;
               return (
@@ -223,11 +225,10 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                 </Field>
               );
             }}
-          />
+          </form.Field>
 
-          <form.Field
-            name="amount"
-            children={(field) => {
+          <form.Field name="amount">
+            {(field) => {
               const isInvalid =
                 field.state.meta.isTouched && !field.state.meta.isValid;
               return (
@@ -266,12 +267,11 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                 </Field>
               );
             }}
-          />
+          </form.Field>
 
           <div className="flex flex-col gap-4">
-            <form.Field
-              name="category"
-              children={(field) => {
+            <form.Field name="category">
+              {(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
@@ -298,11 +298,10 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                   </Field>
                 );
               }}
-            />
+            </form.Field>
 
-            <form.Field
-              name="date"
-              children={(field) => {
+            <form.Field name="date">
+              {(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
@@ -355,13 +354,12 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                   </Field>
                 );
               }}
-            />
+            </form.Field>
           </div>
 
           {type === "expense" && goals.length > 0 && (
-            <form.Field
-              name="goalId"
-              children={(field) => (
+            <form.Field name="goalId">
+              {(field) => (
                 <Field>
                   <FieldLabel htmlFor={field.name}>Goal (optional)</FieldLabel>
                   <Select
@@ -388,12 +386,11 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                   </FieldDescription>
                 </Field>
               )}
-            />
+            </form.Field>
           )}
 
-          <form.Field
-            name="shared"
-            children={(field) => (
+          <form.Field name="shared">
+            {(field) => (
               <Field>
                 <div className="flex items-center gap-2">
                   <Checkbox
@@ -416,7 +413,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                 </FieldDescription>
               </Field>
             )}
-          />
+          </form.Field>
 
           <DialogFooter className="gap-2 sm:gap-0">
             <DialogClose

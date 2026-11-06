@@ -17,7 +17,7 @@ import {
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { GetFormatterForCurrency } from "@/lib/helpers";
+import { getFormatterForCurrency } from "@/lib/helpers";
 import { Period, Timeframe } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -25,13 +25,16 @@ import HistoryPeriodSelector from "./HistoryPeriodSelector";
 
 const History = ({ household }: { household: Household }) => {
   const [timeframe, setTimeframe] = useState<Timeframe>("month");
-  const [period, setPeriod] = useState<Period>({
-    month: new Date().getMonth(),
-    year: new Date().getFullYear(),
+  const [period, setPeriod] = useState<Period>(() => {
+    const now = new Date();
+    return {
+      month: now.getMonth(),
+      year: now.getFullYear(),
+    };
   });
 
   const formatter = useMemo(() => {
-    return GetFormatterForCurrency(household.currency ?? "USD");
+    return getFormatterForCurrency(household.currency ?? "USD");
   }, [household.currency]);
 
   const historyDataQuery = useQuery({
@@ -133,9 +136,7 @@ const History = ({ household }: { household: Household }) => {
                   />
                   <Tooltip
                     cursor={{ opacity: 0.1 }}
-                    content={(props) => (
-                      <CustomTooltip formatter={formatter} {...props} />
-                    )}
+                    content={<CustomTooltip formatter={formatter} />}
                   />
                   <Bar
                     dataKey={"income"}
@@ -215,8 +216,8 @@ function TooltipRow({
   formatter: Intl.NumberFormat;
 }) {
   const formattingFn = useCallback(
-    (value: number) => {
-      return formatter.format(value);
+    (amount: number) => {
+      return formatter.format(amount);
     },
     [formatter],
   );

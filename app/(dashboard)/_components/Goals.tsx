@@ -20,14 +20,14 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { GetFormatterForCurrency } from "@/lib/helpers";
+import { getFormatterForCurrency } from "@/lib/helpers";
 
 import { listGoals } from "../_actions/goals";
 import CreateGoalDialog from "./CreateGoalDialog";
 import DeleteGoalDialog from "./DeleteGoalDialog";
 
 const Goals = ({ household }: { household: Household }) => {
-  const formatter = GetFormatterForCurrency(household.currency ?? "USD");
+  const formatter = getFormatterForCurrency(household.currency ?? "USD");
 
   const goalsQuery = useQuery({
     queryKey: ["goals"],

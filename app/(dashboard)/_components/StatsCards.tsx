@@ -3,12 +3,12 @@
 import { Household } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { TrendingDown, TrendingUp, Wallet } from "lucide-react";
-import { ReactNode, useMemo } from "react";
+import { ReactNode, useMemo, useState } from "react";
 import CountUp from "react-countup";
 
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Card } from "@/components/ui/card";
-import { DateToUTCDate, GetFormatterForCurrency } from "@/lib/helpers";
+import { dateToUtcDate, getFormatterForCurrency } from "@/lib/helpers";
 
 import { type GetBalanceStatsResponseType } from "../../api/stats/balance/route";
 
@@ -24,7 +24,7 @@ const StatsCards = ({ from, to, household }: Props) => {
     queryFn: async () => {
       try {
         const response = await fetch(
-          `/api/stats/balance?from=${DateToUTCDate(from)}&to=${DateToUTCDate(
+          `/api/stats/balance?from=${dateToUtcDate(from)}&to=${dateToUtcDate(
             to,
           )}`,
         );
@@ -42,7 +42,7 @@ const StatsCards = ({ from, to, household }: Props) => {
   });
 
   const formatter = useMemo(() => {
-    return GetFormatterForCurrency(household.currency ?? "USD");
+    return getFormatterForCurrency(household.currency ?? "USD");
   }, [household.currency]);
 
   const { income = 0, expense = 0 } = statsQuery.data || {};
@@ -122,6 +122,10 @@ function StatCard({
       ? "bg-emerald-500/10 dark:bg-emerald-400/10"
       : "bg-rose-500/10 dark:bg-rose-400/10";
 
+  // The card footer shows today's date. It is read once per component
+  // instance so rendering stays pure.
+  const [today] = useState(() => new Date());
+
   return (
     <Card className="flex h-full flex-col p-6 transition-all hover:shadow-md">
       <div className="flex items-center justify-between">
@@ -149,14 +153,14 @@ function StatCard({
             redraw={false}
             end={value}
             decimals={2}
-            formattingFn={(value: number) => formatter.format(value)}
+            formattingFn={(amount: number) => formatter.format(amount)}
             className="text-2xl font-bold text-foreground tabular-nums"
           />
         )}
       </div>
 
       <div className="mt-2 text-xs text-muted-foreground">
-        {new Date().toLocaleDateString(undefined, {
+        {today.toLocaleDateString(undefined, {
           month: "short",
           day: "numeric",
           year: "numeric",

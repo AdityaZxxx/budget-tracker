@@ -7,7 +7,7 @@ import {
   SETTLEMENT_CATEGORY_NAME,
   SETTLEMENT_DESCRIPTION_PREFIX,
 } from "@/lib/constants";
-import { GetFormatterForCurrency } from "@/lib/helpers";
+import { getFormatterForCurrency } from "@/lib/helpers";
 import { requireHousehold } from "@/lib/household";
 import { notify } from "@/lib/notifications";
 import prisma from "@/lib/prisma";
@@ -195,7 +195,7 @@ export async function RecordSettlement(form: RecordSettlementSchemaType) {
     },
   });
 
-  const amountText = GetFormatterForCurrency(
+  const amountText = getFormatterForCurrency(
     household.currency ?? "USD",
   ).format(amount);
 

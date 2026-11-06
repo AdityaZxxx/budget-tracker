@@ -80,9 +80,8 @@ export default function SignInForm({ next }: { next?: string }) {
             }}
             className="space-y-4"
           >
-            <form.Field
-              name="email"
-              children={(field) => {
+            <form.Field name="email">
+              {(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
@@ -111,10 +110,9 @@ export default function SignInForm({ next }: { next?: string }) {
                   </Field>
                 );
               }}
-            />
-            <form.Field
-              name="password"
-              children={(field) => {
+            </form.Field>
+            <form.Field name="password">
+              {(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
@@ -143,7 +141,7 @@ export default function SignInForm({ next }: { next?: string }) {
                   </Field>
                 );
               }}
-            />
+            </form.Field>
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Signing in…" : "Sign in"}
             </Button>

@@ -2,7 +2,7 @@ import { SETTLEMENT_CATEGORY_NAME } from "@/lib/constants";
 import prisma from "@/lib/prisma";
 
 // Budget months follow the UTC calendar: transaction dates are stored as
-// UTC (DateToUTCDate) and the history rollups use UTC getters, so a
+// UTC (dateToUtcDate) and the history rollups use UTC getters, so a
 // transaction's budget month is the UTC month of its date.
 export function monthRangeFor(date: Date): { from: Date; to: Date } {
   const year = date.getUTCFullYear();
