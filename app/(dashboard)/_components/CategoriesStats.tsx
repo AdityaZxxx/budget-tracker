@@ -2,7 +2,6 @@
 
 import { Household } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
 
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
@@ -46,25 +45,21 @@ const CategoriesStats = ({ from, to, household }: Props) => {
 
   const formatter = getFormatterForCurrency(household.currency ?? "USD");
 
-  const { incomeStats, expenseStats } = useMemo(() => {
-    const stats = statsQuery.data || [];
-    const incomeData = stats.filter((d) => d.type === "income");
-    const expenseData = stats.filter((d) => d.type === "expense");
+  const stats = statsQuery.data || [];
+  const incomeData = stats.filter((d) => d.type === "income");
+  const expenseData = stats.filter((d) => d.type === "expense");
 
-    const totalIncome = incomeData.reduce(
-      (sum, d) => sum + (d._sum.amount || 0),
-      0,
-    );
-    const totalExpense = expenseData.reduce(
-      (sum, d) => sum + (d._sum.amount || 0),
-      0,
-    );
+  const totalIncome = incomeData.reduce(
+    (sum, d) => sum + (d._sum.amount || 0),
+    0,
+  );
+  const totalExpense = expenseData.reduce(
+    (sum, d) => sum + (d._sum.amount || 0),
+    0,
+  );
 
-    return {
-      incomeStats: { data: incomeData, total: totalIncome },
-      expenseStats: { data: expenseData, total: totalExpense },
-    };
-  }, [statsQuery.data]);
+  const incomeStats = { data: incomeData, total: totalIncome };
+  const expenseStats = { data: expenseData, total: totalExpense };
 
   return (
     <div className="grid w-full grid-cols-1 gap-4 lg:grid-cols-2">
