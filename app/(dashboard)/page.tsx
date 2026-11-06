@@ -72,10 +72,10 @@ const DashboardPage = async () => {
         </div>
       </div>
       <InvitePartnerCta memberCount={memberCount} />
-      <Overview household={household} />
-      <Balances household={household} />
-      <Goals household={household} />
-      <History household={household} />
+      <Overview currency={household.currency} />
+      <Balances currency={household.currency} />
+      <Goals currency={household.currency} />
+      <History currency={household.currency} />
     </div>
   );
 };

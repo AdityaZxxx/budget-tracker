@@ -1,6 +1,5 @@
 "use client";
 
-import { Household } from "@prisma/client";
 import { useForm, type StandardSchemaV1 } from "@tanstack/react-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -40,7 +39,7 @@ import { createGoal } from "../_actions/goals";
 
 interface Props {
   trigger: ReactNode;
-  household: Household;
+  currency: string | null;
 }
 
 type CreateGoalFormValues = {
@@ -49,15 +48,15 @@ type CreateGoalFormValues = {
   deadline: Date | undefined;
 };
 
-const CreateGoalDialog = ({ trigger, household }: Props) => {
+const CreateGoalDialog = ({ trigger, currency }: Props) => {
   const [open, setOpen] = useState(false);
 
   const queryClient = useQueryClient();
 
-  const currency = Currencies.find((c) => c.value === household.currency);
+  const currencyOption = Currencies.find((c) => c.value === currency);
 
   const { thousandSeparator, decimalSeparator } = useMemo(() => {
-    const formatter = new Intl.NumberFormat(currency?.locale, {
+    const formatter = new Intl.NumberFormat(currencyOption?.locale, {
       style: "decimal",
     });
     const parts = formatter.formatToParts(1234.5);
@@ -67,7 +66,7 @@ const CreateGoalDialog = ({ trigger, household }: Props) => {
       thousandSeparator: ts,
       decimalSeparator: ds,
     };
-  }, [currency]);
+  }, [currencyOption]);
 
   const { mutate, isPending } = useMutation({
     mutationFn: createGoal,

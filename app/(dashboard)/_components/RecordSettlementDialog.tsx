@@ -1,6 +1,5 @@
 "use client";
 
-import { Household } from "@prisma/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { ReactElement, ReactNode, useMemo, useState } from "react";
@@ -33,20 +32,20 @@ import { RecordSettlement } from "../_actions/balance";
 interface Props {
   trigger: ReactNode;
   members: { userId: string; name: string }[];
-  household: Household;
+  currency: string | null;
 }
 
-const RecordSettlementDialog = ({ trigger, members, household }: Props) => {
+const RecordSettlementDialog = ({ trigger, members, currency }: Props) => {
   const [open, setOpen] = useState(false);
   const [memberId, setMemberId] = useState("");
   const [amount, setAmount] = useState(0);
 
   const queryClient = useQueryClient();
 
-  const currency = Currencies.find((c) => c.value === household.currency);
+  const currencyOption = Currencies.find((c) => c.value === currency);
 
   const { thousandSeparator, decimalSeparator } = useMemo(() => {
-    const formatter = new Intl.NumberFormat(currency?.locale, {
+    const formatter = new Intl.NumberFormat(currencyOption?.locale, {
       style: "decimal",
     });
     const parts = formatter.formatToParts(1234.5);
@@ -56,7 +55,7 @@ const RecordSettlementDialog = ({ trigger, members, household }: Props) => {
       thousandSeparator: ts,
       decimalSeparator: ds,
     };
-  }, [currency]);
+  }, [currencyOption]);
 
   const { mutate, isPending } = useMutation({
     mutationFn: RecordSettlement,

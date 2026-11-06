@@ -1,6 +1,5 @@
 "use client";
 
-import { Household } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
@@ -23,10 +22,10 @@ interface CategoriesCardProps {
 interface Props {
   from: Date;
   to: Date;
-  household: Household;
+  currency: string | null;
 }
 
-const CategoriesStats = ({ from, to, household }: Props) => {
+const CategoriesStats = ({ from, to, currency }: Props) => {
   const statsQuery = useQuery<GetCategoriesStatsResponseType>({
     queryKey: ["overview", "stats", "categories", from, to],
     queryFn: async () => {
@@ -45,8 +44,8 @@ const CategoriesStats = ({ from, to, household }: Props) => {
   });
 
   const formatter = useMemo(() => {
-    return getFormatterForCurrency(household.currency ?? "USD");
-  }, [household.currency]);
+    return getFormatterForCurrency(currency ?? "USD");
+  }, [currency]);
 
   const { incomeStats, expenseStats } = useMemo(() => {
     const stats = statsQuery.data || [];

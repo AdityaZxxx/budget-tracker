@@ -1,6 +1,5 @@
 "use client";
 
-import { Household } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
 import CountUp from "react-countup";
@@ -23,7 +22,7 @@ import { cn } from "@/lib/utils";
 
 import HistoryPeriodSelector from "./HistoryPeriodSelector";
 
-const History = ({ household }: { household: Household }) => {
+const History = ({ currency }: { currency: string | null }) => {
   const [timeframe, setTimeframe] = useState<Timeframe>("month");
   const [period, setPeriod] = useState<Period>(() => {
     const now = new Date();
@@ -34,8 +33,8 @@ const History = ({ household }: { household: Household }) => {
   });
 
   const formatter = useMemo(() => {
-    return getFormatterForCurrency(household.currency ?? "USD");
-  }, [household.currency]);
+    return getFormatterForCurrency(currency ?? "USD");
+  }, [currency]);
 
   const historyDataQuery = useQuery({
     queryKey: ["overview", "history", timeframe, period],
