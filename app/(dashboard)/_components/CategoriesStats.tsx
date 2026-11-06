@@ -44,9 +44,7 @@ const CategoriesStats = ({ from, to, household }: Props) => {
     refetchOnWindowFocus: true,
   });
 
-  const formatter = useMemo(() => {
-    return getFormatterForCurrency(household.currency ?? "USD");
-  }, [household.currency]);
+  const formatter = getFormatterForCurrency(household.currency ?? "USD");
 
   const { incomeStats, expenseStats } = useMemo(() => {
     const stats = statsQuery.data || [];

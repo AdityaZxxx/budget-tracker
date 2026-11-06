@@ -2,7 +2,7 @@
 
 import { Household } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import CountUp from "react-countup";
 import {
   Bar,
@@ -33,9 +33,7 @@ const History = ({ household }: { household: Household }) => {
     };
   });
 
-  const formatter = useMemo(() => {
-    return getFormatterForCurrency(household.currency ?? "USD");
-  }, [household.currency]);
+  const formatter = getFormatterForCurrency(household.currency ?? "USD");
 
   const historyDataQuery = useQuery({
     queryKey: ["overview", "history", timeframe, period],
