@@ -65,19 +65,16 @@ export function CurrencyComboBox() {
     },
   });
 
-  const selectOption = React.useCallback(
-    (currency: Currency | null) => {
-      if (!currency) {
-        toast.error("Select a currency to continue");
-        return;
-      }
-      toast.loading("Updating currency…", {
-        id: "update-currency",
-      });
-      mutation.mutate(currency.value);
-    },
-    [mutation],
-  );
+  const selectOption = (currency: Currency | null) => {
+    if (!currency) {
+      toast.error("Select a currency to continue");
+      return;
+    }
+    toast.loading("Updating currency…", {
+      id: "update-currency",
+    });
+    mutation.mutate(currency.value);
+  };
 
   const TriggerButton = (
     <Button
