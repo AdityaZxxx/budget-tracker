@@ -67,6 +67,10 @@ The working tree must pass the same checks CI runs. `.github/workflows/ci.yml` i
 
 The repo has no test suite, by decision (`docs/ROADMAP.md`). The build is the safety net.
 
+Lint and format are mechanical, and the tools own them: `oxlint` reports the rules, `oxfmt` decides the layout. Run `pnpm lint` and `pnpm fmt` before committing, and let the formatter rewrite the file rather than hand-tuning whitespace or import order.
+
+A rule that fires on correct code gets fixed in the code, or, with a stated reason, in `.oxlintrc.json`. A one-off exception that the config cannot express may carry a scoped suppression comment, but only with the reason written next to it.
+
 ## Commit protocol
 
 One commit per ticket, on the current branch. Conventional Commits: a type, a short subject, no body, no implementation chatter. The subject says what changed, not what you did.

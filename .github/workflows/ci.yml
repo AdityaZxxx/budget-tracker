@@ -17,6 +17,8 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm fmt:check
       - run: pnpm build
         env:
           POSTGRES_PRISMA_URL: postgresql://postgres:postgres@localhost:5432/postgres
