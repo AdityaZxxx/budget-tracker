@@ -27,7 +27,7 @@ import { DataTableViewOptions } from "@/components/datatable/Columntoggle";
 import { DataTableFacetedFilter } from "@/components/datatable/FacetedFilters";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -51,7 +51,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useSession } from "@/lib/auth-client";
-import { DateToUTCDate } from "@/lib/helpers";
+import { dateToUtcDate } from "@/lib/helpers";
 import { cn } from "@/lib/utils";
 
 import { GetTrasactionsHistoryResponseType } from "../../../api/transaction-history/route";
@@ -75,7 +75,7 @@ export const columns: ColumnDef<TransactionHistoryRow>[] = [
     filterFn: (row, id, value) => value.includes(row.getValue(id)),
     cell: ({ row }) => (
       <div className="flex items-center gap-3">
-        <span className="text-xl" role="img" aria-label={row.original.category}>
+        <span className="text-xl" aria-hidden="true">
           {row.original.categoryIcon}
         </span>
         <span className="font-medium capitalize">{row.original.category}</span>
@@ -91,9 +91,14 @@ export const columns: ColumnDef<TransactionHistoryRow>[] = [
       <Tooltip>
         <TooltipTrigger
           render={
-            <div
-              className="max-w-[200px] truncate capitalize md:max-w-none"
-              tabIndex={0}
+            // A button, not a div: the tooltip reveals the description that
+            // the cell truncates, so the trigger has to be reachable by
+            // keyboard. The button defaults are neutralised to keep it
+            // looking like the plain text it replaces.
+            <button
+              type="button"
+              aria-label={row.original.description}
+              className="block max-w-[200px] truncate border-0 p-0 text-left capitalize md:max-w-none"
             />
           }
         >
@@ -190,9 +195,9 @@ const TransactionTable = ({ from, to }: Props) => {
     queryKey: ["transactions", "history", from, to],
     queryFn: async () => {
       const response = await fetch(
-        `/api/transaction-history?from=${DateToUTCDate(
+        `/api/transaction-history?from=${dateToUtcDate(
           from,
-        )}&to=${DateToUTCDate(to)}`,
+        )}&to=${dateToUtcDate(to)}`,
       );
       if (!response.ok) throw new Error("Failed to fetch transaction history");
       return response.json();
@@ -270,10 +275,6 @@ const TransactionTable = ({ from, to }: Props) => {
 
   const downloadCsv = () => {
     if (csvData.length === 0) return;
-    const escapeCell = (value: unknown) => {
-      const s = String(value ?? "");
-      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-    };
     const lines = [
       csvHeaders.map((h) => escapeCell(h.label)).join(","),
       ...csvData.map((row) =>
@@ -480,6 +481,11 @@ const TransactionTable = ({ from, to }: Props) => {
 };
 
 export default TransactionTable;
+
+function escapeCell(value: unknown) {
+  const s = String(value ?? "");
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
 
 function AddedByCell({ transaction }: { transaction: TransactionHistoryRow }) {
   const { data: session } = useSession();

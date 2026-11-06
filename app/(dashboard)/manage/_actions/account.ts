@@ -21,19 +21,22 @@ export async function deleteAccount() {
   });
 
   await prisma.$transaction(async (tx) => {
-    const memberships = await tx.householdMembership.findMany({
-      where: { userId },
-      select: { householdId: true },
+    // Households where this user is the only member are deleted in one go.
+    // `every` alone is also true for households without any membership, so
+    // `some` is required to keep the user from removing unrelated households.
+    const soleMemberHouseholds = await tx.household.findMany({
+      where: {
+        AND: [
+          { memberships: { some: { userId } } },
+          { memberships: { every: { userId } } },
+        ],
+      },
+      select: { id: true },
     });
 
-    for (const { householdId } of memberships) {
-      const otherMembers = await tx.householdMembership.count({
-        where: { householdId, userId: { not: userId } },
-      });
-      if (otherMembers === 0) {
-        await tx.household.delete({ where: { id: householdId } });
-      }
-    }
+    await tx.household.deleteMany({
+      where: { id: { in: soleMemberHouseholds.map(({ id }) => id) } },
+    });
 
     // Verification has no FK to User; Better Auth keys these rows by the email
     // inside the identifier (email verification, password reset).

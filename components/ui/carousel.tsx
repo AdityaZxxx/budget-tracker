@@ -18,7 +18,6 @@ type CarouselProps = {
   opts?: CarouselOptions;
   plugins?: CarouselPlugin;
   orientation?: "horizontal" | "vertical";
-  setApi?: (api: CarouselApi) => void;
 };
 
 type CarouselContextProps = {
@@ -29,6 +28,16 @@ type CarouselContextProps = {
   canScrollPrev: boolean;
   canScrollNext: boolean;
 } & CarouselProps;
+
+type ScrollState = {
+  canScrollPrev: boolean;
+  canScrollNext: boolean;
+};
+
+const INITIAL_SCROLL_STATE: ScrollState = {
+  canScrollPrev: false,
+  canScrollNext: false,
+};
 
 const CarouselContext = React.createContext<CarouselContextProps | null>(null);
 
@@ -45,7 +54,6 @@ function useCarousel() {
 function Carousel({
   orientation = "horizontal",
   opts,
-  setApi,
   plugins,
   className,
   children,
@@ -58,14 +66,49 @@ function Carousel({
     },
     plugins,
   );
-  const [canScrollPrev, setCanScrollPrev] = React.useState(false);
-  const [canScrollNext, setCanScrollNext] = React.useState(false);
 
-  const onSelect = React.useCallback((api: CarouselApi) => {
-    if (!api) return;
-    setCanScrollPrev(api.canScrollPrev());
-    setCanScrollNext(api.canScrollNext());
-  }, []);
+  // Embla is an external store: it owns the scroll position and reports
+  // whether the ends are reachable through its events. Reading that state
+  // through useSyncExternalStore keeps the buttons in sync without mirroring
+  // it into React state.
+  const scrollStateRef = React.useRef<ScrollState>(INITIAL_SCROLL_STATE);
+
+  const subscribe = React.useCallback(
+    (onStoreChange: () => void) => {
+      if (!api) return () => {};
+      api.on("select", onStoreChange);
+      api.on("reInit", onStoreChange);
+
+      return () => {
+        api.off("select", onStoreChange);
+        api.off("reInit", onStoreChange);
+      };
+    },
+    [api],
+  );
+
+  const getSnapshot = React.useCallback(() => {
+    if (!api) return scrollStateRef.current;
+
+    const canScrollPrev = api.canScrollPrev();
+    const canScrollNext = api.canScrollNext();
+    const current = scrollStateRef.current;
+
+    if (
+      current.canScrollPrev !== canScrollPrev ||
+      current.canScrollNext !== canScrollNext
+    ) {
+      scrollStateRef.current = { canScrollPrev, canScrollNext };
+    }
+
+    return scrollStateRef.current;
+  }, [api]);
+
+  const { canScrollPrev, canScrollNext } = React.useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    () => INITIAL_SCROLL_STATE,
+  );
 
   const scrollPrev = React.useCallback(() => {
     api?.scrollPrev();
@@ -88,36 +131,32 @@ function Carousel({
     [scrollPrev, scrollNext],
   );
 
-  React.useEffect(() => {
-    if (!api || !setApi) return;
-    setApi(api);
-  }, [api, setApi]);
-
-  React.useEffect(() => {
-    if (!api) return;
-    onSelect(api);
-    api.on("reInit", onSelect);
-    api.on("select", onSelect);
-
-    return () => {
-      api?.off("select", onSelect);
-    };
-  }, [api, onSelect]);
+  const contextValue = React.useMemo(
+    () => ({
+      carouselRef,
+      api,
+      opts,
+      orientation:
+        orientation || (opts?.axis === "y" ? "vertical" : "horizontal"),
+      scrollPrev,
+      scrollNext,
+      canScrollPrev,
+      canScrollNext,
+    }),
+    [
+      carouselRef,
+      api,
+      opts,
+      orientation,
+      scrollPrev,
+      scrollNext,
+      canScrollPrev,
+      canScrollNext,
+    ],
+  );
 
   return (
-    <CarouselContext.Provider
-      value={{
-        carouselRef,
-        api: api,
-        opts,
-        orientation:
-          orientation || (opts?.axis === "y" ? "vertical" : "horizontal"),
-        scrollPrev,
-        scrollNext,
-        canScrollPrev,
-        canScrollNext,
-      }}
-    >
+    <CarouselContext.Provider value={contextValue}>
       <div
         onKeyDownCapture={handleKeyDown}
         className={cn("relative", className)}

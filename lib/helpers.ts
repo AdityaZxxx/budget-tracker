@@ -1,6 +1,6 @@
 import { Currencies } from "./currencies";
 
-export function DateToUTCDate(date: Date) {
+export function dateToUtcDate(date: Date) {
   return new Date(
     Date.UTC(
       date.getFullYear(),
@@ -14,7 +14,7 @@ export function DateToUTCDate(date: Date) {
   );
 }
 
-export function GetFormatterForCurrency(currency: string) {
+export function getFormatterForCurrency(currency: string) {
   const locale = Currencies.find((c) => c.value === currency)?.locale;
 
   return {

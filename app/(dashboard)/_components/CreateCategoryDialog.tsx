@@ -50,13 +50,13 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
 
   const { mutate, isPending } = useMutation({
     mutationFn: CreateCategory,
-    onSuccess: async (data: Category) => {
+    onSuccess: async (category: Category) => {
       form.reset();
-      toast.success(`Category "${data.name}" created`, {
+      toast.success(`Category "${category.name}" created`, {
         id: "create-category",
       });
 
-      successCallback(data);
+      successCallback(category);
 
       await queryClient.invalidateQueries({
         queryKey: ["categories"],
@@ -128,9 +128,8 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
             form.handleSubmit();
           }}
         >
-          <form.Field
-            name="name"
-            children={(field) => {
+          <form.Field name="name">
+            {(field) => {
               const isInvalid =
                 field.state.meta.isTouched && !field.state.meta.isValid;
               return (
@@ -160,11 +159,10 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
                 </Field>
               );
             }}
-          />
+          </form.Field>
 
-          <form.Field
-            name="icon"
-            children={(field) => {
+          <form.Field name="icon">
+            {(field) => {
               const isInvalid =
                 field.state.meta.isTouched && !field.state.meta.isValid;
               return (
@@ -186,7 +184,7 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
                     >
                       {field.state.value ? (
                         <div className="flex flex-col items-center gap-2">
-                          <span className="text-5xl" role="img">
+                          <span className="text-5xl" aria-hidden="true">
                             {field.state.value}
                           </span>
                           <p className="text-xs text-muted-foreground">
@@ -221,7 +219,7 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
                 </Field>
               );
             }}
-          />
+          </form.Field>
           <DialogFooter>
             <DialogClose
               render={

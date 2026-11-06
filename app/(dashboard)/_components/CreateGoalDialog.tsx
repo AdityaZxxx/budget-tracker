@@ -128,9 +128,8 @@ const CreateGoalDialog = ({ trigger, household }: Props) => {
             form.handleSubmit();
           }}
         >
-          <form.Field
-            name="name"
-            children={(field) => {
+          <form.Field name="name">
+            {(field) => {
               const isInvalid =
                 field.state.meta.isTouched && !field.state.meta.isValid;
               return (
@@ -160,11 +159,10 @@ const CreateGoalDialog = ({ trigger, household }: Props) => {
                 </Field>
               );
             }}
-          />
+          </form.Field>
 
-          <form.Field
-            name="target"
-            children={(field) => {
+          <form.Field name="target">
+            {(field) => {
               const isInvalid =
                 field.state.meta.isTouched && !field.state.meta.isValid;
               return (
@@ -201,11 +199,10 @@ const CreateGoalDialog = ({ trigger, household }: Props) => {
                 </Field>
               );
             }}
-          />
+          </form.Field>
 
-          <form.Field
-            name="deadline"
-            children={(field) => {
+          <form.Field name="deadline">
+            {(field) => {
               const isInvalid =
                 field.state.meta.isTouched && !field.state.meta.isValid;
               return (
@@ -271,7 +268,7 @@ const CreateGoalDialog = ({ trigger, household }: Props) => {
                 </Field>
               );
             }}
-          />
+          </form.Field>
 
           <DialogFooter className="gap-2 sm:gap-0">
             <DialogClose

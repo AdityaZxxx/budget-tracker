@@ -70,9 +70,7 @@ export default function UserMenu() {
             <DropdownMenuLabel className="flex flex-col">
               <Tooltip>
                 <TooltipTrigger
-                  render={
-                    <span className="truncate font-medium" tabIndex={0} />
-                  }
+                  render={<span className="truncate font-medium" />}
                 >
                   {session.user.name}
                 </TooltipTrigger>

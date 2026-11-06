@@ -29,35 +29,61 @@ export async function GET(request: NextRequest) {
     },
   });
 
+  const notifications = await prisma.notification.findMany({
+    where: {
+      // One query for every opted-in member, matched on the exact
+      // household/member pairs rather than the cross product of the two id
+      // lists, so a notification never crosses between households.
+      OR: memberships.map((m) => ({
+        householdId: m.householdId,
+        userId: m.userId,
+      })),
+      createdAt: {
+        gte: since,
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  // One query for every member, grouped by the household and recipient each
+  // notification belongs to, so the loop below sends no extra reads.
+  const notificationsByMember = new Map<string, typeof notifications>();
+  for (const notification of notifications) {
+    const key = `${notification.householdId}:${notification.userId}`;
+    const memberNotifications = notificationsByMember.get(key);
+    if (memberNotifications) {
+      memberNotifications.push(notification);
+    } else {
+      notificationsByMember.set(key, [notification]);
+    }
+  }
+
   let sent = 0;
 
   for (const membership of memberships) {
-    const notifications = await prisma.notification.findMany({
-      where: {
-        householdId: membership.householdId,
-        userId: membership.userId,
-        createdAt: {
-          gte: since,
-        },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+    const memberNotifications =
+      notificationsByMember.get(
+        `${membership.householdId}:${membership.userId}`,
+      ) ?? [];
 
     // The digest emails unread activity but never marks notifications read.
-    if (notifications.length === 0) continue;
+    if (memberNotifications.length === 0) continue;
 
-    const items = notifications.map(
+    const items = memberNotifications.map(
       (notification) => `<li>${escapeHtml(notification.message)}</li>`,
     );
 
+    // Emails go out one at a time so the free provider tier is never hit
+    // with a burst.
+    // oxlint-disable-next-line eslint/no-await-in-loop
     await sendEmail({
       to: membership.user.email,
-      subject: `Your Sora digest: ${notifications.length} new ${
-        notifications.length === 1 ? "notification" : "notifications"
+      subject: `Your Sora digest: ${memberNotifications.length} new ${
+        memberNotifications.length === 1 ? "notification" : "notifications"
       }`,
-      text: `Hi ${membership.user.name}, here are your household notifications from the last 24 hours:\n\n${notifications
+      text: `Hi ${membership.user.name}, here are your household notifications from the last 24 hours:\n\n${memberNotifications
         .map((notification) => `- ${notification.message}`)
         .join("\n")}\n`,
       html: `<p>Hi ${escapeHtml(membership.user.name)}, here are your household notifications from the last 24 hours:</p><ul>${items.join(

@@ -2,7 +2,7 @@
 
 import { differenceInDays } from "date-fns";
 import { CalendarIcon, ChevronDown, ChevronUp } from "lucide-react";
-import { type FC, JSX, useEffect, useState } from "react";
+import { type FC, JSX, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -79,11 +79,111 @@ const PRESETS: Preset[] = [
   { name: "lastMonth", label: "Last Month" },
 ];
 
+const startOfToday = (): Date => {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  return date;
+};
+
+const isSameDay = (a: Date | undefined, b: Date | undefined): boolean => {
+  if (!a || !b) return false;
+  return a.toDateString() === b.toDateString();
+};
+
+/** Resolves a preset name into the concrete range it stands for. */
+const getPresetRange = (presetName: string): DateRange => {
+  const preset = PRESETS.find(({ name }) => name === presetName);
+  if (!preset) throw new Error(`Unknown date range preset: ${presetName}`);
+  const from = new Date();
+  const to = new Date();
+  const first = from.getDate() - from.getDay();
+
+  switch (preset.name) {
+    case "today":
+      from.setHours(0, 0, 0, 0);
+      to.setHours(23, 59, 59, 999);
+      break;
+    case "yesterday":
+      from.setDate(from.getDate() - 1);
+      from.setHours(0, 0, 0, 0);
+      to.setDate(to.getDate() - 1);
+      to.setHours(23, 59, 59, 999);
+      break;
+    case "last7":
+      from.setDate(from.getDate() - 6);
+      from.setHours(0, 0, 0, 0);
+      to.setHours(23, 59, 59, 999);
+      break;
+    case "last14":
+      from.setDate(from.getDate() - 13);
+      from.setHours(0, 0, 0, 0);
+      to.setHours(23, 59, 59, 999);
+      break;
+    case "last30":
+      from.setDate(from.getDate() - 29);
+      from.setHours(0, 0, 0, 0);
+      to.setHours(23, 59, 59, 999);
+      break;
+    case "thisWeek":
+      from.setDate(first);
+      from.setHours(0, 0, 0, 0);
+      to.setHours(23, 59, 59, 999);
+      break;
+    case "lastWeek":
+      from.setDate(from.getDate() - 7 - from.getDay());
+      to.setDate(to.getDate() - to.getDay() - 1);
+      from.setHours(0, 0, 0, 0);
+      to.setHours(23, 59, 59, 999);
+      break;
+    case "thisMonth":
+      from.setDate(1);
+      from.setHours(0, 0, 0, 0);
+      to.setHours(23, 59, 59, 999);
+      break;
+    case "lastMonth":
+      from.setMonth(from.getMonth() - 1);
+      from.setDate(1);
+      from.setHours(0, 0, 0, 0);
+      to.setDate(0);
+      to.setHours(23, 59, 59, 999);
+      break;
+  }
+
+  return { from, to };
+};
+
+function PresetButton({
+  preset,
+  label,
+  isSelected,
+  onSelect,
+}: {
+  preset: string;
+  label: string;
+  isSelected: boolean;
+  onSelect: (preset: string) => void;
+}): JSX.Element {
+  return (
+    <Button
+      className={cn(
+        "h-8 w-full justify-start rounded-md px-2.5 text-[13px] font-normal",
+        isSelected && "pointer-events-none bg-accent text-foreground",
+      )}
+      variant="ghost"
+      onClick={() => {
+        onSelect(preset);
+      }}
+    >
+      {label}
+    </Button>
+  );
+}
+
 /** The DateRangePicker component allows a user to select a range of dates */
 export const DateRangePicker: FC<DateRangePickerProps> & {
   filePath: string;
 } = ({
-  initialDateFrom = new Date(new Date().setHours(0, 0, 0, 0)),
+  initialDateFrom,
   initialDateTo,
   onUpdate,
   align = "end",
@@ -93,16 +193,13 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
   const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
 
-  const [range, setRange] = useState<DateRange>({
-    from: getDateAdjustedForTimezone(initialDateFrom),
-    to: initialDateTo
-      ? getDateAdjustedForTimezone(initialDateTo)
-      : getDateAdjustedForTimezone(initialDateFrom),
+  const [range, setRange] = useState<DateRange>(() => {
+    const from = initialDateFrom
+      ? getDateAdjustedForTimezone(initialDateFrom)
+      : startOfToday();
+    const to = initialDateTo ? getDateAdjustedForTimezone(initialDateTo) : from;
+    return { from, to };
   });
-
-  const [selectedPreset, setSelectedPreset] = useState<string | undefined>(
-    undefined,
-  );
 
   // Selections apply live: every committed change goes straight to onUpdate,
   // so closing the popover never discards anything.
@@ -116,67 +213,6 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
     toast.error(
       `The selected date range is too big. Max allowed range is ${maxRangeDays} days.`,
     );
-  };
-
-  const getPresetRange = (presetName: string): DateRange => {
-    const preset = PRESETS.find(({ name }) => name === presetName);
-    if (!preset) throw new Error(`Unknown date range preset: ${presetName}`);
-    const from = new Date();
-    const to = new Date();
-    const first = from.getDate() - from.getDay();
-
-    switch (preset.name) {
-      case "today":
-        from.setHours(0, 0, 0, 0);
-        to.setHours(23, 59, 59, 999);
-        break;
-      case "yesterday":
-        from.setDate(from.getDate() - 1);
-        from.setHours(0, 0, 0, 0);
-        to.setDate(to.getDate() - 1);
-        to.setHours(23, 59, 59, 999);
-        break;
-      case "last7":
-        from.setDate(from.getDate() - 6);
-        from.setHours(0, 0, 0, 0);
-        to.setHours(23, 59, 59, 999);
-        break;
-      case "last14":
-        from.setDate(from.getDate() - 13);
-        from.setHours(0, 0, 0, 0);
-        to.setHours(23, 59, 59, 999);
-        break;
-      case "last30":
-        from.setDate(from.getDate() - 29);
-        from.setHours(0, 0, 0, 0);
-        to.setHours(23, 59, 59, 999);
-        break;
-      case "thisWeek":
-        from.setDate(first);
-        from.setHours(0, 0, 0, 0);
-        to.setHours(23, 59, 59, 999);
-        break;
-      case "lastWeek":
-        from.setDate(from.getDate() - 7 - from.getDay());
-        to.setDate(to.getDate() - to.getDay() - 1);
-        from.setHours(0, 0, 0, 0);
-        to.setHours(23, 59, 59, 999);
-        break;
-      case "thisMonth":
-        from.setDate(1);
-        from.setHours(0, 0, 0, 0);
-        to.setHours(23, 59, 59, 999);
-        break;
-      case "lastMonth":
-        from.setMonth(from.getMonth() - 1);
-        from.setDate(1);
-        from.setHours(0, 0, 0, 0);
-        to.setDate(0);
-        to.setHours(23, 59, 59, 999);
-        break;
-    }
-
-    return { from, to };
   };
 
   // Applies a candidate range: updates state, notifies onUpdate once the
@@ -197,63 +233,34 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
     applyRange(getPresetRange(preset), true);
   };
 
-  const checkPreset = (): void => {
+  // The highlighted preset is derived from the current range, so it can never
+  // drift out of sync with what the user actually selected.
+  const selectedPreset = useMemo<string | undefined>(() => {
     for (const preset of PRESETS) {
       const presetRange = getPresetRange(preset.name);
 
       const normalizedRangeFrom = new Date(range.from);
       normalizedRangeFrom.setHours(0, 0, 0, 0);
-      const normalizedPresetFrom = new Date(
-        presetRange.from.setHours(0, 0, 0, 0),
-      );
+      const normalizedPresetFrom = new Date(presetRange.from);
+      normalizedPresetFrom.setHours(0, 0, 0, 0);
 
       const normalizedRangeTo = new Date(range.to ?? 0);
       normalizedRangeTo.setHours(0, 0, 0, 0);
-      const normalizedPresetTo = new Date(
-        presetRange.to?.setHours(0, 0, 0, 0) ?? 0,
-      );
+      const normalizedPresetTo = new Date(presetRange.to ?? 0);
+      normalizedPresetTo.setHours(0, 0, 0, 0);
 
       if (
         normalizedRangeFrom.getTime() === normalizedPresetFrom.getTime() &&
         normalizedRangeTo.getTime() === normalizedPresetTo.getTime()
       ) {
-        setSelectedPreset(preset.name);
-        return;
+        return preset.name;
       }
     }
 
-    setSelectedPreset(undefined);
-  };
-
-  useEffect(() => {
-    checkPreset();
+    return undefined;
   }, [range]);
 
-  const PresetButton = ({
-    preset,
-    label,
-    isSelected,
-  }: {
-    preset: string;
-    label: string;
-    isSelected: boolean;
-  }): JSX.Element => (
-    <Button
-      className={cn(
-        "h-8 w-full justify-start rounded-md px-2.5 text-[13px] font-normal",
-        isSelected && "pointer-events-none bg-accent text-foreground",
-      )}
-      variant="ghost"
-      onClick={() => {
-        setPreset(preset);
-      }}
-    >
-      {label}
-    </Button>
-  );
-
-  const sameDay =
-    range.to != null && range.from.toDateString() === range.to.toDateString();
+  const sameDay = isSameDay(range.from, range.to);
 
   const triggerContent = (
     <>
@@ -290,6 +297,7 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
             preset={preset.name}
             label={preset.label}
             isSelected={selectedPreset === preset.name}
+            onSelect={setPreset}
           />
         ))}
       </div>

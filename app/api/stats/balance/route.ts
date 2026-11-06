@@ -4,10 +4,6 @@ import { requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 import { OverviewQuerySchema } from "@/schemas/overview";
 
-interface GetRequestParams {
-  request: Request;
-}
-
 interface QueryParams {
   from: string | null;
   to: string | null;

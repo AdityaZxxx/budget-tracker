@@ -1,7 +1,7 @@
 "use client";
 
 import { Household } from "@prisma/client";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronsUpDown } from "lucide-react";
 import * as React from "react";
 import { toast } from "sonner";
@@ -30,9 +30,7 @@ import SkeletonWrapper from "./SkeletonWrapper";
 export function CurrencyComboBox() {
   const [open, setOpen] = React.useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
-
-  const [selectedCurrency, setSelectedCurrency] =
-    React.useState<Currency | null>(null);
+  const queryClient = useQueryClient();
 
   const household = useQuery<Household>({
     queryKey: ["household"],
@@ -41,13 +39,12 @@ export function CurrencyComboBox() {
     refetchOnWindowFocus: true,
   });
 
-  React.useEffect(() => {
-    if (!household.data) return;
-    const userCurrency = Currencies.find(
-      (currency) => currency.value === household.data.currency,
-    );
-    if (userCurrency) setSelectedCurrency(userCurrency);
-  }, [household.data]);
+  // The household query owns the currency; a refetch is what changes it.
+  const selectedCurrency = household.data
+    ? Currencies.find(
+        (currency) => currency.value === household.data.currency,
+      ) || null
+    : null;
 
   const mutation = useMutation({
     mutationFn: UpdateUserCurrency,
@@ -55,11 +52,13 @@ export function CurrencyComboBox() {
       toast.success("Currency updated", {
         id: "update-currency",
       });
-      setSelectedCurrency(
-        Currencies.find((c) => c.value === data.currency) || null,
+      // Write the saved currency into the cache so the new value shows at
+      // once, and a later refetch still replaces it with the server's copy.
+      queryClient.setQueryData<Household>(["household"], (previous) =>
+        previous ? { ...previous, currency: data.currency } : previous,
       );
     },
-    onError: (e) => {
+    onError: () => {
       toast.error("Unable to update currency. Try again.", {
         id: "update-currency",
       });

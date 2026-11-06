@@ -37,7 +37,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { GetFormatterForCurrency } from "@/lib/helpers";
+import { getFormatterForCurrency } from "@/lib/helpers";
 import { cn } from "@/lib/utils";
 
 import { listBudgets, type BudgetWithProgress } from "../../_actions/budgets";
@@ -65,7 +65,7 @@ const BudgetsSection = () => {
   });
 
   const format = household.data?.currency
-    ? GetFormatterForCurrency(household.data.currency).format
+    ? getFormatterForCurrency(household.data.currency).format
     : (value: number) => value.toFixed(2);
 
   return (
