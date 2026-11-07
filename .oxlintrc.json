@@ -51,7 +51,31 @@
     // role="group" on a field and on a carousel slide group, role="region"
     // on the carousel, role="status" on a live region, role="separator"
     // between form controls, and role="combobox" on a picker trigger.
-    "jsx-a11y/prefer-tag-over-role": "off"
+    "jsx-a11y/prefer-tag-over-role": "off",
+
+    // React Compiler guardrail. CI runs these before the compiler is
+    // enabled, so a Rules of React bailout is caught the day it is written.
+    "react/immutability": "error",
+    "react/refs": "error",
+    "react/globals": "error",
+    "react/purity": "error",
+    "react/set-state-in-render": "error",
+    "react/set-state-in-effect": "error",
+    "react/no-deriving-state-in-effects": "error",
+    "react/no-direct-mutation-state": "error",
+    "react/static-components": "error",
+    "react/no-unstable-nested-components": "error",
+    "react/hooks": "error",
+    "react/exhaustive-deps": "error",
+    "react/exhaustive-effect-dependencies": "error",
+    "react/memo-dependencies": "error",
+    "react/preserve-manual-memoization": "error",
+    "react/use-memo": "error",
+    "react/void-use-memo": "error",
+    "react/invariant": "error",
+    "react/unsupported-syntax": "error",
+    "react/incompatible-library": "error",
+    "react/error-boundaries": "error"
   },
   "overrides": [
     {
