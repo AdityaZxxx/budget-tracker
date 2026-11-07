@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 
 import { getMonthSpentByCategory } from "@/lib/budgets";
 import { getFormatterForCurrency } from "@/lib/helpers";
@@ -31,28 +32,32 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 
   const { amount, category, date, description, type, shared } = parsedBody.data;
   const goalId = parsedBody.data.goalId || undefined;
-  const categoryRow = await prisma.category.findFirst({
-    where: {
-      householdId: household.id,
-      name: category,
-    },
-  });
+
+  // The category and the goal do not depend on each other, so they are
+  // fetched together.
+  const [categoryRow, goal] = await Promise.all([
+    prisma.category.findFirst({
+      where: {
+        householdId: household.id,
+        name: category,
+      },
+    }),
+    goalId
+      ? prisma.goal.findFirst({
+          where: {
+            id: goalId,
+            householdId: household.id,
+          },
+        })
+      : null,
+  ]);
 
   if (!categoryRow) {
     throw new Error("Category not found");
   }
 
-  if (goalId) {
-    const goal = await prisma.goal.findFirst({
-      where: {
-        id: goalId,
-        householdId: household.id,
-      },
-    });
-
-    if (!goal) {
-      throw new Error("Goal not found");
-    }
+  if (goalId && !goal) {
+    throw new Error("Goal not found");
   }
 
   // Budgets only apply to shared expenses; personal transactions stay out.
@@ -69,23 +74,23 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 
     if (budget) {
       const spentByCategory = await getMonthSpentByCategory(household.id, date);
-      const before = spentByCategory.get(categoryRow.name) ?? 0;
-      const after = before + amount;
-      const beforePercent = (before / budget.amount) * 100;
-      const afterPercent = (after / budget.amount) * 100;
+      const spentBefore = spentByCategory.get(categoryRow.name) ?? 0;
+      const spentAfter = spentBefore + amount;
+      const beforePercent = (spentBefore / budget.amount) * 100;
+      const afterPercent = (spentAfter / budget.amount) * 100;
 
-      if (budget.mode === "hard" && after > budget.amount) {
+      if (budget.mode === "hard" && spentAfter > budget.amount) {
         throw new Error(
-          `Hard budget exceeded for ${categoryRow.name}: the monthly limit is ${formatAmount(budget.amount)} and ${formatAmount(before)} is already spent, so this ${formatAmount(amount)} expense would bring the month to ${formatAmount(after)}.`,
+          `Hard budget exceeded for ${categoryRow.name}: the monthly limit is ${formatAmount(budget.amount)} and ${formatAmount(spentBefore)} is already spent, so this ${formatAmount(amount)} expense would bring the month to ${formatAmount(spentAfter)}.`,
         );
       }
 
       // One notification per transaction: report the highest threshold
       // crossed (100% covers a jump straight past 80%).
       if (beforePercent < 100 && afterPercent >= 100) {
-        thresholdMessage = `${categoryRow.name} budget reached 100% of ${formatAmount(budget.amount)} this month (${formatAmount(after)} spent).`;
+        thresholdMessage = `${categoryRow.name} budget reached 100% of ${formatAmount(budget.amount)} this month (${formatAmount(spentAfter)} spent).`;
       } else if (beforePercent < 80 && afterPercent >= 80) {
-        thresholdMessage = `${categoryRow.name} budget reached 80% of ${formatAmount(budget.amount)} this month (${formatAmount(after)} spent).`;
+        thresholdMessage = `${categoryRow.name} budget reached 80% of ${formatAmount(budget.amount)} this month (${formatAmount(spentAfter)} spent).`;
       }
     }
   }
@@ -165,13 +170,17 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
   ]);
 
   // The actor just made the transaction, so threshold warnings go to the
-  // other members only.
+  // other members only. The write already landed, so the notification runs
+  // after the response instead of holding it up.
   if (thresholdMessage) {
-    await notifyHouseholdExcept(
-      household.id,
-      session.user.id,
-      "budget_threshold",
-      thresholdMessage,
+    const message = thresholdMessage;
+    after(() =>
+      notifyHouseholdExcept(
+        household.id,
+        session.user.id,
+        "budget_threshold",
+        message,
+      ),
     );
   }
 }

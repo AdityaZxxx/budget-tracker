@@ -2,7 +2,6 @@
 
 import type { HistoryChartRow } from "./HistoryChart";
 
-import { Household } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import { useState } from "react";
@@ -21,7 +20,7 @@ const HistoryChart = dynamic(() => import("./HistoryChart"), {
   loading: () => <Skeleton className="h-[300px] w-full" />,
 });
 
-const History = ({ household }: { household: Household }) => {
+const History = ({ currency }: { currency: string | null }) => {
   const [timeframe, setTimeframe] = useState<Timeframe>("month");
   const [period, setPeriod] = useState<Period>(() => {
     const now = new Date();
@@ -31,7 +30,7 @@ const History = ({ household }: { household: Household }) => {
     };
   });
 
-  const formatter = getFormatterForCurrency(household.currency ?? "USD");
+  const formatter = getFormatterForCurrency(currency ?? "USD");
 
   const historyDataQuery = useQuery({
     queryKey: ["overview", "history", timeframe, period],

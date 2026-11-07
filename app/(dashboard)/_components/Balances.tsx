@@ -1,6 +1,5 @@
 "use client";
 
-import { Household } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { Handshake } from "lucide-react";
 
@@ -18,8 +17,8 @@ import { getFormatterForCurrency } from "@/lib/helpers";
 import { getHouseholdBalances } from "../_actions/balance";
 import RecordSettlementDialog from "./RecordSettlementDialog";
 
-const Balances = ({ household }: { household: Household }) => {
-  const formatter = getFormatterForCurrency(household.currency ?? "USD");
+const Balances = ({ currency }: { currency: string | null }) => {
+  const formatter = getFormatterForCurrency(currency ?? "USD");
 
   const balancesQuery = useQuery({
     queryKey: ["balances"],
@@ -43,7 +42,7 @@ const Balances = ({ household }: { household: Household }) => {
               </CardDescription>
             </div>
             <RecordSettlementDialog
-              household={household}
+              currency={currency}
               members={balances.map(({ userId, name }) => ({ userId, name }))}
               trigger={
                 <Button

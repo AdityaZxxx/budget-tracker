@@ -29,26 +29,25 @@ export async function getHouseholdBalances() {
   const { session, household } = result;
   const callerId = session.user.id;
 
-  const memberships = await prisma.householdMembership.findMany({
-    where: {
-      householdId: household.id,
-    },
-    include: {
-      user: {
-        select: {
-          id: true,
-          name: true,
+  // The memberships, the shared expenses and the settlements do not depend
+  // on each other, so they are fetched together.
+  const [memberships, sharedExpenses, settlements] = await Promise.all([
+    prisma.householdMembership.findMany({
+      where: {
+        householdId: household.id,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+          },
         },
       },
-    },
-    orderBy: {
-      joinedAt: "asc",
-    },
-  });
-
-  const memberCount = memberships.length;
-
-  const [sharedExpenses, settlements] = await Promise.all([
+      orderBy: {
+        joinedAt: "asc",
+      },
+    }),
     prisma.transaction.findMany({
       where: {
         householdId: household.id,
@@ -74,6 +73,8 @@ export async function getHouseholdBalances() {
       },
     }),
   ]);
+
+  const memberCount = memberships.length;
 
   const memberIdByName = new Map(
     memberships.map((membership) => [membership.user.name, membership.user.id]),
