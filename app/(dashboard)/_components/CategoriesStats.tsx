@@ -1,6 +1,5 @@
 "use client";
 
-import { Household } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 
 import SkeletonWrapper from "@/components/SkeletonWrapper";
@@ -22,10 +21,10 @@ interface CategoriesCardProps {
 interface Props {
   from: Date;
   to: Date;
-  household: Household;
+  currency: string | null;
 }
 
-const CategoriesStats = ({ from, to, household }: Props) => {
+const CategoriesStats = ({ from, to, currency }: Props) => {
   const statsQuery = useQuery<GetCategoriesStatsResponseType>({
     queryKey: ["overview", "stats", "categories", from, to],
     queryFn: async () => {
@@ -43,7 +42,7 @@ const CategoriesStats = ({ from, to, household }: Props) => {
     refetchOnWindowFocus: true,
   });
 
-  const formatter = getFormatterForCurrency(household.currency ?? "USD");
+  const formatter = getFormatterForCurrency(currency ?? "USD");
 
   const stats = statsQuery.data || [];
   const incomeData = stats.filter((d) => d.type === "income");
