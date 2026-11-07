@@ -63,11 +63,13 @@ Naming the trap is the point. "Personal transactions were never counted in the h
 
 ## Verify before committing
 
-The working tree must pass the same checks CI runs. `.github/workflows/ci.yml` is the source of truth for which checks those are.
+The working tree must pass the same checks CI runs. `pnpm run verify` is the source of truth for which checks those are.
 
 The repo has no test suite, by decision (`docs/ROADMAP.md`). The build is the safety net.
 
 Lint and format are mechanical, and the tools own them: `oxlint` reports the rules, `oxfmt` decides the layout. Run `pnpm lint` and `pnpm fmt` before committing, and let the formatter rewrite the file rather than hand-tuning whitespace or import order.
+
+A pre-commit hook runs these on every commit: it formats the staged files, then runs `pnpm run verify`. The build stays in CI, because it is the slow one.
 
 A rule that fires on correct code gets fixed in the code, or, with a stated reason, in `.oxlintrc.json`. A one-off exception that the config cannot express may carry a scoped suppression comment, but only with the reason written next to it.
 
