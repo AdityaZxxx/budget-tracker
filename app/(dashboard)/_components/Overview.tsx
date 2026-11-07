@@ -1,6 +1,5 @@
 "use client";
 
-import { Household } from "@prisma/client";
 import { differenceInDays, startOfMonth } from "date-fns";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -11,7 +10,7 @@ import { MAX_DATE_RANGE } from "@/lib/constants";
 import CategoriesStats from "./CategoriesStats";
 import StatsCards from "./StatsCards";
 
-const Overview = ({ household }: { household: Household }) => {
+const Overview = ({ currency }: { currency: string | null }) => {
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>(() => ({
     from: startOfMonth(new Date()),
     to: new Date(),
@@ -41,13 +40,13 @@ const Overview = ({ household }: { household: Household }) => {
 
       <div className="container flex w-full flex-col gap-4">
         <StatsCards
-          household={household}
+          currency={currency}
           from={dateRange.from}
           to={dateRange.to}
         />
 
         <CategoriesStats
-          household={household}
+          currency={currency}
           from={dateRange.from}
           to={dateRange.to}
         />
