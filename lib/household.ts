@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
@@ -29,7 +31,10 @@ export async function getOrCreatePersonalHousehold(userId: string) {
   });
 }
 
-export async function requireHousehold() {
+// The dashboard page and the member count action both need the caller's
+// household. React caches this per render, so the household is resolved once
+// instead of twice.
+export const requireHousehold = cache(async () => {
   const session = await getSession();
   if (!session) {
     return null;
@@ -37,4 +42,4 @@ export async function requireHousehold() {
 
   const household = await getOrCreatePersonalHousehold(session.user.id);
   return { session, household };
-}
+});

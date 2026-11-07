@@ -1,6 +1,5 @@
 "use client";
 
-import { Household } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Plus, Trash2 } from "lucide-react";
@@ -26,8 +25,8 @@ import { listGoals } from "../_actions/goals";
 import CreateGoalDialog from "./CreateGoalDialog";
 import DeleteGoalDialog from "./DeleteGoalDialog";
 
-const Goals = ({ household }: { household: Household }) => {
-  const formatter = getFormatterForCurrency(household.currency ?? "USD");
+const Goals = ({ currency }: { currency: string | null }) => {
+  const formatter = getFormatterForCurrency(currency ?? "USD");
 
   const goalsQuery = useQuery({
     queryKey: ["goals"],
@@ -51,7 +50,7 @@ const Goals = ({ household }: { household: Household }) => {
               </CardDescription>
             </div>
             <CreateGoalDialog
-              household={household}
+              currency={currency}
               trigger={
                 <Button variant="outline" className="gap-2">
                   <Plus className="h-4 w-4" />
