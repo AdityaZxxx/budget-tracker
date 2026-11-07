@@ -11,7 +11,9 @@
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
     "typecheck": "tsc --noEmit",
-    "postinstall": "prisma generate"
+    "verify": "pnpm run lint && pnpm run fmt:check && pnpm run typecheck",
+    "postinstall": "prisma generate",
+    "prepare": "husky"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
@@ -56,6 +58,8 @@
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
     "oxfmt": "^0.76.0",
     "oxlint": "^1.91.0",
     "prisma": "^7.10.1",
