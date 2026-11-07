@@ -2,7 +2,7 @@
 
 import { differenceInDays } from "date-fns";
 import { CalendarIcon, ChevronDown, ChevronUp } from "lucide-react";
-import { type FC, JSX, useMemo, useState } from "react";
+import { type FC, JSX, useState } from "react";
 import { toast } from "sonner";
 
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -78,6 +78,32 @@ const PRESETS: Preset[] = [
   { name: "thisMonth", label: "This Month" },
   { name: "lastMonth", label: "Last Month" },
 ];
+
+/** Finds the preset that matches the current range, if any. */
+const getSelectedPreset = (range: DateRange): string | undefined => {
+  for (const preset of PRESETS) {
+    const presetRange = getPresetRange(preset.name);
+
+    const normalizedRangeFrom = new Date(range.from);
+    normalizedRangeFrom.setHours(0, 0, 0, 0);
+    const normalizedPresetFrom = new Date(presetRange.from);
+    normalizedPresetFrom.setHours(0, 0, 0, 0);
+
+    const normalizedRangeTo = new Date(range.to ?? 0);
+    normalizedRangeTo.setHours(0, 0, 0, 0);
+    const normalizedPresetTo = new Date(presetRange.to ?? 0);
+    normalizedPresetTo.setHours(0, 0, 0, 0);
+
+    if (
+      normalizedRangeFrom.getTime() === normalizedPresetFrom.getTime() &&
+      normalizedRangeTo.getTime() === normalizedPresetTo.getTime()
+    ) {
+      return preset.name;
+    }
+  }
+
+  return undefined;
+};
 
 const startOfToday = (): Date => {
   const date = new Date();
@@ -235,30 +261,7 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
 
   // The highlighted preset is derived from the current range, so it can never
   // drift out of sync with what the user actually selected.
-  const selectedPreset = useMemo<string | undefined>(() => {
-    for (const preset of PRESETS) {
-      const presetRange = getPresetRange(preset.name);
-
-      const normalizedRangeFrom = new Date(range.from);
-      normalizedRangeFrom.setHours(0, 0, 0, 0);
-      const normalizedPresetFrom = new Date(presetRange.from);
-      normalizedPresetFrom.setHours(0, 0, 0, 0);
-
-      const normalizedRangeTo = new Date(range.to ?? 0);
-      normalizedRangeTo.setHours(0, 0, 0, 0);
-      const normalizedPresetTo = new Date(presetRange.to ?? 0);
-      normalizedPresetTo.setHours(0, 0, 0, 0);
-
-      if (
-        normalizedRangeFrom.getTime() === normalizedPresetFrom.getTime() &&
-        normalizedRangeTo.getTime() === normalizedPresetTo.getTime()
-      ) {
-        return preset.name;
-      }
-    }
-
-    return undefined;
-  }, [range]);
+  const selectedPreset = getSelectedPreset(range);
 
   const sameDay = isSameDay(range.from, range.to);
 

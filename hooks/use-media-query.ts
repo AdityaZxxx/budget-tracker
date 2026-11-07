@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 
 const mediaQueryLists = new Map<string, MediaQueryList>();
 
@@ -17,19 +17,13 @@ function getMediaQueryList(query: string) {
 const getServerSnapshot = () => false;
 
 export function useMediaQuery(query: string) {
-  const subscribe = useCallback(
-    (onStoreChange: () => void) => {
-      const mediaQueryList = getMediaQueryList(query);
-      mediaQueryList.addEventListener("change", onStoreChange);
-      return () => mediaQueryList.removeEventListener("change", onStoreChange);
-    },
-    [query],
-  );
+  const subscribe = (onStoreChange: () => void) => {
+    const mediaQueryList = getMediaQueryList(query);
+    mediaQueryList.addEventListener("change", onStoreChange);
+    return () => mediaQueryList.removeEventListener("change", onStoreChange);
+  };
 
-  const getSnapshot = useCallback(
-    () => getMediaQueryList(query).matches,
-    [query],
-  );
+  const getSnapshot = () => getMediaQueryList(query).matches;
 
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }

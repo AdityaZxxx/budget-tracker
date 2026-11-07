@@ -3,7 +3,7 @@
 import { Category, Household } from "@prisma/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { ReactElement, ReactNode, useMemo, useState } from "react";
+import { ReactElement, ReactNode, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { toast } from "sonner";
 
@@ -85,18 +85,11 @@ const BudgetDialog = ({
 
   const currency = Currencies.find((c) => c.value === household?.currency);
 
-  const { thousandSeparator, decimalSeparator } = useMemo(() => {
-    const formatter = new Intl.NumberFormat(currency?.locale, {
-      style: "decimal",
-    });
-    const parts = formatter.formatToParts(1234.5);
-    const ts = parts.find((p) => p.type === "group")?.value;
-    const ds = parts.find((p) => p.type === "decimal")?.value;
-    return {
-      thousandSeparator: ts,
-      decimalSeparator: ds,
-    };
-  }, [currency]);
+  const numberParts = new Intl.NumberFormat(currency?.locale, {
+    style: "decimal",
+  }).formatToParts(1234.5);
+  const thousandSeparator = numberParts.find((p) => p.type === "group")?.value;
+  const decimalSeparator = numberParts.find((p) => p.type === "decimal")?.value;
 
   const { mutate, isPending } = useMutation({
     mutationFn: (values: {
