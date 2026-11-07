@@ -1,6 +1,0 @@
-# The same person committed under three names over the project's life:
-# "adxxya30" before the GitHub username changed, "adityazxxx" from local
-# commits, and "Aditya Rahmad" because GitHub stamps squash merges with the
-# account's public display name. Collapse them so git shows one identity.
-adityazxxx <adityaofficial714@gmail.com> adxxya30 <adityaofficial714@gmail.com>
-adityazxxx <adityaofficial714@gmail.com> Aditya Rahmad <106899341+AdityaZxxx@users.noreply.github.com>
