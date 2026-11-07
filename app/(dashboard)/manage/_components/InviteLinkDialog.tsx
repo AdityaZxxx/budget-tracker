@@ -3,7 +3,7 @@
 import { InviteLink } from "@prisma/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Copy, Loader2, PlusSquare, TrashIcon } from "lucide-react";
-import { QRCodeSVG } from "qrcode.react";
+import dynamic from "next/dynamic";
 import { ReactElement, ReactNode, useState } from "react";
 import { toast } from "sonner";
 
@@ -30,6 +30,13 @@ import {
   listInviteLinks,
   revokeInviteLink,
 } from "../_actions/invite";
+
+// The QR code is behind an explicit toggle, so it only downloads when the
+// household turns QR codes on.
+const QRCodeSVG = dynamic(
+  () => import("qrcode.react").then((mod) => mod.QRCodeSVG),
+  { ssr: false },
+);
 
 interface Props {
   trigger?: ReactNode;

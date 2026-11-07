@@ -1,10 +1,9 @@
-import data from "@emoji-mart/data";
-import Picker from "@emoji-mart/react";
 import { Category } from "@prisma/client";
 import { useForm } from "@tanstack/react-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CircleOff, Loader2, PlusSquare } from "lucide-react";
 import { useTheme } from "next-themes";
+import dynamic from "next/dynamic";
 import { ReactElement, ReactNode, useState } from "react";
 import { toast } from "sonner";
 
@@ -35,6 +34,8 @@ import { cn } from "@/lib/utils";
 import { CreateCategorySchema } from "@/schemas/categories";
 
 import { CreateCategory } from "../_actions/categories";
+
+const EmojiPicker = dynamic(() => import("./EmojiPicker"), { ssr: false });
 
 interface Props {
   type: TransactionType;
@@ -201,8 +202,7 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
                       )}
                     </PopoverTrigger>
                     <PopoverContent className="w-full">
-                      <Picker
-                        data={data}
+                      <EmojiPicker
                         theme={theme.resolvedTheme}
                         onEmojiSelect={(emoji: { native: string }) => {
                           field.handleChange(emoji.native);

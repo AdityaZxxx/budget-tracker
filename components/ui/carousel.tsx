@@ -73,21 +73,18 @@ function Carousel({
   // it into React state.
   const scrollStateRef = React.useRef<ScrollState>(INITIAL_SCROLL_STATE);
 
-  const subscribe = React.useCallback(
-    (onStoreChange: () => void) => {
-      if (!api) return () => {};
-      api.on("select", onStoreChange);
-      api.on("reInit", onStoreChange);
+  const subscribe = (onStoreChange: () => void) => {
+    if (!api) return () => {};
+    api.on("select", onStoreChange);
+    api.on("reInit", onStoreChange);
 
-      return () => {
-        api.off("select", onStoreChange);
-        api.off("reInit", onStoreChange);
-      };
-    },
-    [api],
-  );
+    return () => {
+      api.off("select", onStoreChange);
+      api.off("reInit", onStoreChange);
+    };
+  };
 
-  const getSnapshot = React.useCallback(() => {
+  const getSnapshot = () => {
     if (!api) return scrollStateRef.current;
 
     const canScrollPrev = api.canScrollPrev();
@@ -102,7 +99,7 @@ function Carousel({
     }
 
     return scrollStateRef.current;
-  }, [api]);
+  };
 
   const { canScrollPrev, canScrollNext } = React.useSyncExternalStore(
     subscribe,
@@ -110,50 +107,35 @@ function Carousel({
     () => INITIAL_SCROLL_STATE,
   );
 
-  const scrollPrev = React.useCallback(() => {
+  const scrollPrev = () => {
     api?.scrollPrev();
-  }, [api]);
+  };
 
-  const scrollNext = React.useCallback(() => {
+  const scrollNext = () => {
     api?.scrollNext();
-  }, [api]);
+  };
 
-  const handleKeyDown = React.useCallback(
-    (event: React.KeyboardEvent<HTMLDivElement>) => {
-      if (event.key === "ArrowLeft") {
-        event.preventDefault();
-        scrollPrev();
-      } else if (event.key === "ArrowRight") {
-        event.preventDefault();
-        scrollNext();
-      }
-    },
-    [scrollPrev, scrollNext],
-  );
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      scrollPrev();
+    } else if (event.key === "ArrowRight") {
+      event.preventDefault();
+      scrollNext();
+    }
+  };
 
-  const contextValue = React.useMemo(
-    () => ({
-      carouselRef,
-      api,
-      opts,
-      orientation:
-        orientation || (opts?.axis === "y" ? "vertical" : "horizontal"),
-      scrollPrev,
-      scrollNext,
-      canScrollPrev,
-      canScrollNext,
-    }),
-    [
-      carouselRef,
-      api,
-      opts,
-      orientation,
-      scrollPrev,
-      scrollNext,
-      canScrollPrev,
-      canScrollNext,
-    ],
-  );
+  const contextValue = {
+    carouselRef,
+    api,
+    opts,
+    orientation:
+      orientation || (opts?.axis === "y" ? "vertical" : "horizontal"),
+    scrollPrev,
+    scrollNext,
+    canScrollPrev,
+    canScrollNext,
+  };
 
   return (
     <CarouselContext.Provider value={contextValue}>

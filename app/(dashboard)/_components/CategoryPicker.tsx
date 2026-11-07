@@ -3,7 +3,7 @@
 import { Category } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { useCallback, useEffect, useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -54,13 +54,10 @@ const CategoryPicker = ({ type, onChange, id, ...ariaProps }: Props) => {
     (category: Category) => category.name === value,
   );
 
-  const SuccessCallback = useCallback(
-    (category: Category) => {
-      setValue(category.name);
-      setOpen((prev) => !prev);
-    },
-    [setValue, setOpen],
-  );
+  const SuccessCallback = (category: Category) => {
+    setValue(category.name);
+    setOpen((prev) => !prev);
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
