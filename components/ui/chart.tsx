@@ -48,7 +48,7 @@ function ChartContainer({
 }) {
   const uniqueId = React.useId();
   const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`;
-  const contextValue = React.useMemo(() => ({ config }), [config]);
+  const contextValue = { config };
 
   return (
     <ChartContext.Provider value={contextValue}>
@@ -134,41 +134,15 @@ function ChartTooltipContent({
   }) {
   const { config } = useChart();
 
-  const tooltipLabel = React.useMemo(() => {
-    if (hideLabel || !payload?.length) {
-      return null;
-    }
-
-    const [item] = payload;
-    const key = `${labelKey || item?.dataKey || item?.name || "value"}`;
-    const itemConfig = getPayloadConfigFromPayload(config, item, key);
-    const value =
-      !labelKey && typeof label === "string"
-        ? config[label as keyof typeof config]?.label || label
-        : itemConfig?.label;
-
-    if (labelFormatter) {
-      return (
-        <div className={cn("font-medium", labelClassName)}>
-          {labelFormatter(value, payload)}
-        </div>
-      );
-    }
-
-    if (!value) {
-      return null;
-    }
-
-    return <div className={cn("font-medium", labelClassName)}>{value}</div>;
-  }, [
-    label,
-    labelFormatter,
-    payload,
-    hideLabel,
-    labelClassName,
+  const tooltipLabel = getTooltipLabel({
     config,
+    hideLabel,
+    label,
+    labelClassName,
+    labelFormatter,
     labelKey,
-  ]);
+    payload,
+  });
 
   if (!active || !payload?.length) {
     return null;
@@ -309,6 +283,54 @@ function ChartLegendContent({
       })}
     </div>
   );
+}
+
+// Builds the tooltip's label node from the tooltip payload.
+function getTooltipLabel({
+  config,
+  hideLabel,
+  label,
+  labelClassName,
+  labelFormatter,
+  labelKey,
+  payload,
+}: {
+  config: ChartConfig;
+  hideLabel: boolean;
+  label?: any;
+  labelClassName?: string;
+  labelFormatter?: (
+    label: React.ReactNode,
+    payload: ReadonlyArray<any>,
+  ) => React.ReactNode;
+  labelKey?: string;
+  payload?: any[];
+}) {
+  if (hideLabel || !payload?.length) {
+    return null;
+  }
+
+  const [item] = payload;
+  const key = `${labelKey || item?.dataKey || item?.name || "value"}`;
+  const itemConfig = getPayloadConfigFromPayload(config, item, key);
+  const value =
+    !labelKey && typeof label === "string"
+      ? config[label as keyof typeof config]?.label || label
+      : itemConfig?.label;
+
+  if (labelFormatter) {
+    return (
+      <div className={cn("font-medium", labelClassName)}>
+        {labelFormatter(value, payload)}
+      </div>
+    );
+  }
+
+  if (!value) {
+    return null;
+  }
+
+  return <div className={cn("font-medium", labelClassName)}>{value}</div>;
 }
 
 // Helper to extract item config from a payload.

@@ -42,6 +42,12 @@
       { "allow": ["**/*.css", "dotenv/config"] }
     ],
 
+    // The rule wants the context value wrapped in useMemo so it keeps a
+    // stable identity across renders. The React Compiler does that itself,
+    // and it allocates a cache slot for every context value in the repo.
+    // Keeping the manual memo would duplicate the compiler's own cache.
+    "react/jsx-no-constructed-context-values": "off",
+
     // The rule asks for Object.assign, which mutates the source row. These
     // arrays are server-owned and their consumers expect immutable objects.
     "oxc/no-map-spread": "off",

@@ -1,27 +1,25 @@
 "use client";
 
+import type { HistoryChartRow } from "./HistoryChart";
+
 import { Household } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useMemo, useState } from "react";
-import CountUp from "react-countup";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import dynamic from "next/dynamic";
+import { useState } from "react";
 
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getFormatterForCurrency } from "@/lib/helpers";
 import { Period, Timeframe } from "@/lib/types";
-import { cn } from "@/lib/utils";
 
 import HistoryPeriodSelector from "./HistoryPeriodSelector";
+
+const HistoryChart = dynamic(() => import("./HistoryChart"), {
+  ssr: false,
+  loading: () => <Skeleton className="h-[300px] w-full" />,
+});
 
 const History = ({ household }: { household: Household }) => {
   const [timeframe, setTimeframe] = useState<Timeframe>("month");
@@ -33,9 +31,7 @@ const History = ({ household }: { household: Household }) => {
     };
   });
 
-  const formatter = useMemo(() => {
-    return getFormatterForCurrency(household.currency ?? "USD");
-  }, [household.currency]);
+  const formatter = getFormatterForCurrency(household.currency ?? "USD");
 
   const historyDataQuery = useQuery({
     queryKey: ["overview", "history", timeframe, period],
@@ -91,67 +87,11 @@ const History = ({ household }: { household: Household }) => {
         <CardContent>
           <SkeletonWrapper isLoading={historyDataQuery.isLoading}>
             {dataAvailable ? (
-              <ResponsiveContainer width={"100%"} height={300}>
-                <BarChart data={historyDataQuery.data} barCategoryGap={5}>
-                  <defs>
-                    <linearGradient id="incomeBar" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0" stopColor="#059669" stopOpacity="1" />
-                      <stop offset="1" stopColor="#059669" stopOpacity="0.4" />
-                    </linearGradient>
-                    <linearGradient id="expenseBar" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0" stopColor="#dc2626" stopOpacity="1" />
-                      <stop offset="1" stopColor="#dc2626" stopOpacity="0.4" />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid
-                    strokeDasharray="5 5"
-                    strokeOpacity={"0.2"}
-                    vertical={false}
-                  />
-                  <XAxis
-                    stroke="#888888"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                    padding={{ left: 5, right: 5 }}
-                    dataKey={(data) => {
-                      const { year, month, day } = data;
-                      const date = new Date(year, month, day || 1);
-                      if (timeframe === "year") {
-                        return date.toLocaleDateString("default", {
-                          month: "long",
-                        });
-                      }
-                      return date.toLocaleDateString("default", {
-                        day: "2-digit",
-                      });
-                    }}
-                  />
-                  <YAxis
-                    stroke="#888888"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                    tickFormatter={(value) => formatter.format(value)}
-                  />
-                  <Tooltip
-                    cursor={{ opacity: 0.1 }}
-                    content={<CustomTooltip formatter={formatter} />}
-                  />
-                  <Bar
-                    dataKey={"income"}
-                    fill="url(#incomeBar)"
-                    radius={4}
-                    className="cursor-pointer"
-                  />
-                  <Bar
-                    dataKey={"expense"}
-                    fill="url(#expenseBar)"
-                    radius={4}
-                    className="cursor-pointer"
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+              <HistoryChart
+                data={historyDataQuery.data as HistoryChartRow[]}
+                timeframe={timeframe}
+                formatter={formatter}
+              />
             ) : (
               <Card className="flex h-[300px] flex-col items-center justify-center bg-background">
                 No data for this period
@@ -168,75 +108,3 @@ const History = ({ household }: { household: Household }) => {
 };
 
 export default History;
-
-function CustomTooltip({ active, payload, formatter }: any) {
-  if (!active || !payload || payload.length === 0) return null;
-  const data = payload[0].payload;
-  const { expense, income } = data;
-  return (
-    <div className="w-[300px] max-w-[calc(100vw-2rem)] rounded-md border bg-background p-4">
-      <TooltipRow
-        formatter={formatter}
-        label="Expense"
-        value={expense}
-        bgColor="bg-red-600 dark:bg-red-500"
-        textColor="text-red-600 dark:text-red-400"
-      />
-
-      <TooltipRow
-        formatter={formatter}
-        label="Income"
-        value={income}
-        bgColor="bg-emerald-600 dark:bg-emerald-500"
-        textColor="text-emerald-700 dark:text-emerald-400"
-      />
-
-      <TooltipRow
-        formatter={formatter}
-        label="Balance"
-        value={income - expense}
-        bgColor="bg-gray-500"
-        textColor="text-foreground"
-      />
-    </div>
-  );
-}
-
-function TooltipRow({
-  label,
-  value,
-  bgColor,
-  textColor,
-  formatter,
-}: {
-  label: string;
-  value: number;
-  bgColor: string;
-  textColor: string;
-  formatter: Intl.NumberFormat;
-}) {
-  const formattingFn = useCallback(
-    (amount: number) => {
-      return formatter.format(amount);
-    },
-    [formatter],
-  );
-  return (
-    <div className="flex items-center gap-2">
-      <div className={cn("h-4 w-4 rounded-full", bgColor)} />
-      <div className="flex w-full justify-between">
-        <p className="text-sm font-bold">{label}</p>
-        <div className={cn("text-sm font-bold tabular-nums", textColor)}>
-          <CountUp
-            duration={0.5}
-            preserveValue
-            end={value}
-            decimals={0}
-            className="text-sm tabular-nums"
-            formattingFn={formattingFn}
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
