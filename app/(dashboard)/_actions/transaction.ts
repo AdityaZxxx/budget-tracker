@@ -6,7 +6,7 @@ import { after } from "next/server";
 import { getMonthSpentByCategory } from "@/lib/budgets";
 import { getFormatterForCurrency } from "@/lib/helpers";
 import { assertFullMember, requireHousehold } from "@/lib/household";
-import { notifyHouseholdExcept } from "@/lib/notifications";
+import { notifyHouseholdExcept, notifyMembers } from "@/lib/notifications";
 import prisma from "@/lib/prisma";
 import {
   CreateTransactionSchema,
@@ -245,5 +245,42 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
         message,
       ),
     );
+  }
+
+  // A contribution that crosses the goal's target is news for everyone,
+  // including the contributor. The aggregate below already includes this
+  // transaction, so "before" is derived by subtracting its amount back out;
+  // the goal only announces the crossing, never a total already past target.
+  if (goal) {
+    after(async () => {
+      const contributed = await prisma.transaction.aggregate({
+        where: {
+          householdId: household.id,
+          goalId: goal.id,
+        },
+        _sum: {
+          amount: true,
+        },
+      });
+      const total = contributed._sum.amount ?? 0;
+      if (total < goal.target || total - amount >= goal.target) {
+        return;
+      }
+
+      const members = await prisma.householdMembership.findMany({
+        where: {
+          householdId: household.id,
+        },
+        select: {
+          userId: true,
+        },
+      });
+      await notifyMembers(
+        household.id,
+        members.map((member) => member.userId),
+        "goal_reached",
+        `${goal.name} reached its target: ${formatAmount(total)} of ${formatAmount(goal.target)}.`,
+      );
+    });
   }
 }
