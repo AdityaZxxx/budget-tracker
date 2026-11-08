@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 
 import { SETTLEMENT_CATEGORY_NAME } from "@/lib/constants";
-import { requireHousehold } from "@/lib/household";
+import { assertFullMember, requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 import {
   CreateCategorySchema,
@@ -24,6 +24,7 @@ export async function CreateCategory(form: CreateCategorySchemaType) {
   if (!result) {
     redirect("/sign-in");
   }
+  assertFullMember(result);
 
   const { household } = result;
 
@@ -48,6 +49,7 @@ export async function UpdateCategory(form: UpdateCategorySchemaType) {
   if (!result) {
     redirect("/sign-in");
   }
+  assertFullMember(result);
 
   const { household } = result;
   const { originalName, name, icon, type } = parsedBody.data;
@@ -118,6 +120,7 @@ export async function DeleteCategory(form: DeleteCategorySchemaType) {
   if (!result) {
     redirect("/sign-in");
   }
+  assertFullMember(result);
 
   const { household } = result;
 

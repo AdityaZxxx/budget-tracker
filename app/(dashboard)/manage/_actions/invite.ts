@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 
-import { requireHousehold } from "@/lib/household";
+import { assertFullMember, requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 import {
   RevokeInviteLinkSchema,
@@ -14,6 +14,7 @@ export async function createInviteLink() {
   if (!result) {
     redirect("/sign-in");
   }
+  assertFullMember(result);
 
   const { session, household } = result;
 
@@ -36,6 +37,7 @@ export async function revokeInviteLink(form: RevokeInviteLinkSchemaType) {
   if (!result) {
     redirect("/sign-in");
   }
+  assertFullMember(result);
 
   const { household } = result;
 

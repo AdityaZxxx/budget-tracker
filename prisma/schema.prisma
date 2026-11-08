@@ -30,10 +30,12 @@ model User {
   addedTransactions Transaction[]
   createdInviteLinks InviteLink[]
   notifications     Notification[]
+  transactionShares TransactionShare[]
 }
 
 model Household {
   id        String   @id @default(uuid())
+  name      String?
   currency  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -57,6 +59,7 @@ model HouseholdMembership {
   joinedAt    DateTime  @default(now())
   // Opt-in to the daily email digest of unread household notifications.
   emailDigest Boolean   @default(false)
+  role        String    @default("member")
 
   @@id([householdId, userId])
 }
@@ -154,6 +157,18 @@ model Transaction {
   // normal transactions, so they still count toward spending stats.
   goalId String?
   goal   Goal?   @relation(fields: [goalId], references: [id], onDelete: SetNull)
+
+  shares TransactionShare[]
+}
+
+model TransactionShare {
+  transactionId String
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount        Float
+
+  @@id([transactionId, userId])
 }
 
 model Goal {

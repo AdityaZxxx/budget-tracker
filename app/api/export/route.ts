@@ -19,6 +19,7 @@ export async function GET() {
     inviteLinks,
     budgets,
     notifications,
+    transactionShares,
   ] = await Promise.all([
     prisma.householdMembership.findMany({
       where: { householdId: household.id },
@@ -70,6 +71,10 @@ export async function GET() {
       where: { householdId: household.id, userId: session.user.id },
       orderBy: { createdAt: "desc" },
     }),
+    prisma.transactionShare.findMany({
+      where: { transaction: { householdId: household.id } },
+      orderBy: { transactionId: "asc" },
+    }),
   ]);
 
   const payload = {
@@ -92,6 +97,7 @@ export async function GET() {
     budgets,
     notifications,
     inviteLinks,
+    transactionShares,
   };
 
   return new Response(JSON.stringify(payload, null, 2), {

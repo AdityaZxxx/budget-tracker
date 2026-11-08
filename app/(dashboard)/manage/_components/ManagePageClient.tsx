@@ -38,6 +38,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useCallerRole } from "@/hooks/use-members";
 import { TransactionType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -50,6 +51,8 @@ import InviteLinkDialog from "./InviteLinkDialog";
 import MembersSection from "./MembersSection";
 
 const ManagePageClient = () => {
+  const { canEdit } = useCallerRole();
+
   return (
     <div className="min-h-screen bg-background px-6">
       <header className="border-b bg-card py-8">
@@ -65,27 +68,29 @@ const ManagePageClient = () => {
 
       <div className="container py-8">
         <div className="space-y-8">
-          <section>
-            <Card className="transition-all hover:shadow-md">
-              <CardHeader>
-                <CardTitle className="text-xl">Invite link</CardTitle>
-                <CardDescription>
-                  Share a revocable link or QR code to add another member to
-                  your household
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <InviteLinkDialog
-                  trigger={
-                    <Button className="gap-2">
-                      <Link2 className="h-4 w-4" />
-                      Manage invite link
-                    </Button>
-                  }
-                />
-              </CardContent>
-            </Card>
-          </section>
+          {canEdit && (
+            <section>
+              <Card className="transition-all hover:shadow-md">
+                <CardHeader>
+                  <CardTitle className="text-xl">Invite link</CardTitle>
+                  <CardDescription>
+                    Share a revocable link or QR code to add another member to
+                    your household
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <InviteLinkDialog
+                    trigger={
+                      <Button className="gap-2">
+                        <Link2 className="h-4 w-4" />
+                        Manage invite link
+                      </Button>
+                    }
+                  />
+                </CardContent>
+              </Card>
+            </section>
+          )}
 
           <MembersSection />
 
@@ -110,12 +115,12 @@ const ManagePageClient = () => {
               Transaction categories
             </h2>
             <div className="grid gap-6 md:grid-cols-2">
-              <CategoryList type="income" />
-              <CategoryList type="expense" />
+              <CategoryList type="income" canEdit={canEdit} />
+              <CategoryList type="expense" canEdit={canEdit} />
             </div>
           </section>
 
-          <BudgetsSection />
+          <BudgetsSection canEdit={canEdit} />
 
           <AccountSection />
         </div>
@@ -126,7 +131,13 @@ const ManagePageClient = () => {
 
 export default ManagePageClient;
 
-function CategoryList({ type }: { type: TransactionType }) {
+function CategoryList({
+  type,
+  canEdit,
+}: {
+  type: TransactionType;
+  canEdit: boolean;
+}) {
   const {
     data: categories = [],
     isLoading,
@@ -183,27 +194,29 @@ function CategoryList({ type }: { type: TransactionType }) {
                 </CardDescription>
               </div>
             </div>
-            <Tooltip>
-              <CreateCategoryDialog
-                type={type}
-                successCallback={() => refetch()}
-                trigger={
-                  <TooltipTrigger
-                    render={
-                      <Button
-                        size="sm"
-                        className="gap-2"
-                        aria-label={`Create ${type} category`}
-                      />
-                    }
-                  >
-                    <PlusSquare className="h-4 w-4" />
-                    <span className="sr-only md:not-sr-only">Create</span>
-                  </TooltipTrigger>
-                }
-              />
-              <TooltipContent>Create {type} category</TooltipContent>
-            </Tooltip>
+            {canEdit && (
+              <Tooltip>
+                <CreateCategoryDialog
+                  type={type}
+                  successCallback={() => refetch()}
+                  trigger={
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          size="sm"
+                          className="gap-2"
+                          aria-label={`Create ${type} category`}
+                        />
+                      }
+                    >
+                      <PlusSquare className="h-4 w-4" />
+                      <span className="sr-only md:not-sr-only">Create</span>
+                    </TooltipTrigger>
+                  }
+                />
+                <TooltipContent>Create {type} category</TooltipContent>
+              </Tooltip>
+            )}
           </div>
         </CardHeader>
 
@@ -217,7 +230,11 @@ function CategoryList({ type }: { type: TransactionType }) {
           ) : (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
               {categories.map((category) => (
-                <CategoryCard key={category.name} category={category} />
+                <CategoryCard
+                  key={category.name}
+                  category={category}
+                  canEdit={canEdit}
+                />
               ))}
             </div>
           )}
@@ -287,7 +304,13 @@ function ErrorState({
   );
 }
 
-function CategoryCard({ category }: { category: Category }) {
+function CategoryCard({
+  category,
+  canEdit,
+}: {
+  category: Category;
+  canEdit: boolean;
+}) {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
@@ -301,58 +324,64 @@ function CategoryCard({ category }: { category: Category }) {
           <span className="truncate font-medium">{category.name}</span>
         </div>
 
-        <Tooltip>
-          <DropdownMenu>
-            <TooltipTrigger
-              render={
-                <DropdownMenuTrigger
-                  render={
-                    <Button
-                      variant="ghost"
-                      className="h-8 w-8 p-0 text-muted-foreground opacity-100 hover:bg-muted md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100"
-                      aria-label={`Open actions for ${category.name} category`}
-                    />
-                  }
-                />
-              }
-            >
-              <span className="sr-only">Open actions</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </TooltipTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuGroup>
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              </DropdownMenuGroup>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="flex items-center gap-2"
-                onClick={() => setEditOpen(true)}
+        {canEdit && (
+          <Tooltip>
+            <DropdownMenu>
+              <TooltipTrigger
+                render={
+                  <DropdownMenuTrigger
+                    render={
+                      <Button
+                        variant="ghost"
+                        className="h-8 w-8 p-0 text-muted-foreground opacity-100 hover:bg-muted md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100"
+                        aria-label={`Open actions for ${category.name} category`}
+                      />
+                    }
+                  />
+                }
               >
-                <Pencil className="h-4 w-4 text-muted-foreground" />
-                Edit
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="flex items-center gap-2"
-                onClick={() => setDeleteOpen(true)}
-              >
-                <TrashIcon className="h-4 w-4 text-muted-foreground" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <TooltipContent>Actions</TooltipContent>
-        </Tooltip>
+                <span className="sr-only">Open actions</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </TooltipTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="flex items-center gap-2"
+                  onClick={() => setEditOpen(true)}
+                >
+                  <Pencil className="h-4 w-4 text-muted-foreground" />
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="flex items-center gap-2"
+                  onClick={() => setDeleteOpen(true)}
+                >
+                  <TrashIcon className="h-4 w-4 text-muted-foreground" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <TooltipContent>Actions</TooltipContent>
+          </Tooltip>
+        )}
       </div>
-      <EditCategoryDialog
-        category={category}
-        open={editOpen}
-        onOpenChange={setEditOpen}
-      />
-      <DeleteCategoryDialog
-        category={category}
-        open={deleteOpen}
-        onOpenChange={setDeleteOpen}
-      />
+      {canEdit && (
+        <>
+          <EditCategoryDialog
+            category={category}
+            open={editOpen}
+            onOpenChange={setEditOpen}
+          />
+          <DeleteCategoryDialog
+            category={category}
+            open={deleteOpen}
+            onOpenChange={setDeleteOpen}
+          />
+        </>
+      )}
     </>
   );
 }

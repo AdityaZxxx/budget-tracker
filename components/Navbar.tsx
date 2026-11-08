@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { cn } from "../lib/utils";
+import HouseholdSwitcher from "./HouseholdSwitcher";
 import Logo from "./Logo";
 import NotificationBell from "./NotificationBell";
 import { ThemeSwitcherBtn } from "./ThemeSwitcherBtn";
@@ -36,6 +37,7 @@ export default function Navbar() {
           <NotificationBell />
 
           <div className="hidden md:flex md:items-center md:gap-x-2">
+            <HouseholdSwitcher />
             <NavbarActions />
           </div>
 
@@ -85,6 +87,9 @@ function MobileMenu() {
             <Logo />
           </div>
           <div className="flex flex-col gap-1 pt-4">
+            <div className="px-2 pb-2">
+              <HouseholdSwitcher />
+            </div>
             {items.map((item) => (
               <NavbarItem
                 key={item.label}
