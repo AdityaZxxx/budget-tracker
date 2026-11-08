@@ -16,27 +16,18 @@ import {
   RecordSettlementSchemaType,
 } from "@/schemas/settlement";
 
-// balance is the net amount the caller owes the other member: the caller's
-// shares of shared expenses added by the other member, minus the other
-// member's shares of shared expenses added by the caller, minus settlements
-// the caller paid to them plus settlements they paid to the caller. A shared
-// expense without share rows splits evenly across the members.
-export async function getHouseholdBalances() {
-  const result = await requireHousehold();
-  if (!result) {
-    redirect("/sign-in");
-  }
-
-  const { session, household } = result;
-  const callerId = session.user.id;
-
+// Everything the balance math reads from one Household: the Members, the
+// shared expenses, the settlements recorded as personal transactions, and
+// the stored split shares. Pairwise balances and the simplified debts view
+// consume the same inputs.
+async function loadBalanceInputs(householdId: string) {
   // The memberships, the shared expenses, the settlements and the shares do
   // not depend on each other, so they are fetched together.
   const [memberships, sharedExpenses, settlements, expenseShares] =
     await Promise.all([
       prisma.householdMembership.findMany({
         where: {
-          householdId: household.id,
+          householdId,
         },
         include: {
           user: {
@@ -52,7 +43,7 @@ export async function getHouseholdBalances() {
       }),
       prisma.transaction.findMany({
         where: {
-          householdId: household.id,
+          householdId,
           shared: true,
           type: "expense",
         },
@@ -64,7 +55,7 @@ export async function getHouseholdBalances() {
       }),
       prisma.transaction.findMany({
         where: {
-          householdId: household.id,
+          householdId,
           shared: false,
           type: "expense",
           category: SETTLEMENT_CATEGORY_NAME,
@@ -78,7 +69,7 @@ export async function getHouseholdBalances() {
       prisma.transactionShare.findMany({
         where: {
           transaction: {
-            householdId: household.id,
+            householdId,
             shared: true,
             type: "expense",
           },
@@ -90,12 +81,6 @@ export async function getHouseholdBalances() {
         },
       }),
     ]);
-
-  const memberCount = memberships.length;
-
-  const memberIdByName = new Map(
-    memberships.map((membership) => [membership.user.name, membership.user.id]),
-  );
 
   const sharesByTransactionId = new Map<
     string,
@@ -112,6 +97,75 @@ export async function getHouseholdBalances() {
     }
   }
 
+  return {
+    memberships,
+    sharedExpenses,
+    settlements,
+    sharesByTransactionId,
+  };
+}
+
+// The amount each Member owes toward one shared expense: stored shares when
+// present, otherwise an even split. A Member missing from stored shares owes
+// nothing for that expense.
+function sharesOwedForExpense(
+  expense: { transactionId: string; amount: number },
+  memberships: { user: { id: string } }[],
+  sharesByTransactionId: Map<string, { userId: string; amount: number }[]>,
+  memberCount: number,
+) {
+  const owed = new Map<string, number>();
+  const shares = sharesByTransactionId.get(expense.transactionId);
+  if (shares) {
+    for (const share of shares) {
+      owed.set(share.userId, share.amount);
+    }
+    return owed;
+  }
+
+  const even = expense.amount / memberCount;
+  for (const membership of memberships) {
+    owed.set(membership.user.id, even);
+  }
+  return owed;
+}
+
+// Settlements carry the payee's name in the description, so the payee is
+// resolved through the member list; rows that no longer resolve are ignored.
+function settlementPayeeId(
+  description: string,
+  memberIdByName: Map<string, string>,
+) {
+  return description.startsWith(SETTLEMENT_DESCRIPTION_PREFIX)
+    ? memberIdByName.get(
+        description.slice(SETTLEMENT_DESCRIPTION_PREFIX.length),
+      )
+    : undefined;
+}
+
+// balance is the net amount the caller owes the other member: the caller's
+// shares of shared expenses added by the other member, minus the other
+// member's shares of shared expenses added by the caller, minus settlements
+// the caller paid to them plus settlements they paid to the caller. A shared
+// expense without share rows splits evenly across the members.
+export async function getHouseholdBalances() {
+  const result = await requireHousehold();
+  if (!result) {
+    redirect("/sign-in");
+  }
+
+  const { session, household } = result;
+  const callerId = session.user.id;
+
+  const { memberships, sharedExpenses, settlements, sharesByTransactionId } =
+    await loadBalanceInputs(household.id);
+
+  const memberCount = memberships.length;
+
+  const memberIdByName = new Map(
+    memberships.map((membership) => [membership.user.name, membership.user.id]),
+  );
+
   return memberships
     .filter((membership) => membership.user.id !== callerId)
     .map((membership) => {
@@ -119,37 +173,27 @@ export async function getHouseholdBalances() {
       let balance = 0;
 
       for (const expense of sharedExpenses) {
-        const shares = sharesByTransactionId.get(expense.transactionId);
-        if (shares) {
-          // Explicit shares win over the even split. A member missing from
-          // the share rows owes nothing for this expense.
-          const callerShare =
-            shares.find((share) => share.userId === callerId)?.amount ?? 0;
-          const otherShare =
-            shares.find((share) => share.userId === otherId)?.amount ?? 0;
+        const owed = sharesOwedForExpense(
+          expense,
+          memberships,
+          sharesByTransactionId,
+          memberCount,
+        );
+        const callerShare = owed.get(callerId) ?? 0;
+        const otherShare = owed.get(otherId) ?? 0;
 
-          if (expense.addedById === otherId) {
-            balance += callerShare;
-          } else if (expense.addedById === callerId) {
-            balance -= otherShare;
-          }
-        } else if (expense.addedById === otherId) {
-          balance += expense.amount / memberCount;
+        if (expense.addedById === otherId) {
+          balance += callerShare;
         } else if (expense.addedById === callerId) {
-          balance -= expense.amount / memberCount;
+          balance -= otherShare;
         }
       }
 
       for (const settlement of settlements) {
-        const payeeId = settlement.description.startsWith(
-          SETTLEMENT_DESCRIPTION_PREFIX,
-        )
-          ? memberIdByName.get(
-              settlement.description.slice(
-                SETTLEMENT_DESCRIPTION_PREFIX.length,
-              ),
-            )
-          : undefined;
+        const payeeId = settlementPayeeId(
+          settlement.description,
+          memberIdByName,
+        );
         if (!payeeId) continue;
 
         if (settlement.addedById === callerId && payeeId === otherId) {
@@ -170,6 +214,119 @@ export async function getHouseholdBalances() {
 export type HouseholdBalance = Awaited<
   ReturnType<typeof getHouseholdBalances>
 >[number];
+
+export type SimplifiedTransfer = {
+  fromUserId: string;
+  fromName: string;
+  toUserId: string;
+  toName: string;
+  amount: number;
+};
+
+// The fewest transfers that zero every Balance: each Member's net position
+// across all shared expenses and settlements, settled by greedily pairing
+// the largest creditor with the largest debtor. Every transfer zeroes one
+// side completely, so N members settle in at most N-1 transfers. Sub-cent
+// dust is dropped; the pairwise view keeps full precision. This is a
+// suggestion only — no money moves inside the app.
+export async function getSimplifiedDebts(): Promise<SimplifiedTransfer[]> {
+  const result = await requireHousehold();
+  if (!result) {
+    redirect("/sign-in");
+  }
+
+  const { household } = result;
+
+  const { memberships, sharedExpenses, settlements, sharesByTransactionId } =
+    await loadBalanceInputs(household.id);
+
+  const memberCount = memberships.length;
+
+  const memberIdByName = new Map(
+    memberships.map((membership) => [membership.user.name, membership.user.id]),
+  );
+
+  // Positive net: the member should still receive that much. Negative: they
+  // should still pay it.
+  const netByUserId = new Map<string, number>(
+    memberships.map((membership) => [membership.user.id, 0]),
+  );
+
+  for (const expense of sharedExpenses) {
+    const owed = sharesOwedForExpense(
+      expense,
+      memberships,
+      sharesByTransactionId,
+      memberCount,
+    );
+    for (const [userId, amount] of owed) {
+      if (userId === expense.addedById || amount === 0) continue;
+      netByUserId.set(
+        expense.addedById,
+        (netByUserId.get(expense.addedById) ?? 0) + amount,
+      );
+      netByUserId.set(userId, (netByUserId.get(userId) ?? 0) - amount);
+    }
+  }
+
+  for (const settlement of settlements) {
+    const payeeId = settlementPayeeId(settlement.description, memberIdByName);
+    if (!payeeId) continue;
+
+    // The payer settled a debt, so their net improves by the amount.
+    netByUserId.set(
+      settlement.addedById,
+      (netByUserId.get(settlement.addedById) ?? 0) + settlement.amount,
+    );
+    netByUserId.set(
+      payeeId,
+      (netByUserId.get(payeeId) ?? 0) - settlement.amount,
+    );
+  }
+
+  const EPSILON = 0.005;
+  const creditors = memberships
+    .map((membership) => ({
+      id: membership.user.id,
+      name: membership.user.name,
+      amount: netByUserId.get(membership.user.id) ?? 0,
+    }))
+    .filter((member) => member.amount > EPSILON)
+    .sort((a, b) => b.amount - a.amount);
+  const debtors = memberships
+    .map((membership) => ({
+      id: membership.user.id,
+      name: membership.user.name,
+      amount: netByUserId.get(membership.user.id) ?? 0,
+    }))
+    .filter((member) => member.amount < -EPSILON)
+    .sort((a, b) => a.amount - b.amount);
+
+  const transfers: SimplifiedTransfer[] = [];
+  while (creditors.length > 0 && debtors.length > 0) {
+    const creditor = creditors[0];
+    const debtor = debtors[0];
+    const amount =
+      Math.round(Math.min(creditor.amount, -debtor.amount) * 100) / 100;
+    if (amount <= 0) break;
+
+    transfers.push({
+      fromUserId: debtor.id,
+      fromName: debtor.name,
+      toUserId: creditor.id,
+      toName: creditor.name,
+      amount,
+    });
+
+    creditor.amount -= amount;
+    debtor.amount += amount;
+
+    if (creditor.amount <= EPSILON) creditors.shift();
+    if (-debtor.amount <= EPSILON) debtors.shift();
+  }
+
+  return transfers;
+}
 
 export async function RecordSettlement(form: RecordSettlementSchemaType) {
   const parsedBody = RecordSettlementSchema.safeParse(form);

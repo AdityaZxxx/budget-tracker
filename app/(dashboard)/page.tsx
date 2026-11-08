@@ -12,6 +12,7 @@ import Goals from "./_components/Goals";
 import History from "./_components/History";
 import Overview from "./_components/Overview";
 import SharedSpendingCard from "./_components/SharedSpendingCard";
+import SimplifyDebts from "./_components/SimplifyDebts";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -80,6 +81,9 @@ const DashboardPage = async () => {
       {/* One Member means nobody to owe or be owed by, so the card would
           only ever show its "invite someone" empty text. */}
       {memberCount > 1 && <Balances currency={household.currency} />}
+      {/* With two Members the pairwise list is already the minimal set of
+          transfers; simplification only earns its keep from three up. */}
+      {memberCount > 2 && <SimplifyDebts currency={household.currency} />}
       <Goals currency={household.currency} />
       <History currency={household.currency} />
     </div>
