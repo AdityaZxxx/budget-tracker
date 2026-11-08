@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 
 import { getMonthSpentByCategory } from "@/lib/budgets";
-import { requireHousehold } from "@/lib/household";
+import { assertFullMember, requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 import {
   CreateBudgetSchema,
@@ -60,6 +60,7 @@ export async function createBudget(form: CreateBudgetSchemaType) {
   if (!result) {
     redirect("/sign-in");
   }
+  assertFullMember(result);
 
   const { household } = result;
 
@@ -95,6 +96,7 @@ export async function updateBudget(form: UpdateBudgetSchemaType) {
   if (!result) {
     redirect("/sign-in");
   }
+  assertFullMember(result);
 
   const { household } = result;
 
@@ -133,6 +135,7 @@ export async function deleteBudget(form: DeleteBudgetSchemaType) {
   if (!result) {
     redirect("/sign-in");
   }
+  assertFullMember(result);
 
   const { household } = result;
 

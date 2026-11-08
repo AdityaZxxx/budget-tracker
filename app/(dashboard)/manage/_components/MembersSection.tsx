@@ -5,6 +5,7 @@ import { LogOut, Mail, UserMinus } from "lucide-react";
 import { toast } from "sonner";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,6 +15,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
@@ -23,8 +31,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useSession } from "@/lib/auth-client";
+import { FULL_MEMBER_ROLE, VIEW_ONLY_ROLE } from "@/lib/constants";
 
-import { listMembers, setEmailDigest } from "../_actions/membership";
+import {
+  listMembers,
+  setEmailDigest,
+  setMemberRole,
+} from "../_actions/membership";
 import LeaveHouseholdDialog from "./LeaveHouseholdDialog";
 import RemoveMemberDialog from "./RemoveMemberDialog";
 
@@ -37,6 +50,13 @@ const MembersSection = () => {
     queryKey: ["householdMembers"],
     queryFn: listMembers,
   });
+
+  // The caller's role decides whether the mutation controls render at all;
+  // every action re-checks it server-side.
+  const callerRole = members.find(
+    (member) => member.user.id === session?.user.id,
+  )?.role;
+  const canEdit = callerRole !== VIEW_ONLY_ROLE;
 
   const { mutate: toggleDigest, isPending: isTogglingDigest } = useMutation({
     mutationFn: setEmailDigest,
@@ -52,13 +72,33 @@ const MembersSection = () => {
     },
   });
 
+  const { mutate: changeRole } = useMutation({
+    mutationFn: setMemberRole,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["householdMembers"],
+      });
+    },
+    onError: (error) => {
+      toast.error(
+        error instanceof Error && error.message
+          ? error.message
+          : "Unable to update the member role. Try again.",
+        {
+          id: "member-role",
+        },
+      );
+    },
+  });
+
   return (
     <section>
       <Card className="transition-all hover:shadow-md">
         <CardHeader>
           <CardTitle className="text-xl">Members</CardTitle>
           <CardDescription>
-            Everyone in your household can add, edit, and remove transactions
+            Full members can add, edit, and remove transactions; view-only
+            members follow along
           </CardDescription>
         </CardHeader>
         <Separator />
@@ -97,6 +137,9 @@ const MembersSection = () => {
                     </div>
                     {isSelf ? (
                       <div className="flex shrink-0 items-center gap-2">
+                        {member.role === VIEW_ONLY_ROLE && (
+                          <Badge variant="secondary">View only</Badge>
+                        )}
                         <Mail className="h-4 w-4 shrink-0 text-muted-foreground" />
                         <span className="hidden text-xs whitespace-nowrap text-muted-foreground sm:inline">
                           Email digest
@@ -111,28 +154,69 @@ const MembersSection = () => {
                         />
                       </div>
                     ) : (
-                      <Tooltip>
-                        <RemoveMemberDialog
-                          member={member}
-                          trigger={
-                            <TooltipTrigger
-                              render={
-                                <Button
-                                  variant="ghost"
-                                  size="icon-sm"
-                                  className="text-destructive hover:bg-destructive/10"
-                                  aria-label={`Remove ${member.user.name} from household`}
-                                />
+                      <div className="flex shrink-0 items-center gap-2">
+                        {canEdit ? (
+                          <Select
+                            value={member.role}
+                            onValueChange={(role) => {
+                              if (
+                                (role !== FULL_MEMBER_ROLE &&
+                                  role !== VIEW_ONLY_ROLE) ||
+                                role === member.role
+                              ) {
+                                return;
                               }
+                              changeRole({
+                                userId: member.user.id,
+                                role,
+                              });
+                            }}
+                          >
+                            <SelectTrigger
+                              className="w-32"
+                              aria-label={`Access for ${member.user.name}`}
                             >
-                              <UserMinus />
-                            </TooltipTrigger>
-                          }
-                        />
-                        <TooltipContent>
-                          Remove {member.user.name} from household
-                        </TooltipContent>
-                      </Tooltip>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value={FULL_MEMBER_ROLE}>
+                                Full edit
+                              </SelectItem>
+                              <SelectItem value={VIEW_ONLY_ROLE}>
+                                View only
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          member.role === VIEW_ONLY_ROLE && (
+                            <Badge variant="secondary">View only</Badge>
+                          )
+                        )}
+                        {canEdit && (
+                          <Tooltip>
+                            <RemoveMemberDialog
+                              member={member}
+                              trigger={
+                                <TooltipTrigger
+                                  render={
+                                    <Button
+                                      variant="ghost"
+                                      size="icon-sm"
+                                      className="text-destructive hover:bg-destructive/10"
+                                      aria-label={`Remove ${member.user.name} from household`}
+                                    />
+                                  }
+                                >
+                                  <UserMinus />
+                                </TooltipTrigger>
+                              }
+                            />
+                            <TooltipContent>
+                              Remove {member.user.name} from household
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                      </div>
                     )}
                   </div>
                 );

@@ -1,6 +1,6 @@
 # Coding Standards
 
-Sora is a free finance app for couples and households: one shared ledger per Household, with budgets, goals, and balances. Every member of a Household has equal rights.
+Sora is a free finance app for couples and households: one shared ledger per Household, with budgets, goals, and balances. Full members of a Household have equal rights; a Household can also hold view-only members who can read but not change anything.
 
 These are the judgement calls this repo makes. Mechanical rules (where a file lives, what a function is called) belong in the linter rather than here, because a check fails loudly and prose drifts silently. The product also runs on free tiers only (`docs/adr/0002-free-forever-zero-cost.md`), so a diff that needs a paid service is a finding.
 
@@ -10,7 +10,7 @@ Authorization is membership, not ownership. Resolve the caller's Household first
 
 Attribution and visibility are different questions. A transaction records the member who added it (`addedById`), and that member can leave the household without their transactions disappearing. So "who added it" never answers "who can see it", and only the household does.
 
-There is no owner. Every member can edit or delete any transaction, invite others, and remove others, so a diff that adds an owner check is a finding.
+There is no owner. Full members can all edit or delete any transaction, invite others, and remove others; view-only members can do none of those. A diff that adds an owner check is a finding.
 
 A reviewer should be able to point at the `householdId` filter in every query the diff touches. A query that filters by `addedById` where the intent was "in this household" is a bug even when it returns the right rows today.
 

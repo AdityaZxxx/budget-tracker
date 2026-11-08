@@ -5,7 +5,7 @@ import { after } from "next/server";
 
 import { getMonthSpentByCategory } from "@/lib/budgets";
 import { getFormatterForCurrency } from "@/lib/helpers";
-import { requireHousehold } from "@/lib/household";
+import { assertFullMember, requireHousehold } from "@/lib/household";
 import { notifyHouseholdExcept } from "@/lib/notifications";
 import prisma from "@/lib/prisma";
 import {
@@ -23,6 +23,7 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
   if (!result) {
     redirect("/sign-in");
   }
+  assertFullMember(result);
 
   const { session, household } = result;
 

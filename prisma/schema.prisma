@@ -58,6 +58,9 @@ model HouseholdMembership {
   joinedAt    DateTime  @default(now())
   // Opt-in to the daily email digest of unread household notifications.
   emailDigest Boolean   @default(false)
+  // "member" can change everything; "view_only" can only read. There is
+  // still no owner role — full members all have equal rights.
+  role        String    @default("member")
 
   @@id([householdId, userId])
 }

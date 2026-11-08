@@ -8,7 +8,7 @@ import {
   SETTLEMENT_DESCRIPTION_PREFIX,
 } from "@/lib/constants";
 import { getFormatterForCurrency } from "@/lib/helpers";
-import { requireHousehold } from "@/lib/household";
+import { assertFullMember, requireHousehold } from "@/lib/household";
 import { notify } from "@/lib/notifications";
 import prisma from "@/lib/prisma";
 import {
@@ -292,7 +292,7 @@ export async function getSimplifiedDebts(): Promise<SimplifiedTransfer[]> {
       amount: netByUserId.get(membership.user.id) ?? 0,
     }))
     .filter((member) => member.amount > EPSILON)
-    .sort((a, b) => b.amount - a.amount);
+    .toSorted((a, b) => b.amount - a.amount);
   const debtors = memberships
     .map((membership) => ({
       id: membership.user.id,
@@ -300,7 +300,7 @@ export async function getSimplifiedDebts(): Promise<SimplifiedTransfer[]> {
       amount: netByUserId.get(membership.user.id) ?? 0,
     }))
     .filter((member) => member.amount < -EPSILON)
-    .sort((a, b) => a.amount - b.amount);
+    .toSorted((a, b) => a.amount - b.amount);
 
   const transfers: SimplifiedTransfer[] = [];
   while (creditors.length > 0 && debtors.length > 0) {
@@ -338,6 +338,7 @@ export async function RecordSettlement(form: RecordSettlementSchemaType) {
   if (!result) {
     redirect("/sign-in");
   }
+  assertFullMember(result);
 
   const { session, household } = result;
   const { memberId, amount } = parsedBody.data;

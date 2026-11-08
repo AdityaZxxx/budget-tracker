@@ -17,7 +17,12 @@ import { getFormatterForCurrency } from "@/lib/helpers";
 import { getHouseholdBalances } from "../_actions/balance";
 import RecordSettlementDialog from "./RecordSettlementDialog";
 
-const Balances = ({ currency }: { currency: string | null }) => {
+interface Props {
+  currency: string | null;
+  canEdit?: boolean;
+}
+
+const Balances = ({ currency, canEdit = true }: Props) => {
   const formatter = getFormatterForCurrency(currency ?? "USD");
 
   const balancesQuery = useQuery({
@@ -41,20 +46,22 @@ const Balances = ({ currency }: { currency: string | null }) => {
                 inside the app.
               </CardDescription>
             </div>
-            <RecordSettlementDialog
-              currency={currency}
-              members={balances.map(({ userId, name }) => ({ userId, name }))}
-              trigger={
-                <Button
-                  variant="outline"
-                  className="gap-2"
-                  disabled={balances.length === 0}
-                >
-                  <Handshake className="h-4 w-4" />
-                  Record settlement
-                </Button>
-              }
-            />
+            {canEdit && (
+              <RecordSettlementDialog
+                currency={currency}
+                members={balances.map(({ userId, name }) => ({ userId, name }))}
+                trigger={
+                  <Button
+                    variant="outline"
+                    className="gap-2"
+                    disabled={balances.length === 0}
+                  >
+                    <Handshake className="h-4 w-4" />
+                    Record settlement
+                  </Button>
+                }
+              />
+            )}
           </div>
         </CardHeader>
         <CardContent>

@@ -25,7 +25,13 @@ import { listGoals } from "../_actions/goals";
 import CreateGoalDialog from "./CreateGoalDialog";
 import DeleteGoalDialog from "./DeleteGoalDialog";
 
-const Goals = ({ currency }: { currency: string | null }) => {
+const Goals = ({
+  currency,
+  canEdit = true,
+}: {
+  currency: string | null;
+  canEdit?: boolean;
+}) => {
   const formatter = getFormatterForCurrency(currency ?? "USD");
 
   const goalsQuery = useQuery({
@@ -49,15 +55,17 @@ const Goals = ({ currency }: { currency: string | null }) => {
                 tagging an expense transaction with a goal.
               </CardDescription>
             </div>
-            <CreateGoalDialog
-              currency={currency}
-              trigger={
-                <Button variant="outline" className="gap-2">
-                  <Plus className="h-4 w-4" />
-                  New goal
-                </Button>
-              }
-            />
+            {canEdit && (
+              <CreateGoalDialog
+                currency={currency}
+                trigger={
+                  <Button variant="outline" className="gap-2">
+                    <Plus className="h-4 w-4" />
+                    New goal
+                  </Button>
+                }
+              />
+            )}
           </div>
         </CardHeader>
         <CardContent>
@@ -86,30 +94,32 @@ const Goals = ({ currency }: { currency: string | null }) => {
                               by {format(new Date(goal.deadline), "PPP")}
                             </span>
                           )}
-                          <Tooltip>
-                            <DeleteGoalDialog
-                              goal={goal}
-                              trigger={
-                                <TooltipTrigger
-                                  render={
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-8 w-8"
-                                    />
-                                  }
-                                >
-                                  <span className="sr-only">
-                                    Delete goal {goal.name}
-                                  </span>
-                                  <Trash2 className="h-4 w-4" />
-                                </TooltipTrigger>
-                              }
-                            />
-                            <TooltipContent>
-                              Delete goal {goal.name}
-                            </TooltipContent>
-                          </Tooltip>
+                          {canEdit && (
+                            <Tooltip>
+                              <DeleteGoalDialog
+                                goal={goal}
+                                trigger={
+                                  <TooltipTrigger
+                                    render={
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8"
+                                      />
+                                    }
+                                  >
+                                    <span className="sr-only">
+                                      Delete goal {goal.name}
+                                    </span>
+                                    <Trash2 className="h-4 w-4" />
+                                  </TooltipTrigger>
+                                }
+                              />
+                              <TooltipContent>
+                                Delete goal {goal.name}
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
                         </div>
                       </div>
                       <Progress value={progress} />

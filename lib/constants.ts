@@ -1,5 +1,10 @@
 export const MAX_DATE_RANGE = 90;
 
+// Roles for HouseholdMembership.role. Full members can change everything;
+// view-only members can only read. There is no owner role.
+export const FULL_MEMBER_ROLE = "member";
+export const VIEW_ONLY_ROLE = "view_only";
+
 // System category for settlement transactions; hidden from category
 // stats and pickers because it is not spending.
 export const SETTLEMENT_CATEGORY_NAME = "Settlement";

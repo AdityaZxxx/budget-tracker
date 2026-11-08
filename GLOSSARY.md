@@ -13,7 +13,7 @@ The shared space where a couple or family keeps their finances. All shared money
 _Avoid_: account, family, budget space
 
 **Member**:
-A user who belongs to a household. Every member has equal rights: add, edit, and delete transactions, invite others, and remove others.
+A user who belongs to a household. A member is either a full member, who can add, edit, and delete transactions, invite others, and remove others, or a view-only member, who can only read the ledger. There is no owner: full members all have equal rights.
 _Avoid_: partner, owner (there is no owner role)
 
 **Invite link**:

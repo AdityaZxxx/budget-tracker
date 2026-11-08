@@ -2,6 +2,7 @@ import { type Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { VIEW_ONLY_ROLE } from "@/lib/constants";
 import { requireHousehold } from "@/lib/household";
 
 import { getHouseholdMemberCount } from "./_actions/household";
@@ -37,6 +38,10 @@ const DashboardPage = async () => {
     redirect("/wizard");
   }
 
+  // View-only Members see the ledger but get no mutation entry points; the
+  // actions re-check the role server-side, so hiding is courtesy, not the
+  // security boundary.
+  const canEdit = result.membership.role !== VIEW_ONLY_ROLE;
   const memberCount = await getHouseholdMemberCount();
 
   return (
@@ -47,44 +52,48 @@ const DashboardPage = async () => {
             Hello, {session.user.name.split(" ")[0]}! 👋
           </h1>
 
-          <div className="flex items-center gap-3">
-            <CreateTransactionDialog
-              trigger={
-                <Button
-                  variant="default"
-                  className="bg-emerald-700 text-white hover:bg-emerald-800 dark:bg-emerald-700 dark:hover:bg-emerald-800"
-                >
-                  New income
-                </Button>
-              }
-              type="income"
-            />
-            <CreateTransactionDialog
-              trigger={
-                <Button
-                  variant="default"
-                  className="bg-rose-600 text-white hover:bg-rose-700 dark:bg-rose-700 dark:hover:bg-rose-800"
-                >
-                  New expense
-                </Button>
-              }
-              type="expense"
-            />
-          </div>
+          {canEdit && (
+            <div className="flex items-center gap-3">
+              <CreateTransactionDialog
+                trigger={
+                  <Button
+                    variant="default"
+                    className="bg-emerald-700 text-white hover:bg-emerald-800 dark:bg-emerald-700 dark:hover:bg-emerald-800"
+                  >
+                    New income
+                  </Button>
+                }
+                type="income"
+              />
+              <CreateTransactionDialog
+                trigger={
+                  <Button
+                    variant="default"
+                    className="bg-rose-600 text-white hover:bg-rose-700 dark:bg-rose-700 dark:hover:bg-rose-800"
+                  >
+                    New expense
+                  </Button>
+                }
+                type="expense"
+              />
+            </div>
+          )}
         </div>
       </div>
-      <AddMemberCta memberCount={memberCount} />
+      {canEdit && <AddMemberCta memberCount={memberCount} />}
       <Overview currency={household.currency} />
       {/* The shared-ledger cards start at two Members: below that the
           shared/personal distinction does not exist yet. */}
       {memberCount > 1 && <SharedSpendingCard currency={household.currency} />}
       {/* One Member means nobody to owe or be owed by, so the card would
           only ever show its "invite someone" empty text. */}
-      {memberCount > 1 && <Balances currency={household.currency} />}
+      {memberCount > 1 && (
+        <Balances currency={household.currency} canEdit={canEdit} />
+      )}
       {/* With two Members the pairwise list is already the minimal set of
           transfers; simplification only earns its keep from three up. */}
       {memberCount > 2 && <SimplifyDebts currency={household.currency} />}
-      <Goals currency={household.currency} />
+      <Goals currency={household.currency} canEdit={canEdit} />
       <History currency={household.currency} />
     </div>
   );
