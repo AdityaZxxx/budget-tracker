@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 
-import { requireHousehold } from "@/lib/household";
+import { assertFullMember, requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 import {
   CreateGoalSchema,
@@ -64,6 +64,7 @@ export async function createGoal(form: CreateGoalSchemaType) {
   if (!result) {
     redirect("/sign-in");
   }
+  assertFullMember(result);
 
   const { household } = result;
 
@@ -88,6 +89,7 @@ export async function deleteGoal(form: DeleteGoalSchemaType) {
   if (!result) {
     redirect("/sign-in");
   }
+  assertFullMember(result);
 
   const { household } = result;
 

@@ -50,6 +50,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useCallerRole } from "@/hooks/use-members";
 import { useSession } from "@/lib/auth-client";
 import { dateToUtcDate } from "@/lib/helpers";
 import { cn } from "@/lib/utils";
@@ -496,6 +497,9 @@ function AddedByCell({ transaction }: { transaction: TransactionHistoryRow }) {
 
 function RowActions({ transaction }: { transaction: TransactionHistoryRow }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const { canEdit } = useCallerRole();
+
+  if (!canEdit) return null;
 
   return (
     <>

@@ -44,7 +44,7 @@ import { listBudgets, type BudgetWithProgress } from "../../_actions/budgets";
 import BudgetDialog from "./BudgetDialog";
 import DeleteBudgetDialog from "./DeleteBudgetDialog";
 
-const BudgetsSection = () => {
+const BudgetsSection = ({ canEdit }: { canEdit: boolean }) => {
   const household = useQuery<Household>({
     queryKey: ["household"],
     queryFn: () => fetch("/api/user-settings").then((res) => res.json()),
@@ -79,26 +79,28 @@ const BudgetsSection = () => {
                 Monthly spending limits per category for shared expenses
               </CardDescription>
             </div>
-            <Tooltip>
-              <BudgetDialog
-                household={household.data}
-                trigger={
-                  <TooltipTrigger
-                    render={
-                      <Button
-                        size="sm"
-                        className="gap-2"
-                        aria-label="Create budget"
-                      />
-                    }
-                  >
-                    <PlusSquare className="h-4 w-4" />
-                    <span className="sr-only md:not-sr-only">Create</span>
-                  </TooltipTrigger>
-                }
-              />
-              <TooltipContent>Create budget</TooltipContent>
-            </Tooltip>
+            {canEdit && (
+              <Tooltip>
+                <BudgetDialog
+                  household={household.data}
+                  trigger={
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          size="sm"
+                          className="gap-2"
+                          aria-label="Create budget"
+                        />
+                      }
+                    >
+                      <PlusSquare className="h-4 w-4" />
+                      <span className="sr-only md:not-sr-only">Create</span>
+                    </TooltipTrigger>
+                  }
+                />
+                <TooltipContent>Create budget</TooltipContent>
+              </Tooltip>
+            )}
           </div>
         </CardHeader>
         <Separator />
@@ -136,6 +138,7 @@ const BudgetsSection = () => {
                     budget={budget}
                     household={household.data}
                     format={format}
+                    canEdit={canEdit}
                   />
                 ))}
               </div>
@@ -153,10 +156,12 @@ function BudgetCard({
   budget,
   household,
   format,
+  canEdit,
 }: {
   budget: BudgetWithProgress;
   household?: Household;
   format: (value: number) => string;
+  canEdit: boolean;
 }) {
   const overLimit = budget.percent >= 100;
   const nearLimit = budget.percent >= 80 && !overLimit;
@@ -175,47 +180,49 @@ function BudgetCard({
               {budget.mode}
             </Badge>
           </div>
-          <Tooltip>
-            <DropdownMenu>
-              <TooltipTrigger
-                render={
-                  <DropdownMenuTrigger
-                    render={
-                      <Button
-                        variant="ghost"
-                        className="h-8 w-8 p-0 text-muted-foreground opacity-100 hover:bg-muted md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100"
-                        aria-label={`Open actions for ${budget.category} budget`}
-                      />
-                    }
-                  />
-                }
-              >
-                <span className="sr-only">Open actions</span>
-                <MoreHorizontal className="h-4 w-4" />
-              </TooltipTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuGroup>
-                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="flex items-center gap-2"
-                  onClick={() => setEditOpen(true)}
+          {canEdit && (
+            <Tooltip>
+              <DropdownMenu>
+                <TooltipTrigger
+                  render={
+                    <DropdownMenuTrigger
+                      render={
+                        <Button
+                          variant="ghost"
+                          className="h-8 w-8 p-0 text-muted-foreground opacity-100 hover:bg-muted md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100"
+                          aria-label={`Open actions for ${budget.category} budget`}
+                        />
+                      }
+                    />
+                  }
                 >
-                  <Pencil className="h-4 w-4 text-muted-foreground" />
-                  Edit
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="flex items-center gap-2"
-                  onClick={() => setDeleteOpen(true)}
-                >
-                  <TrashIcon className="h-4 w-4 text-muted-foreground" />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <TooltipContent>Actions</TooltipContent>
-          </Tooltip>
+                  <span className="sr-only">Open actions</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </TooltipTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuGroup>
+                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                  </DropdownMenuGroup>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="flex items-center gap-2"
+                    onClick={() => setEditOpen(true)}
+                  >
+                    <Pencil className="h-4 w-4 text-muted-foreground" />
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="flex items-center gap-2"
+                    onClick={() => setDeleteOpen(true)}
+                  >
+                    <TrashIcon className="h-4 w-4 text-muted-foreground" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <TooltipContent>Actions</TooltipContent>
+            </Tooltip>
+          )}
         </div>
         <Progress
           value={Math.min(budget.percent, 100)}
@@ -230,17 +237,21 @@ function BudgetCard({
           {Math.round(budget.percent)}%
         </p>
       </div>
-      <BudgetDialog
-        budget={budget}
-        household={household}
-        open={editOpen}
-        onOpenChange={setEditOpen}
-      />
-      <DeleteBudgetDialog
-        budget={budget}
-        open={deleteOpen}
-        onOpenChange={setDeleteOpen}
-      />
+      {canEdit && (
+        <>
+          <BudgetDialog
+            budget={budget}
+            household={household}
+            open={editOpen}
+            onOpenChange={setEditOpen}
+          />
+          <DeleteBudgetDialog
+            budget={budget}
+            open={deleteOpen}
+            onOpenChange={setDeleteOpen}
+          />
+        </>
+      )}
     </>
   );
 }

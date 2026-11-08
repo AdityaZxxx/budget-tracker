@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 
-import { requireHousehold } from "@/lib/household";
+import { assertFullMember, requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 
 export async function DeleteTransaction(id: string) {
@@ -10,6 +10,7 @@ export async function DeleteTransaction(id: string) {
   if (!result) {
     redirect("/sign-in");
   }
+  assertFullMember(result);
 
   const { household } = result;
 

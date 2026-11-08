@@ -2,14 +2,23 @@
 
 import { redirect } from "next/navigation";
 
-import { requireHousehold } from "@/lib/household";
-import { notifyHouseholdExcept } from "@/lib/notifications";
+import {
+  assertFullMember,
+  clearActiveHouseholdCookie,
+  FULL_MEMBER_ROLE,
+  requireHousehold,
+  setActiveHouseholdCookie,
+  VIEW_ONLY_ROLE,
+} from "@/lib/household";
+import { notify, notifyHouseholdExcept } from "@/lib/notifications";
 import prisma from "@/lib/prisma";
 import {
   RemoveMemberSchema,
   RemoveMemberSchemaType,
   SetEmailDigestSchema,
   SetEmailDigestSchemaType,
+  SetMemberRoleSchema,
+  SetMemberRoleSchemaType,
 } from "@/schemas/membership";
 
 export async function listMembers() {
@@ -73,6 +82,23 @@ export async function leaveHousehold() {
     }
   });
 
+  const remainingMemberships = await prisma.householdMembership.findMany({
+    where: {
+      userId: session.user.id,
+    },
+    orderBy: {
+      joinedAt: "asc",
+    },
+    select: {
+      householdId: true,
+    },
+  });
+  if (remainingMemberships[0]) {
+    await setActiveHouseholdCookie(remainingMemberships[0].householdId);
+  } else {
+    await clearActiveHouseholdCookie();
+  }
+
   // If the household was deleted above there is nobody left to notify.
   await notifyHouseholdExcept(
     household.id,
@@ -96,6 +122,7 @@ export async function removeMember(form: RemoveMemberSchemaType) {
   if (!result) {
     redirect("/sign-in");
   }
+  assertFullMember(result);
 
   const { session, household } = result;
 
@@ -153,6 +180,80 @@ export async function removeMember(form: RemoveMemberSchemaType) {
     session.user.id,
     "member_left",
     `${removedMembership.user.name} was removed from the household.`,
+  );
+}
+
+export async function setMemberRole(form: SetMemberRoleSchemaType) {
+  const parsedBody = SetMemberRoleSchema.safeParse(form);
+  if (!parsedBody.success) {
+    throw new Error("Bad request");
+  }
+
+  const result = await requireHousehold();
+  if (!result) {
+    redirect("/sign-in");
+  }
+
+  const { session, household, membership } = result;
+  const { userId, role } = parsedBody.data;
+  const isSelf = userId === session.user.id;
+
+  if (isSelf) {
+    if (role !== FULL_MEMBER_ROLE) {
+      throw new Error("Use leave household to give up your own edit access");
+    }
+    const fullMemberCount = await prisma.householdMembership.count({
+      where: {
+        householdId: household.id,
+        role: FULL_MEMBER_ROLE,
+      },
+    });
+    if (fullMemberCount > 0) {
+      throw new Error("Only another member can change your role");
+    }
+  } else if (membership.role !== FULL_MEMBER_ROLE) {
+    throw new Error("View-only members cannot change roles");
+  }
+
+  const targetMembership = await prisma.householdMembership.findUnique({
+    where: {
+      householdId_userId: {
+        householdId: household.id,
+        userId,
+      },
+    },
+    include: {
+      user: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
+
+  if (!targetMembership) {
+    throw new Error("Member not found");
+  }
+
+  await prisma.householdMembership.update({
+    where: {
+      householdId_userId: {
+        householdId: household.id,
+        userId,
+      },
+    },
+    data: {
+      role,
+    },
+  });
+
+  await notify(
+    household.id,
+    userId,
+    "member_role",
+    role === VIEW_ONLY_ROLE
+      ? `${session.user.name} set your access to view-only in this household.`
+      : `${session.user.name} gave you full edit access in this household.`,
   );
 }
 

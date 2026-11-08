@@ -13,7 +13,7 @@ The shared space where a couple or family keeps their finances. All shared money
 _Avoid_: account, family, budget space
 
 **Member**:
-A user who belongs to a household. Every member has equal rights: add, edit, and delete transactions, invite others, and remove others.
+A user who belongs to a household. A member is either a full member, who can add, edit, and delete transactions, invite others, and remove others, or a view-only member, who can only read the ledger. There is no owner: full members all have equal rights.
 _Avoid_: partner, owner (there is no owner role)
 
 **Invite link**:
@@ -49,8 +49,15 @@ _Avoid_: savings target
 A transaction that records one member paying what they owed another member, zeroing their balance. No money ever moves inside the app.
 _Avoid_: payment, transfer
 
+**Active household**:
+The household a user is currently working in when they belong to more than one. Remembered per browser and validated against memberships on every read; switching changes every screen at once.
+_Avoid_: current workspace, selected account
+
 **Balance**:
 The net amount one member owes another, computed from shared transactions and settlements.
+
+**Split share**:
+The part of one shared expense that a single member owes. Shares default to an even split across all members; a shared expense can also carry per-member shares by amount or percent. Shares never change who added the transaction: the adder fronts the money and the others owe their shares back.
 
 **Currency**:
 The single currency of a household, chosen at onboarding. All amounts in the household are in this currency.

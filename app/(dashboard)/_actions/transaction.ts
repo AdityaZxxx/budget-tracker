@@ -5,8 +5,8 @@ import { after } from "next/server";
 
 import { getMonthSpentByCategory } from "@/lib/budgets";
 import { getFormatterForCurrency } from "@/lib/helpers";
-import { requireHousehold } from "@/lib/household";
-import { notifyHouseholdExcept } from "@/lib/notifications";
+import { assertFullMember, requireHousehold } from "@/lib/household";
+import { notifyHouseholdExcept, notifyMembers } from "@/lib/notifications";
 import prisma from "@/lib/prisma";
 import {
   CreateTransactionSchema,
@@ -23,6 +23,7 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
   if (!result) {
     redirect("/sign-in");
   }
+  assertFullMember(result);
 
   const { session, household } = result;
 
@@ -32,10 +33,10 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 
   const { amount, category, date, description, type, shared } = parsedBody.data;
   const goalId = parsedBody.data.goalId || undefined;
+  const shareInput =
+    type === "expense" && shared ? (parsedBody.data.shares ?? []) : [];
 
-  // The category and the goal do not depend on each other, so they are
-  // fetched together.
-  const [categoryRow, goal] = await Promise.all([
+  const [categoryRow, goal, memberships] = await Promise.all([
     prisma.category.findFirst({
       where: {
         householdId: household.id,
@@ -50,6 +51,16 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
           },
         })
       : null,
+    shareInput.length > 0
+      ? prisma.householdMembership.findMany({
+          where: {
+            householdId: household.id,
+          },
+          select: {
+            userId: true,
+          },
+        })
+      : [],
   ]);
 
   if (!categoryRow) {
@@ -58,6 +69,26 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 
   if (goalId && !goal) {
     throw new Error("Goal not found");
+  }
+
+  const memberIds = new Set(memberships.map((m) => m.userId));
+  const shareUserIds = shareInput.map((share) => share.userId);
+  const hasForeignOrDuplicateMember =
+    shareUserIds.some((userId) => !memberIds.has(userId)) ||
+    new Set(shareUserIds).size !== shareUserIds.length;
+  if (hasForeignOrDuplicateMember) {
+    throw new Error(
+      "Shares must name each member of this household at most once",
+    );
+  }
+
+  const shareSum = Math.round(
+    shareInput.reduce((sum, share) => sum + share.amount, 0) * 100,
+  );
+  if (shareInput.length > 0 && shareSum !== Math.round(amount * 100)) {
+    throw new Error(
+      `The member shares add up to ${formatAmount(shareSum / 100)} but the expense is ${formatAmount(amount)}.`,
+    );
   }
 
   // Budgets only apply to shared expenses; personal transactions stay out.
@@ -95,8 +126,8 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
     }
   }
 
-  await prisma.$transaction([
-    prisma.transaction.create({
+  await prisma.$transaction(async (tx) => {
+    const created = await tx.transaction.create({
       data: {
         householdId: household.id,
         addedById: session.user.id,
@@ -109,65 +140,74 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
         categoryIcon: categoryRow.icon,
         goalId,
       },
-    }),
+    });
 
-    // Personal transactions stay out of the household rollups.
-    ...(shared
-      ? [
-          prisma.monthHistory.upsert({
-            where: {
-              day_month_year_householdId: {
-                householdId: household.id,
-                day: date.getUTCDate(),
-                month: date.getUTCMonth(),
-                year: date.getUTCFullYear(),
-              },
-            },
-            create: {
-              householdId: household.id,
-              day: date.getUTCDate(),
-              month: date.getUTCMonth(),
-              year: date.getUTCFullYear(),
-              expense: type === "expense" ? amount : 0,
-              income: type === "income" ? amount : 0,
-            },
-            update: {
-              expense: {
-                increment: type === "expense" ? amount : 0,
-              },
-              income: {
-                increment: type === "income" ? amount : 0,
-              },
-            },
-          }),
+    if (shareInput.length > 0) {
+      await tx.transactionShare.createMany({
+        data: shareInput.map((share) => ({
+          transactionId: created.id,
+          userId: share.userId,
+          amount: share.amount,
+        })),
+      });
+    }
 
-          prisma.yearHistory.upsert({
-            where: {
-              month_year_householdId: {
-                householdId: household.id,
-                month: date.getUTCMonth(),
-                year: date.getUTCFullYear(),
-              },
-            },
-            create: {
-              householdId: household.id,
-              month: date.getUTCMonth(),
-              year: date.getUTCFullYear(),
-              expense: type === "expense" ? amount : 0,
-              income: type === "income" ? amount : 0,
-            },
-            update: {
-              expense: {
-                increment: type === "expense" ? amount : 0,
-              },
-              income: {
-                increment: type === "income" ? amount : 0,
-              },
-            },
-          }),
-        ]
-      : []),
-  ]);
+    if (!shared) {
+      return;
+    }
+
+    await tx.monthHistory.upsert({
+      where: {
+        day_month_year_householdId: {
+          householdId: household.id,
+          day: date.getUTCDate(),
+          month: date.getUTCMonth(),
+          year: date.getUTCFullYear(),
+        },
+      },
+      create: {
+        householdId: household.id,
+        day: date.getUTCDate(),
+        month: date.getUTCMonth(),
+        year: date.getUTCFullYear(),
+        expense: type === "expense" ? amount : 0,
+        income: type === "income" ? amount : 0,
+      },
+      update: {
+        expense: {
+          increment: type === "expense" ? amount : 0,
+        },
+        income: {
+          increment: type === "income" ? amount : 0,
+        },
+      },
+    });
+
+    await tx.yearHistory.upsert({
+      where: {
+        month_year_householdId: {
+          householdId: household.id,
+          month: date.getUTCMonth(),
+          year: date.getUTCFullYear(),
+        },
+      },
+      create: {
+        householdId: household.id,
+        month: date.getUTCMonth(),
+        year: date.getUTCFullYear(),
+        expense: type === "expense" ? amount : 0,
+        income: type === "income" ? amount : 0,
+      },
+      update: {
+        expense: {
+          increment: type === "expense" ? amount : 0,
+        },
+        income: {
+          increment: type === "income" ? amount : 0,
+        },
+      },
+    });
+  });
 
   // The actor just made the transaction, so threshold warnings go to the
   // other members only. The write already landed, so the notification runs
@@ -182,5 +222,51 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
         message,
       ),
     );
+  }
+
+  if (shared) {
+    const message = `${session.user.name} added a shared ${type} of ${formatAmount(amount)} (${description || categoryRow.name}).`;
+    after(() =>
+      notifyHouseholdExcept(
+        household.id,
+        session.user.id,
+        "transaction",
+        message,
+      ),
+    );
+  }
+
+  if (goal) {
+    after(async () => {
+      const contributed = await prisma.transaction.aggregate({
+        where: {
+          householdId: household.id,
+          goalId: goal.id,
+        },
+        _sum: {
+          amount: true,
+        },
+      });
+      const contributedTotal = contributed._sum.amount ?? 0;
+      const contributedBefore = contributedTotal - amount;
+      if (contributedBefore >= goal.target || contributedTotal < goal.target) {
+        return;
+      }
+
+      const members = await prisma.householdMembership.findMany({
+        where: {
+          householdId: household.id,
+        },
+        select: {
+          userId: true,
+        },
+      });
+      await notifyMembers(
+        household.id,
+        members.map((member) => member.userId),
+        "goal_reached",
+        `${goal.name} reached its target: ${formatAmount(contributedTotal)} of ${formatAmount(goal.target)}.`,
+      );
+    });
   }
 }
