@@ -52,5 +52,8 @@ _Avoid_: payment, transfer
 **Balance**:
 The net amount one member owes another, computed from shared transactions and settlements.
 
+**Split share**:
+The part of one shared expense that a single member owes. Shares default to an even split across all members; a shared expense can also carry per-member shares by amount or percent. Shares never change who added the transaction: the adder fronts the money and the others owe their shares back.
+
 **Currency**:
 The single currency of a household, chosen at onboarding. All amounts in the household are in this currency.

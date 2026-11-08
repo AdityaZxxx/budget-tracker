@@ -30,6 +30,7 @@ model User {
   addedTransactions Transaction[]
   createdInviteLinks InviteLink[]
   notifications     Notification[]
+  transactionShares TransactionShare[]
 }
 
 model Household {
@@ -154,6 +155,22 @@ model Transaction {
   // normal transactions, so they still count toward spending stats.
   goalId String?
   goal   Goal?   @relation(fields: [goalId], references: [id], onDelete: SetNull)
+
+  shares TransactionShare[]
+}
+
+// One member's share of one shared expense. The member who added the
+// transaction fronts the money; every member owes their share back to them.
+// A transaction with no share rows is split evenly across the members at
+// balance time; rows always sum to the transaction amount.
+model TransactionShare {
+  transactionId String
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount        Float
+
+  @@id([transactionId, userId])
 }
 
 model Goal {

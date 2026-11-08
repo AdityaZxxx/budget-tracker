@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+const TransactionShareSchema = z.object({
+  userId: z.string().min(1),
+  amount: z.coerce.number().nonnegative().multipleOf(0.01),
+});
+
 export const CreateTransactionSchema = z.object({
   amount: z.coerce.number().positive().multipleOf(0.01),
   description: z.string().optional(),
@@ -9,6 +14,8 @@ export const CreateTransactionSchema = z.object({
   shared: z.boolean().default(true),
   // Empty string means no goal (the form's unset value).
   goalId: z.string().optional(),
+  // Per-member split of a shared expense; absent means split evenly.
+  shares: z.array(TransactionShareSchema).optional(),
 });
 
 export type CreateTransactionSchemaType = {
@@ -19,6 +26,7 @@ export type CreateTransactionSchemaType = {
   type: "income" | "expense";
   shared: boolean;
   goalId?: string;
+  shares?: { userId: string; amount: number }[];
 };
 export type CreateTransactionSchemaOutput = z.output<
   typeof CreateTransactionSchema

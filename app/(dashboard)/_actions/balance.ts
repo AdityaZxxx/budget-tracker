@@ -16,10 +16,11 @@ import {
   RecordSettlementSchemaType,
 } from "@/schemas/settlement";
 
-// balance is the net amount the caller owes the other member:
-// shared expenses added by the other minus shared expenses added by the
-// caller (each split evenly across members), minus settlements the caller
-// paid to them plus settlements they paid to the caller.
+// balance is the net amount the caller owes the other member: the caller's
+// shares of shared expenses added by the other member, minus the other
+// member's shares of shared expenses added by the caller, minus settlements
+// the caller paid to them plus settlements they paid to the caller. A shared
+// expense without share rows splits evenly across the members.
 export async function getHouseholdBalances() {
   const result = await requireHousehold();
   if (!result) {
@@ -29,56 +30,87 @@ export async function getHouseholdBalances() {
   const { session, household } = result;
   const callerId = session.user.id;
 
-  // The memberships, the shared expenses and the settlements do not depend
-  // on each other, so they are fetched together.
-  const [memberships, sharedExpenses, settlements] = await Promise.all([
-    prisma.householdMembership.findMany({
-      where: {
-        householdId: household.id,
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
+  // The memberships, the shared expenses, the settlements and the shares do
+  // not depend on each other, so they are fetched together.
+  const [memberships, sharedExpenses, settlements, expenseShares] =
+    await Promise.all([
+      prisma.householdMembership.findMany({
+        where: {
+          householdId: household.id,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+            },
           },
         },
-      },
-      orderBy: {
-        joinedAt: "asc",
-      },
-    }),
-    prisma.transaction.findMany({
-      where: {
-        householdId: household.id,
-        shared: true,
-        type: "expense",
-      },
-      select: {
-        addedById: true,
-        amount: true,
-      },
-    }),
-    prisma.transaction.findMany({
-      where: {
-        householdId: household.id,
-        shared: false,
-        type: "expense",
-        category: SETTLEMENT_CATEGORY_NAME,
-      },
-      select: {
-        addedById: true,
-        amount: true,
-        description: true,
-      },
-    }),
-  ]);
+        orderBy: {
+          joinedAt: "asc",
+        },
+      }),
+      prisma.transaction.findMany({
+        where: {
+          householdId: household.id,
+          shared: true,
+          type: "expense",
+        },
+        select: {
+          transactionId: true,
+          addedById: true,
+          amount: true,
+        },
+      }),
+      prisma.transaction.findMany({
+        where: {
+          householdId: household.id,
+          shared: false,
+          type: "expense",
+          category: SETTLEMENT_CATEGORY_NAME,
+        },
+        select: {
+          addedById: true,
+          amount: true,
+          description: true,
+        },
+      }),
+      prisma.transactionShare.findMany({
+        where: {
+          transaction: {
+            householdId: household.id,
+            shared: true,
+            type: "expense",
+          },
+        },
+        select: {
+          transactionId: true,
+          userId: true,
+          amount: true,
+        },
+      }),
+    ]);
 
   const memberCount = memberships.length;
 
   const memberIdByName = new Map(
     memberships.map((membership) => [membership.user.name, membership.user.id]),
   );
+
+  const sharesByTransactionId = new Map<
+    string,
+    { userId: string; amount: number }[]
+  >();
+  for (const share of expenseShares) {
+    const shares = sharesByTransactionId.get(share.transactionId);
+    if (shares) {
+      shares.push({ userId: share.userId, amount: share.amount });
+    } else {
+      sharesByTransactionId.set(share.transactionId, [
+        { userId: share.userId, amount: share.amount },
+      ]);
+    }
+  }
 
   return memberships
     .filter((membership) => membership.user.id !== callerId)
@@ -87,7 +119,21 @@ export async function getHouseholdBalances() {
       let balance = 0;
 
       for (const expense of sharedExpenses) {
-        if (expense.addedById === otherId) {
+        const shares = sharesByTransactionId.get(expense.transactionId);
+        if (shares) {
+          // Explicit shares win over the even split. A member missing from
+          // the share rows owes nothing for this expense.
+          const callerShare =
+            shares.find((share) => share.userId === callerId)?.amount ?? 0;
+          const otherShare =
+            shares.find((share) => share.userId === otherId)?.amount ?? 0;
+
+          if (expense.addedById === otherId) {
+            balance += callerShare;
+          } else if (expense.addedById === callerId) {
+            balance -= otherShare;
+          }
+        } else if (expense.addedById === otherId) {
           balance += expense.amount / memberCount;
         } else if (expense.addedById === callerId) {
           balance -= expense.amount / memberCount;

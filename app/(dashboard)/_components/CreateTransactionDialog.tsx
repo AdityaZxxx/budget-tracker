@@ -1,11 +1,11 @@
 "use client";
 
 import { Household } from "@prisma/client";
-import { useForm, type StandardSchemaV1 } from "@tanstack/react-form";
+import { useStore, useForm, type StandardSchemaV1 } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
-import { ReactElement, ReactNode, useState } from "react";
+import { ReactElement, ReactNode, useMemo, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { toast } from "sonner";
 
@@ -41,8 +41,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useSession } from "@/lib/auth-client";
 import { Currencies } from "@/lib/currencies";
-import { dateToUtcDate } from "@/lib/helpers";
+import { dateToUtcDate, getFormatterForCurrency } from "@/lib/helpers";
 import { TransactionType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { CreateTransactionSchema } from "@/schemas/transaction";
@@ -50,6 +51,7 @@ import { CreateTransactionSchema } from "@/schemas/transaction";
 import { listGoals } from "../_actions/goals";
 import { getHouseholdMemberCount } from "../_actions/household";
 import { CreateTransaction } from "../_actions/transaction";
+import { listMembers } from "../manage/_actions/membership";
 import CategoryPicker from "./CategoryPicker";
 
 interface Props {
@@ -66,6 +68,49 @@ type CreateTransactionFormValues = {
   shared: boolean;
   goalId: string;
 };
+
+type SplitMode = "equal" | "amounts" | "percent";
+
+type ShareDraft = { userId: string; amount: number };
+
+type SplitMember = { user: { id: string } };
+
+function parseAmountInput(raw: string | undefined) {
+  const parsed = Number.parseFloat((raw ?? "").replace(",", "."));
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+// Turns the per-member inputs into share rows: amounts mode uses the values
+// as-is, percent mode converts to a share of the expense. Every share is
+// rounded to cents and the rounding remainder goes to the largest share, so
+// the stored rows always sum to the expense amount exactly.
+function finalizeShares(
+  mode: "amounts" | "percent",
+  inputs: Record<string, string>,
+  members: SplitMember[],
+  amount: number,
+): ShareDraft[] {
+  const rounded = members.map((member) => {
+    const raw = parseAmountInput(inputs[member.user.id]);
+    return {
+      userId: member.user.id,
+      amount:
+        Math.round((mode === "percent" ? (amount * raw) / 100 : raw) * 100) /
+        100,
+    };
+  });
+
+  const remainder =
+    Math.round(
+      (amount - rounded.reduce((sum, share) => sum + share.amount, 0)) * 100,
+    ) / 100;
+  if (remainder !== 0 && rounded.length > 0) {
+    const largest = rounded.reduce((a, b) => (b.amount > a.amount ? b : a));
+    largest.amount = Math.round((largest.amount + remainder) * 100) / 100;
+  }
+
+  return rounded.filter((share) => share.amount > 0);
+}
 
 const CreateTransactionDialog = ({ trigger, type }: Props) => {
   const [open, setOpen] = useState(false);
@@ -108,6 +153,15 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
   const memberCount = memberCountQuery.data;
   const showSharedToggle = memberCount === undefined || memberCount > 1;
 
+  const membersQuery = useQuery({
+    queryKey: ["householdMembers"],
+    queryFn: listMembers,
+    enabled: memberCount !== undefined && memberCount > 1,
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
+  });
+  const members = useMemo(() => membersQuery.data ?? [], [membersQuery.data]);
+
   const queryClient = useQueryClient();
 
   const { mutate, isPending } = useMutation({
@@ -117,6 +171,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
         id: "create-transaction",
       });
       form.reset();
+      resetSplitInputs();
 
       queryClient.invalidateQueries({
         queryKey: ["overview"],
@@ -168,9 +223,74 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
       mutate({
         ...value,
         date: dateToUtcDate(value.date),
+        shares: buildShares(value),
       });
     },
   });
+
+  // The split section reads the live form state so it can react to the
+  // shared checkbox and the amount field without duplicating them.
+  const sharedValue = useStore(form.store, (state) => state.values.shared);
+  const amountValue = useStore(form.store, (state) => state.values.amount);
+  const formatter = getFormatterForCurrency(household.data?.currency ?? "USD");
+  const { data: session } = useSession();
+
+  const showSplitOptions =
+    type === "expense" &&
+    memberCount !== undefined &&
+    memberCount > 1 &&
+    sharedValue;
+
+  const [splitMode, setSplitMode] = useState<SplitMode>("equal");
+  const [splitAmounts, setSplitAmounts] = useState<Record<string, string>>({});
+  const [splitPercents, setSplitPercents] = useState<Record<string, string>>(
+    {},
+  );
+
+  const buildShares = (value: CreateTransactionFormValues) => {
+    if (value.type !== "expense" || !value.shared || splitMode === "equal") {
+      return undefined;
+    }
+    return finalizeShares(
+      splitMode,
+      splitMode === "percent" ? splitPercents : splitAmounts,
+      members,
+      value.amount,
+    );
+  };
+
+  // Percent shares absorb their rounding remainder in finalizeShares, so the
+  // preview is exactly what will reach the server.
+  const previewShares = useMemo(() => {
+    if (!showSplitOptions || splitMode === "equal") {
+      return null;
+    }
+    return finalizeShares(
+      splitMode,
+      splitMode === "percent" ? splitPercents : splitAmounts,
+      members,
+      amountValue,
+    );
+  }, [
+    showSplitOptions,
+    splitMode,
+    splitPercents,
+    splitAmounts,
+    members,
+    amountValue,
+  ]);
+
+  const splitInvalid =
+    previewShares !== null &&
+    Math.round(
+      previewShares.reduce((sum, share) => sum + share.amount, 0) * 100,
+    ) !== Math.round(amountValue * 100);
+
+  const resetSplitInputs = () => {
+    setSplitMode("equal");
+    setSplitAmounts({});
+    setSplitPercents({});
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -422,6 +542,94 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
             </form.Field>
           )}
 
+          {showSplitOptions && members.length > 0 && (
+            <div className="space-y-3 rounded-lg border p-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-sm font-medium">Split</p>
+                <Select
+                  value={splitMode}
+                  onValueChange={(value) => {
+                    if (value === null) return;
+                    setSplitMode(value as SplitMode);
+                  }}
+                >
+                  <SelectTrigger
+                    className="w-44"
+                    aria-label="How this expense is split"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="equal">Equally</SelectItem>
+                    <SelectItem value="amounts">By amount</SelectItem>
+                    <SelectItem value="percent">By percent</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {splitMode !== "equal" && (
+                <div className="space-y-2">
+                  {members.map((member) => (
+                    <div
+                      key={member.user.id}
+                      className="flex items-center gap-2"
+                    >
+                      <span className="min-w-0 flex-1 truncate text-sm">
+                        {member.user.name}
+                        {member.user.id === session?.user.id ? " (you)" : ""}
+                      </span>
+                      <NumericFormat
+                        customInput={Input}
+                        className="w-28"
+                        value={
+                          (splitMode === "percent"
+                            ? splitPercents[member.user.id]
+                            : splitAmounts[member.user.id]) ?? ""
+                        }
+                        onValueChange={(values) => {
+                          const raw = values.value ?? "";
+                          if (splitMode === "percent") {
+                            setSplitPercents((prev) => ({
+                              ...prev,
+                              [member.user.id]: raw,
+                            }));
+                          } else {
+                            setSplitAmounts((prev) => ({
+                              ...prev,
+                              [member.user.id]: raw,
+                            }));
+                          }
+                        }}
+                        thousandSeparator={thousandSeparator}
+                        decimalSeparator={decimalSeparator}
+                        decimalScale={splitMode === "percent" ? 1 : 2}
+                        suffix={splitMode === "percent" ? "%" : undefined}
+                        allowNegative={false}
+                        aria-label={`Share for ${member.user.name}`}
+                      />
+                    </div>
+                  ))}
+                  <p
+                    className={cn(
+                      "text-xs",
+                      splitInvalid
+                        ? "text-destructive"
+                        : "text-muted-foreground",
+                    )}
+                  >
+                    Assigned{" "}
+                    {formatter.format(
+                      previewShares?.reduce(
+                        (sum, share) => sum + share.amount,
+                        0,
+                      ) ?? 0,
+                    )}{" "}
+                    of {formatter.format(amountValue)}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
           <DialogFooter className="gap-2 sm:gap-0">
             <DialogClose
               render={
@@ -437,7 +645,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
             </DialogClose>
             <Button
               type="submit"
-              disabled={isPending}
+              disabled={isPending || splitInvalid}
               className="w-full sm:w-auto"
             >
               {!isPending ? "Create" : <Loader2 className="animate-spin" />}
