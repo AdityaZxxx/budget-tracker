@@ -223,8 +223,6 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
     },
   });
 
-  // The split section reads the live form state so it can react to the
-  // shared checkbox and the amount field without duplicating them.
   const sharedValue = useStore(form.store, (state) => state.values.shared);
   const amountValue = useStore(form.store, (state) => state.values.amount);
   const formatter = getFormatterForCurrency(household.data?.currency ?? "USD");

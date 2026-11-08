@@ -13,6 +13,12 @@ export function monthRangeFor(date: Date): { from: Date; to: Date } {
   };
 }
 
+export function previousMonthRange(date: Date): { from: Date; to: Date } {
+  return monthRangeFor(
+    new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() - 1, 1)),
+  );
+}
+
 export function sharedSpendingFilter(
   householdId: string,
   range: { from: Date; to: Date },

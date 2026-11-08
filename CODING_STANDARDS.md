@@ -55,11 +55,15 @@ Mutations are server actions, so the household check runs inside the same call a
 
 A diff that adds a mutation should land as an action with the household check inside it. A diff that adds a query should follow the polling pattern its neighbouring queries already use, and a diff that mutates data should invalidate the query keys it affects.
 
-## Comments carry a why
+## Comments are a last resort
 
-A comment earns its place only when it states something the code cannot: the reason behind a choice, a non-obvious constraint, a trap. Everything else is noise the next reader has to verify.
+The default is none. A comment explaining what the code does is proof the code failed to say it itself: rename the symbol, extract the function, add a type, or restructure until the intent is obvious without prose. A surprise in our own code is the code's problem, not the reader's, and a comment is not the fix.
 
-Naming the trap is the point. "Personal transactions were never counted in the household rollups" tells the reader why the decrement is conditional; "update rollups" tells them nothing.
+Five things survive. A legal or licence header. A non-obvious behaviour forced by an external dependency, platform, vendor, or protocol we cannot reshape. A `prettier-ignore`. A doc comment that defines a public API contract. A link to an issue or RFC for a constraint code cannot express.
+
+Everything else dies, including the long justification: length is a confession, not a credential. When a rule here and a comment disagree about which is load-bearing, the comment loses.
+
+The same bar governs suppressions. Look up the rule an `eslint-disable`, `@ts-ignore`, or `@ts-expect-error` silences. If it catches a real bug or protects correctness, remove the suppression and fix the code. A suppression survives only when the rule itself is faulty, pedantic, or style-only.
 
 ## Verify before committing
 
@@ -71,7 +75,7 @@ Lint and format are mechanical, and the tools own them: `oxlint` reports the rul
 
 A pre-commit hook runs these on every commit: it formats the staged files, then runs `pnpm run verify`. The build stays in CI, because it is the slow one.
 
-A rule that fires on correct code gets fixed in the code, or, with a stated reason, in `.oxlintrc.json`. A one-off exception that the config cannot express may carry a scoped suppression comment, but only with the reason written next to it.
+A rule that fires on correct code gets fixed in the code, or, with a stated reason, in `.oxlintrc.json`. A scoped suppression comment is the last option, and only under the bar in "Comments are a last resort".
 
 ## Commit protocol
 

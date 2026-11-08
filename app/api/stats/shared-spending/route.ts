@@ -1,6 +1,10 @@
 import { redirect } from "next/navigation";
 
-import { monthRangeFor, sharedSpendingFilter } from "@/lib/budgets";
+import {
+  monthRangeFor,
+  previousMonthRange,
+  sharedSpendingFilter,
+} from "@/lib/budgets";
 import { requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 
@@ -22,11 +26,7 @@ export type GetSharedSpendingResponseType = Awaited<
 async function getSharedSpending(householdId: string) {
   const now = new Date();
   const thisMonth = monthRangeFor(now);
-  // Date.UTC normalizes a month of -1 into the previous December, so the
-  // subtraction never needs explicit year rollover handling.
-  const lastMonth = monthRangeFor(
-    new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1)),
-  );
+  const lastMonth = previousMonthRange(now);
 
   const sumSharedExpenses = (range: { from: Date; to: Date }) =>
     prisma.transaction.aggregate({
