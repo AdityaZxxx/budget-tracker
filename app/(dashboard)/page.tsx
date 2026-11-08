@@ -11,6 +11,7 @@ import CreateTransactionDialog from "./_components/CreateTransactionDialog";
 import Goals from "./_components/Goals";
 import History from "./_components/History";
 import Overview from "./_components/Overview";
+import SharedSpendingCard from "./_components/SharedSpendingCard";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -73,6 +74,9 @@ const DashboardPage = async () => {
       </div>
       <AddMemberCta memberCount={memberCount} />
       <Overview currency={household.currency} />
+      {/* The shared-ledger cards start at two Members: below that the
+          shared/personal distinction does not exist yet. */}
+      {memberCount > 1 && <SharedSpendingCard currency={household.currency} />}
       {/* One Member means nobody to owe or be owed by, so the card would
           only ever show its "invite someone" empty text. */}
       {memberCount > 1 && <Balances currency={household.currency} />}
