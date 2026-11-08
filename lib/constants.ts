@@ -1,5 +1,9 @@
 export const MAX_DATE_RANGE = 90;
 
+// Cookie that remembers which of a user's households is active. The value
+// is validated against current memberships on every read.
+export const ACTIVE_HOUSEHOLD_COOKIE = "sora_active_household";
+
 // Roles for HouseholdMembership.role. Full members can change everything;
 // view-only members can only read. There is no owner role.
 export const FULL_MEMBER_ROLE = "member";

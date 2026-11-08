@@ -49,6 +49,10 @@ _Avoid_: savings target
 A transaction that records one member paying what they owed another member, zeroing their balance. No money ever moves inside the app.
 _Avoid_: payment, transfer
 
+**Active household**:
+The household a user is currently working in when they belong to more than one. Remembered per browser and validated against memberships on every read; switching changes every screen at once.
+_Avoid_: current workspace, selected account
+
 **Balance**:
 The net amount one member owes another, computed from shared transactions and settlements.
 

@@ -35,6 +35,9 @@ model User {
 
 model Household {
   id        String   @id @default(uuid())
+  // Display name for the switcher; null for the household a user got by
+  // default before households could be named.
+  name      String?
   currency  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

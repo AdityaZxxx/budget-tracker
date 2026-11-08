@@ -4,8 +4,10 @@ import { redirect } from "next/navigation";
 
 import {
   assertFullMember,
+  clearActiveHouseholdCookie,
   FULL_MEMBER_ROLE,
   requireHousehold,
+  setActiveHouseholdCookie,
   VIEW_ONLY_ROLE,
 } from "@/lib/household";
 import { notify, notifyHouseholdExcept } from "@/lib/notifications";
@@ -79,6 +81,26 @@ export async function leaveHousehold() {
       });
     }
   });
+
+  // Point the active-household cookie at a household the caller still
+  // belongs to, or clear it. A stale value would fall back on the next read,
+  // but this keeps the next screen's household a deliberate choice.
+  const remainingMemberships = await prisma.householdMembership.findMany({
+    where: {
+      userId: session.user.id,
+    },
+    orderBy: {
+      joinedAt: "asc",
+    },
+    select: {
+      householdId: true,
+    },
+  });
+  if (remainingMemberships[0]) {
+    await setActiveHouseholdCookie(remainingMemberships[0].householdId);
+  } else {
+    await clearActiveHouseholdCookie();
+  }
 
   // If the household was deleted above there is nobody left to notify.
   await notifyHouseholdExcept(
