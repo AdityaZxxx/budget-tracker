@@ -183,4 +183,18 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
       ),
     );
   }
+
+  // A shared Transaction is household news: the other Members' balances and
+  // rollups just moved. Personal ones stay silent, matching their visibility.
+  if (shared) {
+    const message = `${session.user.name} added a shared ${type} of ${formatAmount(amount)} (${description || categoryRow.name}).`;
+    after(() =>
+      notifyHouseholdExcept(
+        household.id,
+        session.user.id,
+        "transaction",
+        message,
+      ),
+    );
+  }
 }
