@@ -13,6 +13,24 @@ export function monthRangeFor(date: Date): { from: Date; to: Date } {
   };
 }
 
+export function sharedSpendingFilter(
+  householdId: string,
+  range: { from: Date; to: Date },
+) {
+  return {
+    householdId,
+    shared: true,
+    type: "expense" as const,
+    category: {
+      not: SETTLEMENT_CATEGORY_NAME,
+    },
+    date: {
+      gte: range.from,
+      lte: range.to,
+    },
+  };
+}
+
 // Shared expense totals per category for the calendar month containing
 // `date`. Settlements are excluded: they are not spending.
 export async function getMonthSpentByCategory(
@@ -22,18 +40,7 @@ export async function getMonthSpentByCategory(
   const { from, to } = monthRangeFor(date);
   const rows = await prisma.transaction.groupBy({
     by: ["category"],
-    where: {
-      householdId,
-      shared: true,
-      type: "expense",
-      category: {
-        not: SETTLEMENT_CATEGORY_NAME,
-      },
-      date: {
-        gte: from,
-        lte: to,
-      },
-    },
+    where: sharedSpendingFilter(householdId, { from, to }),
     _sum: {
       amount: true,
     },

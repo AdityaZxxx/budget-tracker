@@ -33,13 +33,9 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 
   const { amount, category, date, description, type, shared } = parsedBody.data;
   const goalId = parsedBody.data.goalId || undefined;
-  // Shares only exist for shared expenses: income and personal transactions
-  // never enter the balance math.
   const shareInput =
     type === "expense" && shared ? (parsedBody.data.shares ?? []) : [];
 
-  // The category and the goal do not depend on each other, so they are
-  // fetched together.
   const [categoryRow, goal, memberships] = await Promise.all([
     prisma.category.findFirst({
       where: {
@@ -75,8 +71,6 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
     throw new Error("Goal not found");
   }
 
-  // The member ids double as the duplicate check: a repeated userId would
-  // collide with the share table's composite key.
   const memberIds = new Set(memberships.map((m) => m.userId));
   const shareUserIds = shareInput.map((share) => share.userId);
   const hasForeignOrDuplicateMember =
@@ -132,8 +126,6 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
     }
   }
 
-  // One interactive transaction: the shares need the created transaction's
-  // id, and the rollup pair must land or not with them.
   await prisma.$transaction(async (tx) => {
     const created = await tx.transaction.create({
       data: {
@@ -160,7 +152,6 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
       });
     }
 
-    // Personal transactions stay out of the household rollups.
     if (!shared) {
       return;
     }
@@ -233,8 +224,6 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
     );
   }
 
-  // A shared Transaction is household news: the other Members' balances and
-  // rollups just moved. Personal ones stay silent, matching their visibility.
   if (shared) {
     const message = `${session.user.name} added a shared ${type} of ${formatAmount(amount)} (${description || categoryRow.name}).`;
     after(() =>
@@ -247,10 +236,6 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
     );
   }
 
-  // A contribution that crosses the goal's target is news for everyone,
-  // including the contributor. The aggregate below already includes this
-  // transaction, so "before" is derived by subtracting its amount back out;
-  // the goal only announces the crossing, never a total already past target.
   if (goal) {
     after(async () => {
       const contributed = await prisma.transaction.aggregate({
@@ -262,8 +247,9 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
           amount: true,
         },
       });
-      const total = contributed._sum.amount ?? 0;
-      if (total < goal.target || total - amount >= goal.target) {
+      const contributedTotal = contributed._sum.amount ?? 0;
+      const contributedBefore = contributedTotal - amount;
+      if (contributedBefore >= goal.target || contributedTotal < goal.target) {
         return;
       }
 
@@ -279,7 +265,7 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
         household.id,
         members.map((member) => member.userId),
         "goal_reached",
-        `${goal.name} reached its target: ${formatAmount(total)} of ${formatAmount(goal.target)}.`,
+        `${goal.name} reached its target: ${formatAmount(contributedTotal)} of ${formatAmount(goal.target)}.`,
       );
     });
   }

@@ -14,7 +14,6 @@ export const CreateTransactionSchema = z.object({
   shared: z.boolean().default(true),
   // Empty string means no goal (the form's unset value).
   goalId: z.string().optional(),
-  // Per-member split of a shared expense; absent means split evenly.
   shares: z.array(TransactionShareSchema).optional(),
 });
 

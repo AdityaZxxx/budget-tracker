@@ -14,9 +14,6 @@ export function useMembers() {
   });
 }
 
-// The caller's membership role in the active household. Until both queries
-// land the role is unknown and treated as full member, so edit controls do
-// not flash away from full members.
 export function useCallerRole() {
   const { data: session } = useSession();
   const membersQuery = useMembers();
@@ -27,6 +24,6 @@ export function useCallerRole() {
 
   return {
     role: self?.role,
-    canEdit: self?.role !== VIEW_ONLY_ROLE,
+    canEdit: self ? self.role !== VIEW_ONLY_ROLE : true,
   };
 }

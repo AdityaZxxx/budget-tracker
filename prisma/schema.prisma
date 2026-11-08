@@ -35,8 +35,6 @@ model User {
 
 model Household {
   id        String   @id @default(uuid())
-  // Display name for the switcher; null for the household a user got by
-  // default before households could be named.
   name      String?
   currency  String?
   createdAt DateTime @default(now())
@@ -61,8 +59,6 @@ model HouseholdMembership {
   joinedAt    DateTime  @default(now())
   // Opt-in to the daily email digest of unread household notifications.
   emailDigest Boolean   @default(false)
-  // "member" can change everything; "view_only" can only read. There is
-  // still no owner role — full members all have equal rights.
   role        String    @default("member")
 
   @@id([householdId, userId])
@@ -165,10 +161,6 @@ model Transaction {
   shares TransactionShare[]
 }
 
-// One member's share of one shared expense. The member who added the
-// transaction fronts the money; every member owes their share back to them.
-// A transaction with no share rows is split evenly across the members at
-// balance time; rows always sum to the transaction amount.
 model TransactionShare {
   transactionId String
   transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)

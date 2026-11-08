@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { monthRangeFor } from "@/lib/budgets";
-import { SETTLEMENT_CATEGORY_NAME } from "@/lib/constants";
+import { monthRangeFor, sharedSpendingFilter } from "@/lib/budgets";
 import { requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 
@@ -29,22 +28,9 @@ async function getSharedSpending(householdId: string) {
     new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1)),
   );
 
-  // Settlements are excluded: a settlement is money moving between members,
-  // not spending, matching what budgets count.
   const sumSharedExpenses = (range: { from: Date; to: Date }) =>
     prisma.transaction.aggregate({
-      where: {
-        householdId,
-        shared: true,
-        type: "expense",
-        category: {
-          not: SETTLEMENT_CATEGORY_NAME,
-        },
-        date: {
-          gte: range.from,
-          lte: range.to,
-        },
-      },
+      where: sharedSpendingFilter(householdId, range),
       _sum: {
         amount: true,
       },

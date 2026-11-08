@@ -82,9 +82,6 @@ export async function leaveHousehold() {
     }
   });
 
-  // Point the active-household cookie at a household the caller still
-  // belongs to, or clear it. A stale value would fall back on the next read,
-  // but this keeps the next screen's household a deliberate choice.
   const remainingMemberships = await prisma.householdMembership.findMany({
     where: {
       userId: session.user.id,
@@ -186,10 +183,6 @@ export async function removeMember(form: RemoveMemberSchemaType) {
   );
 }
 
-// Full Members can set other Members' roles; a Member can only change their
-// own role to promote themselves back to full edit, and only when no full
-// Member is left — otherwise a household whose full members all left would
-// be stuck with a ledger nobody can edit.
 export async function setMemberRole(form: SetMemberRoleSchemaType) {
   const parsedBody = SetMemberRoleSchema.safeParse(form);
   if (!parsedBody.success) {

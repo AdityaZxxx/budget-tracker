@@ -24,7 +24,6 @@ interface Props {
 const JoinHouseholdCard = ({ token, householdName, inviterName }: Props) => {
   const { mutate: join, isPending } = useMutation({
     mutationFn: () => joinHouseholdByToken(token),
-    // A successful join redirects from inside the action.
     onError: (error) => {
       toast.error(
         error instanceof Error && error.message

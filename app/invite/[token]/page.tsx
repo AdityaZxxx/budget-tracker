@@ -49,7 +49,6 @@ const InvitePage = async ({
     redirect(`/sign-in?next=${encodeURIComponent(`/invite/${token}`)}`);
   }
 
-  // Already a member: the invite link is just a shortcut back in.
   const existingMembership = await prisma.householdMembership.findUnique({
     where: {
       householdId_userId: {

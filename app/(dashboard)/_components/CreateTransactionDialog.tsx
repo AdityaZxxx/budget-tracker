@@ -80,10 +80,6 @@ function parseAmountInput(raw: string | undefined) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-// Turns the per-member inputs into share rows: amounts mode uses the values
-// as-is, percent mode converts to a share of the expense. Every share is
-// rounded to cents and the rounding remainder goes to the largest share, so
-// the stored rows always sum to the expense amount exactly.
 function finalizeShares(
   mode: "amounts" | "percent",
   inputs: Record<string, string>,
@@ -142,21 +138,20 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
 
   const goals = goalsQuery.data ?? [];
 
-  // Until the count arrives the toggle stays visible: hiding it on a guess
-  // would flash it away for multi-Member households.
   const memberCountQuery = useQuery({
     queryKey: ["memberCount"],
     queryFn: getHouseholdMemberCount,
     refetchInterval: 30_000,
     refetchOnWindowFocus: true,
   });
-  const memberCount = memberCountQuery.data;
-  const showSharedToggle = memberCount === undefined || memberCount > 1;
+  const knownMemberCount = memberCountQuery.data;
+  const showSharedToggle =
+    knownMemberCount === undefined || knownMemberCount > 1;
 
   const membersQuery = useQuery({
     queryKey: ["householdMembers"],
     queryFn: listMembers,
-    enabled: memberCount !== undefined && memberCount > 1,
+    enabled: knownMemberCount !== undefined && knownMemberCount > 1,
     refetchInterval: 30_000,
     refetchOnWindowFocus: true,
   });
@@ -237,8 +232,8 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
 
   const showSplitOptions =
     type === "expense" &&
-    memberCount !== undefined &&
-    memberCount > 1 &&
+    knownMemberCount !== undefined &&
+    knownMemberCount > 1 &&
     sharedValue;
 
   const [splitMode, setSplitMode] = useState<SplitMode>("equal");
@@ -259,8 +254,6 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
     );
   };
 
-  // Percent shares absorb their rounding remainder in finalizeShares, so the
-  // preview is exactly what will reach the server.
   const previewShares = useMemo(() => {
     if (!showSplitOptions || splitMode === "equal") {
       return null;

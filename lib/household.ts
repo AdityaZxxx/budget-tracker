@@ -11,11 +11,6 @@ import prisma from "@/lib/prisma";
 
 export { FULL_MEMBER_ROLE, VIEW_ONLY_ROLE };
 
-// A user can belong to several Households; the cookie picks the active one.
-// A cookie pointing at a Household the user is no longer a member of falls
-// back to the oldest membership, so stale values can never surface another
-// household's ledger. A user with no memberships lazily gets a fresh
-// personal Household.
 export async function getOrCreatePersonalHousehold(userId: string) {
   const memberships = await prisma.householdMembership.findMany({
     where: {
@@ -91,9 +86,6 @@ export async function clearActiveHouseholdCookie() {
   cookieStore.delete(ACTIVE_HOUSEHOLD_COOKIE);
 }
 
-// View-only Members can read the whole ledger but change nothing; full
-// Members keep the equal rights every Member starts with. There is still no
-// owner: no Member outranks another full Member.
 export function assertFullMember(
   result: NonNullable<Awaited<ReturnType<typeof requireHousehold>>>,
 ) {

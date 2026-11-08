@@ -17,8 +17,6 @@ interface Props {
   memberCount: number;
 }
 
-// Empty state for a one-Member Household. Adding a Member is offered, not
-// pushed: a solo Household is a complete use case, not a half-set-up couple.
 const AddMemberCta = ({ memberCount }: Props) => {
   if (memberCount > 1) return null;
 

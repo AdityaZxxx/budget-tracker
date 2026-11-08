@@ -38,9 +38,6 @@ const DashboardPage = async () => {
     redirect("/wizard");
   }
 
-  // View-only Members see the ledger but get no mutation entry points; the
-  // actions re-check the role server-side, so hiding is courtesy, not the
-  // security boundary.
   const canEdit = result.membership.role !== VIEW_ONLY_ROLE;
   const memberCount = await getHouseholdMemberCount();
 
@@ -82,16 +79,10 @@ const DashboardPage = async () => {
       </div>
       {canEdit && <AddMemberCta memberCount={memberCount} />}
       <Overview currency={household.currency} />
-      {/* The shared-ledger cards start at two Members: below that the
-          shared/personal distinction does not exist yet. */}
       {memberCount > 1 && <SharedSpendingCard currency={household.currency} />}
-      {/* One Member means nobody to owe or be owed by, so the card would
-          only ever show its "invite someone" empty text. */}
       {memberCount > 1 && (
         <Balances currency={household.currency} canEdit={canEdit} />
       )}
-      {/* With two Members the pairwise list is already the minimal set of
-          transfers; simplification only earns its keep from three up. */}
       {memberCount > 2 && <SimplifyDebts currency={household.currency} />}
       <Goals currency={household.currency} canEdit={canEdit} />
       <History currency={household.currency} />

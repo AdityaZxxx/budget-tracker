@@ -51,8 +51,6 @@ const MembersSection = () => {
     queryFn: listMembers,
   });
 
-  // The caller's role decides whether the mutation controls render at all;
-  // every action re-checks it server-side.
   const callerRole = members.find(
     (member) => member.user.id === session?.user.id,
   )?.role;

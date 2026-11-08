@@ -68,7 +68,6 @@ export default function HouseholdSwitcher() {
   const { mutate: switchTo, isPending: isSwitching } = useMutation({
     mutationFn: switchHousehold,
     onSuccess: () => {
-      // Everything on screen is household-scoped, so all queries refetch.
       queryClient.invalidateQueries();
       router.refresh();
     },
@@ -85,8 +84,6 @@ export default function HouseholdSwitcher() {
       queryClient.invalidateQueries();
       setCreateOpen(false);
       setName("");
-      // The new household has no currency, so the dashboard routes into the
-      // wizard to set it up.
       router.push("/");
       router.refresh();
     },

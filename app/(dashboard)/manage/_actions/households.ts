@@ -7,8 +7,6 @@ import { getSession } from "@/lib/auth";
 import { setActiveHouseholdCookie } from "@/lib/household";
 import prisma from "@/lib/prisma";
 
-// Switching is membership-gated, not role-gated: a view-only member may
-// still switch to (or create) another household where they have full edit.
 export async function switchHousehold(householdId: string) {
   const session = await getSession();
   if (!session) {
@@ -53,8 +51,6 @@ export async function createHousehold(name: string) {
     return created;
   });
 
-  // The creator starts working in the new household right away; the
-  // dashboard sends them to the wizard because it has no currency yet.
   await setActiveHouseholdCookie(household.id);
   revalidatePath("/", "layout");
   return household;

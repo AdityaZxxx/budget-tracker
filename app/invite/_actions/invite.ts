@@ -7,17 +7,14 @@ import { setActiveHouseholdCookie } from "@/lib/household";
 import { notify, notifyMembers } from "@/lib/notifications";
 import prisma from "@/lib/prisma";
 
-// Accepting an invite is an explicit button press, not a side effect of
-// loading the link, because the join also sets the active-household cookie
-// and cookies cannot be written while a page renders.
+// The join lives in a Server Action rather than the page render: Next.js
+// forbids writing cookies while a page renders.
 export async function joinHouseholdByToken(token: string) {
   const session = await getSession();
   if (!session) {
     redirect(`/sign-in?next=${encodeURIComponent(`/invite/${token}`)}`);
   }
 
-  // The token is a bearer credential: holding it authorizes joining this
-  // one household, so the membership is keyed only on household + user.
   const inviteLink = await prisma.inviteLink.findFirst({
     where: {
       token,
@@ -45,8 +42,6 @@ export async function joinHouseholdByToken(token: string) {
       },
     });
 
-    // The link creator gets a dedicated event; everyone else just sees the
-    // join, so the creator is excluded from the member_joined fan-out.
     const otherMembers = await prisma.householdMembership.findMany({
       where: {
         householdId: inviteLink.householdId,
@@ -74,8 +69,6 @@ export async function joinHouseholdByToken(token: string) {
     }
   }
 
-  // Joining lands the member in the joined household, even when they
-  // already belong to others.
   await setActiveHouseholdCookie(inviteLink.householdId);
   redirect("/");
 }
