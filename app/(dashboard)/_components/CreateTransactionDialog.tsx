@@ -48,6 +48,7 @@ import { cn } from "@/lib/utils";
 import { CreateTransactionSchema } from "@/schemas/transaction";
 
 import { listGoals } from "../_actions/goals";
+import { getHouseholdMemberCount } from "../_actions/household";
 import { CreateTransaction } from "../_actions/transaction";
 import CategoryPicker from "./CategoryPicker";
 
@@ -95,6 +96,17 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
   });
 
   const goals = goalsQuery.data ?? [];
+
+  // Until the count arrives the toggle stays visible: hiding it on a guess
+  // would flash it away for multi-Member households.
+  const memberCountQuery = useQuery({
+    queryKey: ["memberCount"],
+    queryFn: getHouseholdMemberCount,
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
+  });
+  const memberCount = memberCountQuery.data;
+  const showSharedToggle = memberCount === undefined || memberCount > 1;
 
   const queryClient = useQueryClient();
 
@@ -382,31 +394,33 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
             </form.Field>
           )}
 
-          <form.Field name="shared">
-            {(field) => (
-              <Field>
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id={field.name}
-                    name={field.name}
-                    checked={field.state.value}
-                    onBlur={field.handleBlur}
-                    onCheckedChange={(checked) => field.handleChange(checked)}
-                  />
-                  <FieldLabel
-                    htmlFor={field.name}
-                    className="text-sm font-normal"
-                  >
-                    Shared with household
-                  </FieldLabel>
-                </div>
-                <FieldDescription className="text-xs sm:text-sm">
-                  Personal transactions are visible only to you and excluded
-                  from household totals and budgets
-                </FieldDescription>
-              </Field>
-            )}
-          </form.Field>
+          {showSharedToggle && (
+            <form.Field name="shared">
+              {(field) => (
+                <Field>
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id={field.name}
+                      name={field.name}
+                      checked={field.state.value}
+                      onBlur={field.handleBlur}
+                      onCheckedChange={(checked) => field.handleChange(checked)}
+                    />
+                    <FieldLabel
+                      htmlFor={field.name}
+                      className="text-sm font-normal"
+                    >
+                      Shared with household
+                    </FieldLabel>
+                  </div>
+                  <FieldDescription className="text-xs sm:text-sm">
+                    Personal transactions are visible only to you and excluded
+                    from household totals and budgets
+                  </FieldDescription>
+                </Field>
+              )}
+            </form.Field>
+          )}
 
           <DialogFooter className="gap-2 sm:gap-0">
             <DialogClose

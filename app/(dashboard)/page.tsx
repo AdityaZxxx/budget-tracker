@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 import { requireHousehold } from "@/lib/household";
 
 import { getHouseholdMemberCount } from "./_actions/household";
+import AddMemberCta from "./_components/AddMemberCta";
 import Balances from "./_components/Balances";
 import CreateTransactionDialog from "./_components/CreateTransactionDialog";
 import Goals from "./_components/Goals";
 import History from "./_components/History";
-import InvitePartnerCta from "./_components/InvitePartnerCta";
 import Overview from "./_components/Overview";
 
 export const metadata: Metadata = {
@@ -71,9 +71,11 @@ const DashboardPage = async () => {
           </div>
         </div>
       </div>
-      <InvitePartnerCta memberCount={memberCount} />
+      <AddMemberCta memberCount={memberCount} />
       <Overview currency={household.currency} />
-      <Balances currency={household.currency} />
+      {/* One Member means nobody to owe or be owed by, so the card would
+          only ever show its "invite someone" empty text. */}
+      {memberCount > 1 && <Balances currency={household.currency} />}
       <Goals currency={household.currency} />
       <History currency={household.currency} />
     </div>

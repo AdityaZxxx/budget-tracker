@@ -17,25 +17,30 @@ interface Props {
   memberCount: number;
 }
 
-const InvitePartnerCta = ({ memberCount }: Props) => {
+// Empty state for a one-Member Household. Adding a Member is offered, not
+// pushed: a solo Household is a complete use case, not a half-set-up couple.
+const AddMemberCta = ({ memberCount }: Props) => {
   if (memberCount > 1) return null;
 
   return (
     <div className="container pt-6">
-      <Card className="border-emerald-700/30 bg-emerald-500/5 transition-all hover:shadow-md">
+      <Card className="transition-all hover:shadow-md">
         <CardHeader>
-          <CardTitle className="text-xl">Invite your partner</CardTitle>
+          <CardTitle className="text-xl">
+            Add a Member any time to share this ledger
+          </CardTitle>
           <CardDescription>
-            Share a revocable link or QR code to add another member to your
-            household. You will both see the same ledger.
+            Share a revocable link or QR code and everyone you add sees the same
+            transactions, budgets, and goals. Tracking on your own works fine
+            too.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <InviteLinkDialog
             trigger={
-              <Button className="gap-2">
+              <Button variant="outline" className="gap-2">
                 <UserPlus className="h-4 w-4" />
-                Invite your partner
+                Invite a Member
               </Button>
             }
           />
@@ -45,4 +50,4 @@ const InvitePartnerCta = ({ memberCount }: Props) => {
   );
 };
 
-export default InvitePartnerCta;
+export default AddMemberCta;
