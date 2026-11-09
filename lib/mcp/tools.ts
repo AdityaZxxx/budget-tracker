@@ -2,16 +2,16 @@ import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
 import { z } from "zod";
 
-// The tools answer with JSON in the text block. Agents read it, and the CLI
-// parses it, so both sides see the same shape.
+// No tool declares an output schema, so the SDK never expects
+// structuredContent and the payload rides in the text block.
 export function toolResult(data: unknown): CallToolResult {
   return {
     content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
   };
 }
 
-// A failed tool call is a result the agent can read and react to, not a
-// transport error, so the failure is reported in the result itself.
+// A tool failure is a result the agent can read and react to, not a
+// transport error.
 export function toolError(message: string): CallToolResult {
   return {
     content: [{ type: "text", text: message }],
@@ -30,28 +30,47 @@ export const dateRangeShape = {
     .describe("End date as YYYY-MM-DD. Defaults to today."),
 };
 
-const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 
-function startOfDay(value: string) {
-  return new Date(`${value}T00:00:00.000Z`);
+export function parseDate(value: string) {
+  const match = DATE_PATTERN.exec(value);
+
+  if (!match) {
+    throw new Error(`Invalid date: ${value}. Use the YYYY-MM-DD format.`);
+  }
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const date = new Date(Date.UTC(year, month - 1, day));
+
+  // Date.UTC rolls 2026-02-30 into March 2 instead of failing, so reading
+  // the parts back is what catches an impossible date.
+  if (
+    date.getUTCFullYear() !== year ||
+    date.getUTCMonth() !== month - 1 ||
+    date.getUTCDate() !== day
+  ) {
+    throw new Error(`Invalid date: ${value}. Use the YYYY-MM-DD format.`);
+  }
+
+  return date;
 }
 
-function endOfDay(value: string) {
-  return new Date(`${value}T23:59:59.999Z`);
+export function startOfDay(value: string) {
+  return parseDate(value);
 }
 
-// The range is inclusive on both ends and defaults to the current calendar
-// month, which is the range the dashboard opens on. The defaults use the
-// caller's own calendar, so "this month" means the month they are in.
+export function endOfDay(value: string) {
+  const date = parseDate(value);
+  date.setUTCHours(23, 59, 59, 999);
+  return date;
+}
+
+// The defaults read the caller's local calendar components and build a UTC
+// date from them, so "this month" means their month, not UTC's.
 export function resolveDateRange(from?: string, to?: string) {
   const now = new Date();
-
-  if (from && !DATE_PATTERN.test(from)) {
-    throw new Error(`Invalid date: ${from}. Use the YYYY-MM-DD format.`);
-  }
-  if (to && !DATE_PATTERN.test(to)) {
-    throw new Error(`Invalid date: ${to}. Use the YYYY-MM-DD format.`);
-  }
 
   const start = from
     ? startOfDay(from)
@@ -69,10 +88,6 @@ export function resolveDateRange(from?: string, to?: string) {
           999,
         ),
       );
-
-  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
-    throw new Error("The date range is not a real date.");
-  }
 
   if (start > end) {
     throw new Error("The start date is after the end date.");
