@@ -18,6 +18,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -114,7 +115,9 @@ export default function HouseholdSwitcher() {
           <ChevronDown className="h-3.5 w-3.5 opacity-50" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-60">
-          <DropdownMenuLabel>Households</DropdownMenuLabel>
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>Households</DropdownMenuLabel>
+          </DropdownMenuGroup>
           <DropdownMenuSeparator />
           {households.length === 0 ? (
             <p className="px-2 py-3 text-sm text-muted-foreground">Loading…</p>
