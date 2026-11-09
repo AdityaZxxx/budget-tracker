@@ -2,7 +2,11 @@
 
 import { redirect } from "next/navigation";
 
-import { getBudgetsWithProgress } from "@/lib/budgets";
+import {
+  createHouseholdBudget,
+  getBudgetsWithProgress,
+  updateHouseholdBudget,
+} from "@/lib/budgets";
 import { assertFullMember, requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 import {
@@ -35,28 +39,7 @@ export async function createBudget(form: CreateBudgetSchemaType) {
   }
   assertFullMember(result);
 
-  const { household } = result;
-
-  const category = await prisma.category.findFirst({
-    where: {
-      householdId: household.id,
-      name: parsedBody.data.category,
-      type: "expense",
-    },
-  });
-
-  if (!category) {
-    throw new Error("Category not found");
-  }
-
-  return await prisma.budget.create({
-    data: {
-      householdId: household.id,
-      category: category.name,
-      amount: parsedBody.data.amount,
-      mode: parsedBody.data.mode,
-    },
-  });
+  return await createHouseholdBudget(result.household.id, parsedBody.data);
 }
 
 export async function updateBudget(form: UpdateBudgetSchemaType) {
@@ -71,31 +54,7 @@ export async function updateBudget(form: UpdateBudgetSchemaType) {
   }
   assertFullMember(result);
 
-  const { household } = result;
-
-  const category = await prisma.category.findFirst({
-    where: {
-      householdId: household.id,
-      name: parsedBody.data.category,
-      type: "expense",
-    },
-  });
-
-  if (!category) {
-    throw new Error("Category not found");
-  }
-
-  return await prisma.budget.update({
-    where: {
-      id: parsedBody.data.id,
-      householdId: household.id,
-    },
-    data: {
-      category: category.name,
-      amount: parsedBody.data.amount,
-      mode: parsedBody.data.mode,
-    },
-  });
+  return await updateHouseholdBudget(result.household.id, parsedBody.data);
 }
 
 export async function deleteBudget(form: DeleteBudgetSchemaType) {

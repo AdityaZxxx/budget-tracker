@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 
-import { getGoalsWithProgress } from "@/lib/goals";
+import { createHouseholdGoal, getGoalsWithProgress } from "@/lib/goals";
 import { assertFullMember, requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 import {
@@ -33,17 +33,7 @@ export async function createGoal(form: CreateGoalSchemaType) {
   }
   assertFullMember(result);
 
-  const { household } = result;
-
-  const { name, target, deadline } = parsedBody.data;
-  return await prisma.goal.create({
-    data: {
-      householdId: household.id,
-      name,
-      target,
-      deadline: deadline ?? null,
-    },
-  });
+  return await createHouseholdGoal(result.household.id, parsedBody.data);
 }
 
 export async function deleteGoal(form: DeleteGoalSchemaType) {

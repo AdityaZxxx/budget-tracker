@@ -16,9 +16,8 @@ import {
   toolResult,
 } from "./tools";
 
-// The read tools answer from the token's Household. Everything except the
-// transaction list is a household aggregate over shared Transactions only,
-// so a read never exposes another Member's personal spending.
+// Every read but the transaction list is a household aggregate over shared
+// Transactions only.
 export function registerReadTools(server: McpServer, context: McpContext) {
   server.registerTool(
     "get_overview",
@@ -110,7 +109,7 @@ export function registerReadTools(server: McpServer, context: McpContext) {
     {
       title: "Get balances",
       description:
-        "What each other Member owes the caller, or what the caller owes them, from shared expenses and settlements.",
+        "What each other Member owes the caller, or what the caller owes them, from shared Transactions and Settlements.",
       inputSchema: {},
     },
     async () => {

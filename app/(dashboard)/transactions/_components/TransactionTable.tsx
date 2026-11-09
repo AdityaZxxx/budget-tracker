@@ -491,6 +491,19 @@ function AddedByCell({ transaction }: { transaction: TransactionHistoryRow }) {
           Personal
         </Badge>
       )}
+      {transaction.addedVia === "agent" && (
+        // The marker says the entry arrived through an assistant, so a Member
+        // can spot the ones to check. The label carries the meaning on its
+        // own and the tooltip only adds the detail.
+        <Tooltip>
+          <TooltipTrigger render={<span className="inline-flex" />}>
+            <Badge variant="outline" className="text-xs">
+              Via agent
+            </Badge>
+          </TooltipTrigger>
+          <TooltipContent>Added through an assistant</TooltipContent>
+        </Tooltip>
+      )}
     </div>
   );
 }

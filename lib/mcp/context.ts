@@ -1,8 +1,7 @@
 import type { TokenAuth } from "@/lib/api-token";
 import type { TokenScope } from "@/lib/types";
 
-// Everything a tool needs to answer a request, resolved once per call. The
-// token is the only credential, so no tool reads a browser session.
+// The token is the only credential, so no tool depends on a browser session.
 export type McpContext = {
   householdId: string;
   householdName: string | null;

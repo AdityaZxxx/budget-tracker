@@ -177,6 +177,9 @@ model Transaction {
   category String
   categoryIcon String
 
+  // null = added through the UI, "agent" = added through an assistant
+  addedVia String?
+
   // Tags the transaction as a contribution to a goal; contributions are
   // normal transactions, so they still count toward spending stats.
   goalId String?

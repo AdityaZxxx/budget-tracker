@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { CreateGoalSchema } from "@/schemas/goals";
 
 export async function getGoalsWithProgress(householdId: string) {
   const [goals, contributionSums] = await Promise.all([
@@ -38,3 +39,31 @@ export async function getGoalsWithProgress(householdId: string) {
 export type GoalWithProgress = Awaited<
   ReturnType<typeof getGoalsWithProgress>
 >[number];
+
+export type CreateGoalInput = {
+  name: string;
+  target: number;
+  deadline?: Date;
+};
+
+// A Goal holds no money: contributions are Transactions tagged with it.
+export async function createHouseholdGoal(
+  householdId: string,
+  input: CreateGoalInput,
+) {
+  const parsed = CreateGoalSchema.safeParse(input);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid goal");
+  }
+
+  const { name, target, deadline } = parsed.data;
+
+  return await prisma.goal.create({
+    data: {
+      householdId,
+      name,
+      target,
+      deadline: deadline ?? null,
+    },
+  });
+}
