@@ -30,7 +30,7 @@ async function loadBalanceInputs(householdId: string) {
           type: "expense",
         },
         select: {
-          transactionId: true,
+          id: true,
           addedById: true,
           amount: true,
         },
@@ -88,13 +88,13 @@ async function loadBalanceInputs(householdId: string) {
 }
 
 function sharesOwedForExpense(
-  expense: { transactionId: string; amount: number },
+  expense: { id: string; amount: number },
   memberships: { user: { id: string } }[],
   sharesByTransactionId: Map<string, { userId: string; amount: number }[]>,
   memberCount: number,
 ) {
   const owed = new Map<string, number>();
-  const shares = sharesByTransactionId.get(expense.transactionId);
+  const shares = sharesByTransactionId.get(expense.id);
   if (shares) {
     for (const share of shares) {
       owed.set(share.userId, share.amount);
