@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { requireHousehold } from "@/lib/household";
@@ -25,5 +26,10 @@ export async function UpdateUserCurrency(currency: string) {
       currency,
     },
   });
+
+  // The currency is passed to the dashboard as a server-rendered prop, so the
+  // pages that render it have to be re-rendered with the new value.
+  revalidatePath("/", "layout");
+
   return household;
 }
