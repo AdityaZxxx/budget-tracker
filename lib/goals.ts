@@ -17,6 +17,7 @@ export async function getGoalsWithProgress(householdId: string) {
         goalId: {
           not: null,
         },
+        shared: true,
       },
       _sum: {
         amount: true,
