@@ -53,9 +53,9 @@ import {
 import { useCallerRole } from "@/hooks/use-members";
 import { useSession } from "@/lib/auth-client";
 import { dateToUtcDate } from "@/lib/helpers";
+import { type GetTransactionsHistoryResponseType } from "@/lib/transactions";
 import { cn } from "@/lib/utils";
 
-import { GetTrasactionsHistoryResponseType } from "../../../api/transaction-history/route";
 import DeleteTransactionDialog from "./DeleteTransactionDialog";
 
 interface Props {
@@ -64,7 +64,7 @@ interface Props {
 }
 
 const emptyData: any[] = [];
-type TransactionHistoryRow = GetTrasactionsHistoryResponseType[0];
+type TransactionHistoryRow = GetTransactionsHistoryResponseType[0];
 
 export const columns: ColumnDef<TransactionHistoryRow>[] = [
   {
@@ -192,7 +192,7 @@ const TransactionTable = ({ from, to }: Props) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
-  const history = useQuery<GetTrasactionsHistoryResponseType>({
+  const history = useQuery<GetTransactionsHistoryResponseType>({
     queryKey: ["transactions", "history", from, to],
     queryFn: async () => {
       const response = await fetch(
@@ -447,7 +447,7 @@ const TransactionTable = ({ from, to }: Props) => {
 export default TransactionTable;
 
 function getCsvData(
-  transactions: GetTrasactionsHistoryResponseType | undefined,
+  transactions: GetTransactionsHistoryResponseType | undefined,
 ) {
   if (!transactions) return [];
 
@@ -464,7 +464,7 @@ function getCsvData(
   }));
 }
 
-function getCategoryOptions(transactions: GetTrasactionsHistoryResponseType) {
+function getCategoryOptions(transactions: GetTransactionsHistoryResponseType) {
   const categories = new Map<string, { value: string; label: string }>();
   for (const transaction of transactions) {
     categories.set(transaction.category, {

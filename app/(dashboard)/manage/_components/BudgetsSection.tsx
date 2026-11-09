@@ -37,10 +37,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { type BudgetWithProgress } from "@/lib/budgets";
 import { getFormatterForCurrency } from "@/lib/helpers";
 import { cn } from "@/lib/utils";
 
-import { listBudgets, type BudgetWithProgress } from "../../_actions/budgets";
+import { listBudgets } from "../../_actions/budgets";
 import BudgetDialog from "./BudgetDialog";
 import DeleteBudgetDialog from "./DeleteBudgetDialog";
 

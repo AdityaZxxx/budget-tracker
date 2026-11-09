@@ -2,9 +2,9 @@ import { redirect } from "next/navigation";
 import { NextRequest } from "next/server";
 import { z } from "zod";
 
-import { SETTLEMENT_CATEGORY_NAME } from "@/lib/constants";
+import { getCategories } from "@/lib/categories";
 import { requireHousehold } from "@/lib/household";
-import prisma from "@/lib/prisma";
+
 export async function GET(request: NextRequest) {
   const result = await requireHousehold();
 
@@ -23,19 +23,6 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  const type = queryParams.data;
-  const categories = await prisma.category.findMany({
-    where: {
-      householdId: result.household.id,
-      // The system Settlement category is hidden from pickers and lists.
-      name: {
-        not: SETTLEMENT_CATEGORY_NAME,
-      },
-      ...(type && { type }),
-    },
-    orderBy: {
-      name: "asc",
-    },
-  });
+  const categories = await getCategories(result.household.id, queryParams.data);
   return Response.json(categories);
 }

@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { requireHousehold } from "@/lib/household";
-import prisma from "@/lib/prisma";
+import { getBalanceStats } from "@/lib/transactions";
 import { OverviewQuerySchema } from "@/schemas/overview";
 
 interface QueryParams {
@@ -34,31 +34,4 @@ export async function GET(request: Request): Promise<Response> {
   );
 
   return Response.json(stats);
-}
-
-export type GetBalanceStatsResponseType = Awaited<
-  ReturnType<typeof getBalanceStats>
->;
-
-async function getBalanceStats(householdId: string, from: Date, to: Date) {
-  const totals = await prisma.transaction.groupBy({
-    by: ["type"],
-    where: {
-      householdId,
-      shared: true,
-      date: {
-        gte: from,
-        lte: to,
-      },
-    },
-    _sum: {
-      amount: true,
-    },
-  });
-
-  return {
-    expense: totals.find((t) => t.type === "expense")?._sum.amount || 0,
-
-    income: totals.find((t) => t.type === "income")?._sum.amount || 0,
-  };
 }

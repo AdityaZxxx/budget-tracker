@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 
-import { getMonthSpentByCategory } from "@/lib/budgets";
+import { getBudgetsWithProgress } from "@/lib/budgets";
 import { assertFullMember, requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 import {
@@ -20,35 +20,8 @@ export async function listBudgets() {
     redirect("/sign-in");
   }
 
-  const { household } = result;
-
-  const [budgets, spentByCategory] = await Promise.all([
-    prisma.budget.findMany({
-      where: {
-        householdId: household.id,
-      },
-      orderBy: {
-        createdAt: "asc",
-      },
-    }),
-    getMonthSpentByCategory(household.id, new Date()),
-  ]);
-
-  return budgets.map((budget) => {
-    const spent = spentByCategory.get(budget.category) ?? 0;
-    const percent = (spent / budget.amount) * 100;
-    return {
-      ...budget,
-      spent,
-      remaining: Math.round((budget.amount - spent) * 100) / 100,
-      percent: Math.round(percent * 100) / 100,
-    };
-  });
+  return await getBudgetsWithProgress(result.household.id);
 }
-
-export type BudgetWithProgress = Awaited<
-  ReturnType<typeof listBudgets>
->[number];
 
 export async function createBudget(form: CreateBudgetSchemaType) {
   const parsedBody = CreateBudgetSchema.safeParse(form);

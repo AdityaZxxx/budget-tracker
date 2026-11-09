@@ -31,13 +31,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { type BudgetWithProgress } from "@/lib/budgets";
 import { Currencies } from "@/lib/currencies";
 
-import {
-  createBudget,
-  updateBudget,
-  type BudgetWithProgress,
-} from "../../_actions/budgets";
+import { createBudget, updateBudget } from "../../_actions/budgets";
 
 interface Props {
   trigger?: ReactNode;

@@ -53,3 +53,32 @@ export async function getMonthSpentByCategory(
   });
   return new Map(rows.map((row) => [row.category, row._sum.amount ?? 0]));
 }
+
+export async function getBudgetsWithProgress(householdId: string) {
+  const [budgets, spentByCategory] = await Promise.all([
+    prisma.budget.findMany({
+      where: {
+        householdId,
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+    }),
+    getMonthSpentByCategory(householdId, new Date()),
+  ]);
+
+  return budgets.map((budget) => {
+    const spent = spentByCategory.get(budget.category) ?? 0;
+    const percent = (spent / budget.amount) * 100;
+    return {
+      ...budget,
+      spent,
+      remaining: Math.round((budget.amount - spent) * 100) / 100,
+      percent: Math.round(percent * 100) / 100,
+    };
+  });
+}
+
+export type BudgetWithProgress = Awaited<
+  ReturnType<typeof getBudgetsWithProgress>
+>[number];

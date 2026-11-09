@@ -1,9 +1,8 @@
 import { redirect } from "next/navigation";
 import { NextRequest } from "next/server";
 
-import { getFormatterForCurrency } from "@/lib/helpers";
 import { requireHousehold } from "@/lib/household";
-import prisma from "@/lib/prisma";
+import { getTransactionsHistory } from "@/lib/transactions";
 import { OverviewQuerySchema } from "@/schemas/overview";
 
 export async function GET(request: NextRequest) {
@@ -28,7 +27,7 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  const transactions = await getTrasactionsHistory(
+  const transactions = await getTransactionsHistory(
     result.household.id,
     result.session.user.id,
     result.household.currency,
@@ -37,50 +36,4 @@ export async function GET(request: NextRequest) {
   );
 
   return Response.json(transactions);
-}
-
-export type GetTrasactionsHistoryResponseType = Awaited<
-  ReturnType<typeof getTrasactionsHistory>
->;
-
-async function getTrasactionsHistory(
-  householdId: string,
-  userId: string,
-  currency: string | null,
-  from: Date,
-  to: Date,
-) {
-  if (!currency) {
-    throw new Error("household currency not set");
-  }
-
-  const formatter = getFormatterForCurrency(currency);
-
-  const transactions = await prisma.transaction.findMany({
-    where: {
-      householdId,
-      date: {
-        gte: from,
-        lte: to,
-      },
-      // Members see shared transactions plus their own personal ones.
-      OR: [{ shared: true }, { addedById: userId }],
-    },
-    orderBy: {
-      date: "asc",
-    },
-    include: {
-      addedBy: {
-        select: {
-          name: true,
-        },
-      },
-    },
-  });
-
-  return transactions.map(({ addedBy, ...transaction }) => ({
-    ...transaction,
-    addedByName: addedBy.name,
-    formattedAmount: formatter.format(transaction.amount),
-  }));
 }

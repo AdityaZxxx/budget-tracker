@@ -8,8 +8,7 @@ import CountUp from "react-countup";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Card } from "@/components/ui/card";
 import { dateToUtcDate, getFormatterForCurrency } from "@/lib/helpers";
-
-import { type GetBalanceStatsResponseType } from "../../api/stats/balance/route";
+import { type GetBalanceStatsResponseType } from "@/lib/transactions";
 
 interface Props {
   from: Date;
