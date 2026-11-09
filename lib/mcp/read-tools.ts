@@ -74,10 +74,11 @@ export function registerReadTools(server: McpServer, context: McpContext) {
     async ({ from, to, category, shared }) => {
       try {
         const range = resolveDateRange(from, to);
+        const currency = context.currency ?? "USD";
         const transactions = await getTransactionsHistory(
           context.householdId,
           context.userId,
-          context.currency ?? "USD",
+          currency,
           range.from,
           range.to,
           { category, shared },
@@ -86,7 +87,7 @@ export function registerReadTools(server: McpServer, context: McpContext) {
         return toolResult({
           from: range.from.toISOString(),
           to: range.to.toISOString(),
-          currency: context.currency,
+          currency,
           transactions: transactions.map((transaction) => ({
             id: transaction.id,
             date: transaction.date.toISOString(),

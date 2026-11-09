@@ -41,7 +41,8 @@ function endOfDay(value: string) {
 }
 
 // The range is inclusive on both ends and defaults to the current calendar
-// month, which is the range the dashboard opens on.
+// month, which is the range the dashboard opens on. The defaults use the
+// caller's own calendar, so "this month" means the month they are in.
 export function resolveDateRange(from?: string, to?: string) {
   const now = new Date();
 
@@ -54,10 +55,24 @@ export function resolveDateRange(from?: string, to?: string) {
 
   const start = from
     ? startOfDay(from)
+    : new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0));
+  const end = to
+    ? endOfDay(to)
     : new Date(
-        Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0),
+        Date.UTC(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate(),
+          23,
+          59,
+          59,
+          999,
+        ),
       );
-  const end = to ? endOfDay(to) : endOfDay(now.toISOString().slice(0, 10));
+
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    throw new Error("The date range is not a real date.");
+  }
 
   if (start > end) {
     throw new Error("The start date is after the end date.");

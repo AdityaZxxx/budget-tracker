@@ -1,4 +1,5 @@
 import type { TokenAuth } from "@/lib/api-token";
+import type { TokenScope } from "@/lib/types";
 
 // Everything a tool needs to answer a request, resolved once per call. The
 // token is the only credential, so no tool reads a browser session.
@@ -9,6 +10,7 @@ export type McpContext = {
   userId: string;
   userName: string;
   role: string;
+  scope: TokenScope;
 };
 
 export function contextFromToken(
@@ -21,5 +23,6 @@ export function contextFromToken(
     userId: auth.user.id,
     userName: auth.user.name,
     role: auth.membership.role,
+    scope: auth.token.scope as TokenScope,
   };
 }

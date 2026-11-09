@@ -11,6 +11,7 @@
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
     "typecheck": "tsc --noEmit",
+    "typecheck:cli": "pnpm --filter sora-cli run typecheck",
     "verify": "pnpm run lint && pnpm run fmt:check && pnpm run typecheck",
     "postinstall": "prisma generate",
     "prepare": "husky"
