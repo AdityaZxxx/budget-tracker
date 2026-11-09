@@ -7,6 +7,10 @@ export async function getTransactionsHistory(
   currency: string | null,
   from: Date,
   to: Date,
+  filters?: {
+    category?: string;
+    shared?: boolean;
+  },
 ) {
   if (!currency) {
     throw new Error("household currency not set");
@@ -23,6 +27,8 @@ export async function getTransactionsHistory(
       },
       // Members see shared transactions plus their own personal ones.
       OR: [{ shared: true }, { addedById: userId }],
+      ...(filters?.category && { category: filters.category }),
+      ...(filters?.shared !== undefined && { shared: filters.shared }),
     },
     orderBy: {
       date: "asc",

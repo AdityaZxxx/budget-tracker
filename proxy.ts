@@ -17,10 +17,13 @@ export function proxy(request: NextRequest) {
   const isAuthApi = pathname.startsWith("/api/auth");
   // Cron routes authenticate with a bearer secret instead of a session.
   const isCronApi = pathname.startsWith("/api/cron");
+  // The MCP endpoint authenticates with an API token instead of a session.
+  const isTokenApi = pathname.startsWith("/api/mcp");
   const isApiRoute = pathname.startsWith("/api");
   const isProtected =
     !isPublic &&
     !isCronApi &&
+    !isTokenApi &&
     (pathname === "/" ||
       protectedPrefixes.some((prefix) => pathname.startsWith(prefix)) ||
       (isApiRoute && !isAuthApi));
