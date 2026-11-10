@@ -137,12 +137,16 @@ const InviteLinkDialog = ({ trigger }: Props) => {
                       </div>
                     )}
                     <div className="w-full min-w-0 flex-1 space-y-2">
-                      <span
-                        className="block truncate text-xs text-muted-foreground"
-                        title={url}
-                      >
-                        {url}
-                      </span>
+                      <Tooltip>
+                        <TooltipTrigger
+                          render={
+                            <span className="block truncate text-xs text-muted-foreground">
+                              {url}
+                            </span>
+                          }
+                        />
+                        <TooltipContent>{url}</TooltipContent>
+                      </Tooltip>
                       <div className="flex gap-2">
                         <Tooltip>
                           <TooltipTrigger
