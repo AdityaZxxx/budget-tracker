@@ -145,13 +145,6 @@ A proof is good enough when it shows: the action that was taken, the value the s
 
 Run `stop` after every failed attempt too, so a broken iteration does not strand a port or a container.
 
-## Known defects at this commit
-
-Found by running this skill, and reproducible on `main`:
-
-1. **Adding a transaction from the UI crashes the page.** In the "Create a new expense" dialog, picking a category makes React throw "Maximum update depth exceeded" and the page dies. `CategoryPicker` calls `onChange` from an effect whose dependency is a new function on every render, and the React Compiler does not stabilise it. Reproduces in the dev server and in the production bundle. Adding a transaction through MCP or the CLI works, so the journeys in `features/transactions.md` use that path and report the UI failure as a finding.
-2. **Signing in against the production bundle leaves a blank page.** The sign-in request succeeds and the session cookie is set, but the client-side navigation to the dashboard unmounts the page and the URL stays on `/sign-in`. The dev server is fine. `control-sora launch --prod` reproduces it; `control-sora launch` (dev) does not.
-
 ## The feature map
 
 `features/README.md` indexes the map. One file per user-facing feature:

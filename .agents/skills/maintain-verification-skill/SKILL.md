@@ -39,10 +39,3 @@ Only edit the verification skill's own directory (`.agents/skills/verify-sora/`:
 6. **Ship or stop.** For **changed**: write the proven corrections into the working tree and leave them there, uncommitted, with a summary of each file and why it changed. Do not commit, do not push, and do not open a pull request — this repo's flow is local-only, and the user reviews the diff before anything is committed. For **clean** or **blocked**: change nothing and report the outcome and the coverage honestly.
 
 Keep concise run notes (features covered, unreachable prerequisites, confirmed drift, outcome) in `.scratch/verify-sora/runs/<run-id>.md`; they are scratch and are not committed.
-
-## Known product gaps to expect
-
-These were found by the verification skill on `main` and are product regressions, not doc drift. Do not "fix" them in the map; keep them recorded and re-check them on every pass.
-
-- Choosing a category in the new-transaction dialog crashes the page with `Maximum update depth exceeded` (both the dev server and the production bundle).
-- Signing in against the production bundle (`control-sora launch --prod`) leaves a blank page at `/sign-in`; the dev server is fine.

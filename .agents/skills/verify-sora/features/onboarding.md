@@ -43,4 +43,4 @@ Preconditions:
 - `control-sora login` only signs in the seeded members. A brand new member has to be driven through the form, as above.
 - The dashboard's date-range button reads `Nov 10, 2026` (today) on a fresh household even though the range is the whole month. Assert the numbers, not the button label.
 - After `reset` or `reset --empty`, the browser's session cookie points at a deleted session. Sign in again before driving.
-- Signing in against the production bundle (`control-sora launch --prod`) leaves a blank page at `/sign-in`: the session is created, but the client-side navigation to the dashboard never happens. Drive onboarding on the dev server, and see the known defects in the skill's `SKILL.md`.
+- The auth pages show the Sora mark, not a link home: the dashboard is out of reach while signed out, and prefetching it would cache the sign-in redirect under the dashboard route.
