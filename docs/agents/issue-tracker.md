@@ -7,7 +7,7 @@ Issues and specs for this repo live as markdown files in `.scratch/`. Nothing is
 - One feature per directory: `.scratch/<feature-slug>/`
 - The spec is `.scratch/<feature-slug>/spec.md`
 - Implementation issues are one file per ticket at `.scratch/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01`, never a single combined tickets file
-- Triage state is recorded as a `Status:` line near the top of each issue file (see `triage-labels.md` for the role strings)
+- Triage state is recorded as a `Status:` line near the top of each issue file (see `Triage labels` below for the role strings)
 - Comments and conversation history append to the bottom of the file under a `## Comments` heading
 
 `.scratch/` is gitignored, so tickets are local working state. Durable rules live in `CODING_STANDARDS.md` and `AGENTS.md`, which are tracked.
@@ -24,9 +24,23 @@ What the ticket must deliver, in the product language of `GLOSSARY.md`.
 Rules: `pnpm build` green; no commit; load-bearing comments only.
 ```
 
-- `Status:` carries the ticket's state. Build tickets use `open`, `in progress`, or `done`. A ticket that arrived from outside the build plan carries one of the role strings from `triage-labels.md`.
+- `Status:` carries the ticket's state. Build tickets use `open`, `in progress`, or `done`. A ticket that arrived from outside the build plan carries one of the role strings below.
 - `Blocked by: NN` lists the ticket numbers that must land first, so blockers-first order is mechanical rather than remembered.
 - `Rules:` restates the house rules for that ticket when it needs to stand alone in a fresh context.
+
+## Triage labels
+
+The skills speak in terms of five canonical triage roles. The tracker is local markdown, so a label is the value written on the ticket's `Status:` line.
+
+| Label in mattpocock/skills | Label in our tracker | Meaning                                  |
+| -------------------------- | -------------------- | ---------------------------------------- |
+| `needs-triage`             | `needs-triage`       | Maintainer needs to evaluate this issue  |
+| `needs-info`               | `needs-info`         | Waiting on reporter for more information |
+| `ready-for-agent`          | `ready-for-agent`    | Fully specified, ready for an AFK agent  |
+| `ready-for-human`          | `ready-for-human`    | Requires human implementation            |
+| `wontfix`                  | `wontfix`            | Will not be actioned                     |
+
+Build tickets use `open`, `in progress`, or `done` instead. When a skill mentions a role (for example "apply the AFK-ready triage label"), use the corresponding label string from this table.
 
 ## When a skill says "publish to the issue tracker"
 

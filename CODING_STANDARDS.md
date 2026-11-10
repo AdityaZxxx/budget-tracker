@@ -1,7 +1,5 @@
 # Coding Standards
 
-Sora is a free finance app for couples and households: one shared ledger per Household, with budgets, goals, and balances. Full members of a Household have equal rights; a Household can also hold view-only members who can read but not change anything.
-
 These are the judgement calls this repo makes. Mechanical rules (where a file lives, what a function is called) belong in the linter rather than here, because a check fails loudly and prose drifts silently. The product also runs on free tiers only (`docs/adr/0002-free-forever-zero-cost.md`), so a diff that needs a paid service is a finding.
 
 ## Household scope is the authorization model
@@ -55,6 +53,61 @@ Mutations are server actions, so the household check runs inside the same call a
 
 A diff that adds a mutation should land as an action with the household check inside it. A diff that adds a query should follow the polling pattern its neighbouring queries already use, and a diff that mutates data should invalidate the query keys it affects.
 
+## Every surface reaches the same seam
+
+Sora has three surfaces: the web app, the MCP endpoint, and the CLI. The CLI is a thin MCP client, so the surfaces that carry the rules are the web app and the MCP endpoint, and both must reach the same `lib/` functions. The web app reaches them through server actions and `GET` routes; the MCP endpoint reaches them through the tools in `lib/mcp/`.
+
+A rule that lives only in a server action is a rule an agent walks past, because agents drive the MCP endpoint. When a diff changes how money is read or written, it decides what happens on both paths. The seam is `lib/`, and the transports stay thin: a server action and an MCP tool decode their input, call one `lib/` function, and map the error.
+
+The `lib/` function owns the rule. It validates the write it performs, and a transport's schema is a coarse filter that produces a usable error, not the rule itself. A rule written in one transport and missing from `lib/` is a rule the other transport does not have, and a rule the two transports spell differently is drift until someone says the difference is deliberate.
+
+A helper is extracted when it names a concept. A single-use expression stays where it is used.
+
+## Complexity needs a reason
+
+Before a diff adds a check, a branch, a flag, or a layer for a race or an edge case, it names three things: the concrete failure, how likely it is, and what the complexity costs. A human agrees with those three before the complexity lands. A defensive branch that cannot name a failure is scope the diff did not need.
+
+If a rule in this file fights the task in front of you, say so and get a human sign-off before breaking it. A rule here is a default, not a wall.
+
+## Safety
+
+Four rules protect the people whose money this app holds. They are one line each in `AGENTS.md` because they apply to every task, including the ones that touch no product code. This is what they mean and how to comply.
+
+**Kill only what you started.** A dev server, a Postgres container, and a browser session all outlive the command that started them. Record the PID when you start a process and stop it by that PID. Matching on a name, a path, or a worktree string kills a sibling worktree's server, and `pkill -f` and `pgrep | kill` do it by pattern. The output looks identical either way, so the mistake is invisible from the terminal.
+
+**Disposable databases only.** A verification run starts its own Postgres container (see the `verify-sora` skill). A database holding a real household's data is not a fixture, and a migration pointed at one is not a test.
+
+**No machine-specific addresses in committed code.** A host, a port, and a secret belong in config or env. The documented local-dev defaults are the exception: `BETTER_AUTH_URL` in `.env.example`, the `NEXT_PUBLIC_SITE_URL` fallback in `app/layout.tsx`, and `DEFAULT_ENDPOINT` in `packages/sora-cli`. Anything else hardcoded is one developer's machine leaking into the repo.
+
+**Invented households.** Tickets, commits, messages, and screenshots use households, names, and amounts that exist nowhere. The verification fixture household (`avery@sora.test`, `blake@sora.test`) is the shape: `.test` addresses, invented names, round numbers.
+
+## Documentation
+
+Documentation is for a decision and its reason, or a constraint that spans components. It is not a feature list, a field reference, or a record of what a diff did; the code and the tests already hold those.
+
+A change that makes existing guidance inaccurate updates that guidance in the same change. When a documented decision changes, the affected text is rewritten or removed, not appended to. A new document needs a reason to exist that the code cannot carry.
+
+Plans, research notes, and scratch files are not committed. `.scratch/` is gitignored for that reason.
+
+## A money diff walks a checklist
+
+Before a diff that reads or writes money is called done, point at each of these:
+
+1. Every query filters by `householdId`.
+2. The filter is one of the two shapes: household aggregate, or member view.
+3. A shared transaction write moves the matching `MonthHistory` and `YearHistory` in the same `prisma.$transaction`.
+4. Any date that names a bucket uses the UTC getters.
+5. Any amount is formatted with `getFormatterForCurrency`.
+6. A mutation is a server action with the household check inside it; a read is a `GET` route.
+7. The mutation invalidates the query keys its change affects.
+8. Both paths reach the change: the web action and the MCP tool.
+
+Nothing here is new. It is the sections above gathered into the order a reviewer reads them, and a diff that fails one item is a finding. The checklist does not replace reading the diff.
+
+## Types are inferred
+
+Let the checker infer a type wherever it can. Annotate only where inference fails or where the type is the contract between two modules. `any` is not a type, it is a hole in the review, and `unknown` plus a narrowing is the fix.
+
 ## Comments are a last resort
 
 The default is none. A comment explaining what the code does is proof the code failed to say it itself: rename the symbol, extract the function, add a type, or restructure until the intent is obvious without prose. A surprise in our own code is the code's problem, not the reader's, and a comment is not the fix.
@@ -69,13 +122,19 @@ The same bar governs suppressions. Look up the rule an `eslint-disable`, `@ts-ig
 
 The working tree must pass the same checks CI runs. `pnpm run verify` is the source of truth for which checks those are.
 
-The repo has no test suite, by decision (`docs/ROADMAP.md`). The build is the safety net.
+The repo has no test suite, by decision (`docs/ROADMAP.md`). The build is the safety net for what compiles; behaviour is proved separately, by running the app.
 
 Lint and format are mechanical, and the tools own them: `oxlint` reports the rules, `oxfmt` decides the layout. Run `pnpm lint` and `pnpm fmt` before committing, and let the formatter rewrite the file rather than hand-tuning whitespace or import order.
 
 A pre-commit hook runs these on every commit: it formats the staged files, then runs `pnpm run verify`. The build stays in CI, because it is the slow one.
 
 A rule that fires on correct code gets fixed in the code, or, with a stated reason, in `.oxlintrc.json`. A scoped suppression comment is the last option, and only under the bar in "Comments are a last resort".
+
+## Prove behaviour, do not assert it
+
+A behaviour change is not finished until it has been seen running. Use the `verify-sora` skill to drive the real app against a disposable database and capture the run: the command, the value that came back, the side effect. Reading the source proves what the code says, not what the app does, and a green build does not see a hard budget refuse a transaction.
+
+The skill's own rule holds here: never edit product code during a verification run. A behaviour that no longer matches the feature map is a finding to report, not a defect to patch mid-run.
 
 ## Commit protocol
 

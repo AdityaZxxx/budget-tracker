@@ -20,7 +20,14 @@ If any of these files don't exist, **proceed silently**. Don't flag their absenc
 │   ├── 0001-household-scoped-data-model.md
 │   ├── 0002-free-forever-zero-cost.md
 │   └── 0003-invite-by-revocable-link.md
-└── src/
+├── app/          routes, server actions, and API routes
+├── components/   React components
+├── hooks/        client hooks
+├── lib/          the domain functions every surface reaches
+├── packages/     sora-cli and sora-lint-plugin
+├── prisma/       the schema and its migrations
+├── schemas/      the zod contracts the transports validate with
+└── proxy.ts
 ```
 
 ## Use the glossary's vocabulary
