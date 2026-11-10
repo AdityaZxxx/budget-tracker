@@ -1,16 +1,16 @@
 "use server";
 
+import type {
+  CreateGoalSchemaType,
+  DeleteGoalSchemaType,
+} from "@/schemas/goals";
+
 import { redirect } from "next/navigation";
 
 import { createHouseholdGoal, getGoalsWithProgress } from "@/lib/goals";
 import { assertFullMember, requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
-import {
-  CreateGoalSchema,
-  CreateGoalSchemaType,
-  DeleteGoalSchema,
-  DeleteGoalSchemaType,
-} from "@/schemas/goals";
+import { CreateGoalSchema, DeleteGoalSchema } from "@/schemas/goals";
 
 export async function listGoals() {
   const result = await requireHousehold();

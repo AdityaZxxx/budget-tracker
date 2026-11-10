@@ -1,14 +1,13 @@
 "use server";
 
+import type { RecordSettlementSchemaType } from "@/schemas/settlement";
+
 import { redirect } from "next/navigation";
 
 import { getMemberBalances, getSimplifiedTransfers } from "@/lib/balances";
 import { assertFullMember, requireHousehold } from "@/lib/household";
 import { recordSettlement } from "@/lib/settlements";
-import {
-  RecordSettlementSchema,
-  RecordSettlementSchemaType,
-} from "@/schemas/settlement";
+import { RecordSettlementSchema } from "@/schemas/settlement";
 
 export async function getHouseholdBalances() {
   const result = await requireHousehold();

@@ -1,5 +1,8 @@
 "use client";
 
+import type { ChartTooltipPayload } from "@/components/ui/chart";
+import type { Timeframe } from "@/lib/types";
+
 import CountUp from "react-countup";
 import {
   Bar,
@@ -11,20 +14,25 @@ import {
   YAxis,
 } from "recharts";
 
-import { Timeframe } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-export interface HistoryChartRow {
+export type HistoryChartRow = {
   year: number;
   month: number;
   expense: number;
   income: number;
   day?: number;
-}
+};
 
 interface Props {
   data: HistoryChartRow[];
   timeframe: Timeframe;
+  formatter: { format: (value: number) => string };
+}
+
+interface HistoryTooltipProps {
+  active?: boolean;
+  payload?: ChartTooltipPayload<HistoryChartRow>;
   formatter: { format: (value: number) => string };
 }
 
@@ -97,9 +105,10 @@ export default function HistoryChart({ data, timeframe, formatter }: Props) {
   );
 }
 
-function CustomTooltip({ active, payload, formatter }: any) {
+function CustomTooltip({ active, payload, formatter }: HistoryTooltipProps) {
   if (!active || !payload || payload.length === 0) return null;
   const data = payload[0].payload;
+  if (!data) return null;
   const { expense, income } = data;
   return (
     <div className="w-[300px] max-w-[calc(100vw-2rem)] rounded-md border bg-background p-4">

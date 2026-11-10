@@ -2,7 +2,7 @@
 
 import { differenceInDays } from "date-fns";
 import { CalendarIcon, ChevronDown, ChevronUp } from "lucide-react";
-import { type FC, JSX, useState } from "react";
+import { type FC, type JSX, useState } from "react";
 import { toast } from "sonner";
 
 import { useIsMobile } from "@/hooks/use-mobile";

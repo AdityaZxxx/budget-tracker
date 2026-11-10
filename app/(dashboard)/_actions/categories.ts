@@ -1,5 +1,11 @@
 "use server";
 
+import type {
+  CreateCategorySchemaType,
+  DeleteCategorySchemaType,
+  UpdateCategorySchemaType,
+} from "@/schemas/categories";
+
 import { redirect } from "next/navigation";
 
 import { SETTLEMENT_CATEGORY_NAME } from "@/lib/constants";
@@ -7,11 +13,8 @@ import { assertFullMember, requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 import {
   CreateCategorySchema,
-  CreateCategorySchemaType,
   DeleteCategorySchema,
-  DeleteCategorySchemaType,
   UpdateCategorySchema,
-  UpdateCategorySchemaType,
 } from "@/schemas/categories";
 
 export async function CreateCategory(form: CreateCategorySchemaType) {

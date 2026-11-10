@@ -1,6 +1,7 @@
 "use client";
 
 import type { HistoryChartRow } from "./HistoryChart";
+import type { Period, Timeframe } from "@/lib/types";
 
 import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
@@ -11,7 +12,6 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getFormatterForCurrency } from "@/lib/helpers";
-import { Period, Timeframe } from "@/lib/types";
 
 import HistoryPeriodSelector from "./HistoryPeriodSelector";
 

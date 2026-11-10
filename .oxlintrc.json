@@ -38,6 +38,18 @@
     // so React no longer needs to be in scope.
     "react/react-in-jsx-scope": "off",
 
+    // The rules the codebase already satisfies: type-only imports, no
+    // explicit any, no duplicate imports, no forEach.
+    "typescript/consistent-type-imports": "error",
+    "typescript/no-explicit-any": "error",
+    "import/no-duplicates": "error",
+    "unicorn/no-array-for-each": "error",
+
+    // 29 of the 30 hits are `import * as React`, which is how the React
+    // types are named here, and the last is the recharts namespace in the
+    // chart component. A rule that fires on correct code gets turned off.
+    "import/no-namespace": "off",
+
     "sora/no-em-dash-copy": "error",
     "sora/no-hookless-use-function": "error",
     "sora/no-low-value-comments": "error",

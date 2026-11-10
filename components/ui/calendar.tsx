@@ -4,6 +4,7 @@ import type {
   ChevronProps,
   RootProps,
   WeekNumberProps,
+  DayButton,
 } from "react-day-picker";
 
 import {
@@ -12,7 +13,7 @@ import {
   ChevronRightIcon,
 } from "lucide-react";
 import * as React from "react";
-import { DayButton, DayPicker, getDefaultClassNames } from "react-day-picker";
+import { DayPicker, getDefaultClassNames } from "react-day-picker";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";

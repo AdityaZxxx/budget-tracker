@@ -1,6 +1,8 @@
 "use client";
 
-import { Household } from "@prisma/client";
+import type { Currency } from "../lib/currencies";
+import type { Household } from "@prisma/client";
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronsUpDown } from "lucide-react";
 import * as React from "react";
@@ -24,7 +26,7 @@ import {
 import { useMediaQuery } from "@/hooks/use-media-query";
 
 import { UpdateUserCurrency } from "../app/wizard/_actions/userSettings";
-import { Currencies, Currency } from "../lib/currencies";
+import { Currencies } from "../lib/currencies";
 import SkeletonWrapper from "./SkeletonWrapper";
 
 export function CurrencyComboBox() {

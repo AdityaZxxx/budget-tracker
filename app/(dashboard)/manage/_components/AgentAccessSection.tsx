@@ -1,8 +1,9 @@
 "use client";
 
 import type { TokenScope } from "@/lib/types";
+import type { Household } from "@prisma/client";
+import type { ReactElement } from "react";
 
-import { Household } from "@prisma/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Check,
@@ -12,7 +13,7 @@ import {
   PlusSquare,
   TrashIcon,
 } from "lucide-react";
-import { ReactElement, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";

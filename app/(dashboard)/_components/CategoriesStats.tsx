@@ -1,5 +1,7 @@
 "use client";
 
+import type { TransactionType } from "@/lib/types";
+
 import { useQuery } from "@tanstack/react-query";
 
 import SkeletonWrapper from "@/components/SkeletonWrapper";
@@ -7,7 +9,6 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { dateToUtcDate, getFormatterForCurrency } from "@/lib/helpers";
-import { TransactionType } from "@/lib/types";
 
 import { type GetCategoriesStatsResponseType } from "../../api/stats/categories/route";
 

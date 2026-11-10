@@ -1,5 +1,8 @@
 "use client";
 
+import type { GetHistoryPeriodsResponseType } from "../../api/history-periods/route";
+import type { Period, Timeframe } from "@/lib/types";
+
 import { useQuery } from "@tanstack/react-query";
 
 import SkeletonWrapper from "@/components/SkeletonWrapper";
@@ -11,9 +14,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Period, Timeframe } from "@/lib/types";
-
-import { GetHistoryPeriodsResponseType } from "../../api/history-periods/route";
 
 interface Props {
   period: Period;

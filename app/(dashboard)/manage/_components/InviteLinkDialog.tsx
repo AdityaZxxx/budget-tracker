@@ -1,10 +1,12 @@
 "use client";
 
-import { InviteLink } from "@prisma/client";
+import type { InviteLink } from "@prisma/client";
+import type { ReactElement, ReactNode } from "react";
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Copy, Loader2, PlusSquare, TrashIcon } from "lucide-react";
 import dynamic from "next/dynamic";
-import { ReactElement, ReactNode, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";

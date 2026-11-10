@@ -1,13 +1,12 @@
 "use server";
 
+import type { RevokeInviteLinkSchemaType } from "@/schemas/invite";
+
 import { redirect } from "next/navigation";
 
 import { assertFullMember, requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
-import {
-  RevokeInviteLinkSchema,
-  RevokeInviteLinkSchemaType,
-} from "@/schemas/invite";
+import { RevokeInviteLinkSchema } from "@/schemas/invite";
 
 export async function createInviteLink() {
   const result = await requireHousehold();
