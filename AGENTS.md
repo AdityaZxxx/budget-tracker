@@ -1,35 +1,22 @@
-# AGENTS.md
+Sora is a free finance app for couples and households: one shared ledger per household, with budgets, goals, and balances.
 
-Sora is a free finance app for couples and households: one shared ledger per Household, with budgets, goals, and balances.
+## Read on demand
 
-## Agent skills
+Read the one the task names. They do not all need to be read.
 
-### Issue tracker
-
-Tickets are local markdown files under `.scratch/<feature>/`, one file per ticket, worked blockers-first. See `docs/agents/issue-tracker.md`.
-
-### Triage labels
-
-Five canonical roles, each label string equal to its name. See `docs/agents/triage-labels.md`.
-
-### Domain docs
-
-Single-context: root `GLOSSARY.md` plus `docs/adr/`. See `docs/agents/domain.md`.
-
-### Verification
-
-Drive the real app instead of asserting from the source. The `verify-sora` skill runs the web UI, the CLI, and the MCP endpoint against a disposable database. See `.agents/skills/verify-sora/SKILL.md`.
-
-## Coding standards
-
-The judgement calls this repo makes, plus the commit protocol. Read before reviewing a diff or committing, and read the sections you need before changing how money is read or written. See `CODING_STANDARDS.md`.
+- **Tickets** - picking up, writing, or ordering work: `docs/agents/issue-tracker.md`
+- **Vocabulary** - naming a domain concept, or a change that might contradict an ADR: `docs/agents/domain.md`
+- **Standards** - reviewing a diff or committing: `CODING_STANDARDS.md`
+- **Money diff** - changing how money is read or written: "A money diff walks a checklist" in `CODING_STANDARDS.md`
+- **Proof** - driving the real app: the `verify-sora` skill (`.agents/skills/verify-sora/SKILL.md`)
+- **Map drift** - the verification feature map no longer matches the app: the `maintain-verification-skill` skill (`.agents/skills/maintain-verification-skill/SKILL.md`)
 
 ## Safety
 
-- Kill only what you started. Never `pkill -f`, `pgrep | kill`, or kill a PID found by matching a name, path, or worktree string.
-- Never point a dev server, a migration, or a script at a database that holds a real household's data.
-- Never bake one machine's addresses into committed code: no hardcoded `localhost` URLs, origins, ports, or secrets in source, config, or `.env.example` beyond obvious placeholders.
-- Keep real household data out of the repo. Tickets, commits, messages, and captures use invented households, names, and amounts.
+- Kill only what you started: stop it by the PID you recorded, not by a name, a path, or a worktree string.
+- Dev servers, migrations, and scripts run against a disposable database. Real household data is never a target.
+- Committed code holds no machine-specific addresses, apart from the local-dev defaults in `.env.example`, `app/layout.tsx`, and `packages/sora-cli`. Host, port, and secrets live in config or env.
+- Invented households: tickets, commits, messages, and captures use names and amounts that exist nowhere.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

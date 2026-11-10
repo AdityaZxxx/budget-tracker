@@ -1,7 +1,5 @@
 # Coding Standards
 
-Sora is a free finance app for couples and households: one shared ledger per Household, with budgets, goals, and balances. Full members of a Household have equal rights; a Household can also hold view-only members who can read but not change anything.
-
 These are the judgement calls this repo makes. Mechanical rules (where a file lives, what a function is called) belong in the linter rather than here, because a check fails loudly and prose drifts silently. The product also runs on free tiers only (`docs/adr/0002-free-forever-zero-cost.md`), so a diff that needs a paid service is a finding.
 
 ## Household scope is the authorization model
@@ -70,6 +68,18 @@ A helper is extracted when it names a concept. A single-use expression stays whe
 Before a diff adds a check, a branch, a flag, or a layer for a race or an edge case, it names three things: the concrete failure, how likely it is, and what the complexity costs. A human agrees with those three before the complexity lands. A defensive branch that cannot name a failure is scope the diff did not need.
 
 If a rule in this file fights the task in front of you, say so and get a human sign-off before breaking it. A rule here is a default, not a wall.
+
+## Safety
+
+Four rules protect the people whose money this app holds. They are one line each in `AGENTS.md` because they apply to every task, including the ones that touch no product code. This is what they mean and how to comply.
+
+**Kill only what you started.** A dev server, a Postgres container, and a browser session all outlive the command that started them. Record the PID when you start a process and stop it by that PID. Matching on a name, a path, or a worktree string kills a sibling worktree's server, and `pkill -f` and `pgrep | kill` do it by pattern. The output looks identical either way, so the mistake is invisible from the terminal.
+
+**Disposable databases only.** A verification run starts its own Postgres container (see the `verify-sora` skill). A database holding a real household's data is not a fixture, and a migration pointed at one is not a test.
+
+**No machine-specific addresses in committed code.** A host, a port, and a secret belong in config or env. The documented local-dev defaults are the exception: `BETTER_AUTH_URL` in `.env.example`, the `NEXT_PUBLIC_SITE_URL` fallback in `app/layout.tsx`, and `DEFAULT_ENDPOINT` in `packages/sora-cli`. Anything else hardcoded is one developer's machine leaking into the repo.
+
+**Invented households.** Tickets, commits, messages, and screenshots use households, names, and amounts that exist nowhere. The verification fixture household (`avery@sora.test`, `blake@sora.test`) is the shape: `.test` addresses, invented names, round numbers.
 
 ## Documentation
 
