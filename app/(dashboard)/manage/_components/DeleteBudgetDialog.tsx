@@ -15,8 +15,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { type BudgetWithProgress } from "@/lib/budgets";
 
-import { deleteBudget, type BudgetWithProgress } from "../../_actions/budgets";
+import { deleteBudget } from "../../_actions/budgets";
 
 interface Props {
   trigger?: ReactNode;

@@ -67,6 +67,17 @@ export async function leaveHousehold() {
       },
     });
 
+    // The token outlives the membership that backs it, so it is revoked here
+    // rather than left working for a User who is no longer a Member.
+    await tx.apiToken.updateMany({
+      where: {
+        householdId: household.id,
+        userId: session.user.id,
+        revokedAt: null,
+      },
+      data: { revokedAt: new Date() },
+    });
+
     const remaining = await tx.householdMembership.count({
       where: {
         householdId: household.id,
@@ -156,6 +167,15 @@ export async function removeMember(form: RemoveMemberSchemaType) {
         householdId: household.id,
         userId: parsedBody.data.userId,
       },
+    });
+
+    await tx.apiToken.updateMany({
+      where: {
+        householdId: household.id,
+        userId: parsedBody.data.userId,
+        revokedAt: null,
+      },
+      data: { revokedAt: new Date() },
     });
 
     const remaining = await tx.householdMembership.count({

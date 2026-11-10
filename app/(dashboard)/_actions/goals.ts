@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 
+import { createHouseholdGoal, getGoalsWithProgress } from "@/lib/goals";
 import { assertFullMember, requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 import {
@@ -17,42 +18,8 @@ export async function listGoals() {
     redirect("/sign-in");
   }
 
-  const { household } = result;
-
-  const [goals, contributionSums] = await Promise.all([
-    prisma.goal.findMany({
-      where: {
-        householdId: household.id,
-      },
-      orderBy: {
-        createdAt: "asc",
-      },
-    }),
-    prisma.transaction.groupBy({
-      by: ["goalId"],
-      where: {
-        householdId: household.id,
-        goalId: {
-          not: null,
-        },
-      },
-      _sum: {
-        amount: true,
-      },
-    }),
-  ]);
-
-  const contributedByGoalId = new Map(
-    contributionSums.map((row) => [row.goalId, row._sum.amount ?? 0]),
-  );
-
-  return goals.map((goal) => ({
-    ...goal,
-    contributed: contributedByGoalId.get(goal.id) ?? 0,
-  }));
+  return await getGoalsWithProgress(result.household.id);
 }
-
-export type GoalWithProgress = Awaited<ReturnType<typeof listGoals>>[number];
 
 export async function createGoal(form: CreateGoalSchemaType) {
   const parsedBody = CreateGoalSchema.safeParse(form);
@@ -66,17 +33,7 @@ export async function createGoal(form: CreateGoalSchemaType) {
   }
   assertFullMember(result);
 
-  const { household } = result;
-
-  const { name, target, deadline } = parsedBody.data;
-  return await prisma.goal.create({
-    data: {
-      householdId: household.id,
-      name,
-      target,
-      deadline: deadline ?? null,
-    },
-  });
+  return await createHouseholdGoal(result.household.id, parsedBody.data);
 }
 
 export async function deleteGoal(form: DeleteGoalSchemaType) {

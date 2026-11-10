@@ -31,6 +31,7 @@ model User {
   createdInviteLinks InviteLink[]
   notifications     Notification[]
   transactionShares TransactionShare[]
+  apiTokens         ApiToken[]
 }
 
 model Household {
@@ -39,6 +40,10 @@ model Household {
   currency  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // Agent access is opt-in per household. Off means no token can be created
+  // and no existing token works.
+  agentAccessEnabled Boolean @default(false)
 
   memberships  HouseholdMembership[]
   inviteLinks  InviteLink[]
@@ -49,6 +54,7 @@ model Household {
   notifications Notification[]
   monthHistory MonthHistory[]
   yearHistory  YearHistory[]
+  apiTokens    ApiToken[]
 }
 
 model HouseholdMembership {
@@ -73,6 +79,24 @@ model InviteLink {
   createdBy   User      @relation(fields: [createdById], references: [id], onDelete: Cascade)
   createdAt   DateTime  @default(now())
   revokedAt   DateTime?
+}
+
+// A personal bearer credential for programmatic access. Only the hash is
+// stored, so the plaintext is shown once at creation and never again.
+model ApiToken {
+  id          String    @id @default(uuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  scope       String    @default("read-only")
+  tokenHash   String    @unique
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+  revokedAt   DateTime?
+
+  @@index([householdId])
 }
 
 model Session {
@@ -152,6 +176,9 @@ model Transaction {
 
   category String
   categoryIcon String
+
+  // null = added through the UI, "agent" = added through an assistant
+  addedVia String?
 
   // Tags the transaction as a contribution to a goal; contributions are
   // normal transactions, so they still count toward spending stats.

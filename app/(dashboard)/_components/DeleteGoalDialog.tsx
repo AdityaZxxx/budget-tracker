@@ -15,8 +15,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { type GoalWithProgress } from "@/lib/goals";
 
-import { deleteGoal, type GoalWithProgress } from "../_actions/goals";
+import { deleteGoal } from "../_actions/goals";
 
 interface Props {
   trigger: ReactNode;

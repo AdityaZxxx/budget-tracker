@@ -46,6 +46,7 @@ import CreateCategoryDialog from "../../_components/CreateCategoryDialog";
 import DeleteCategoryDialog from "../../_components/DeletecategoryDialog";
 import EditCategoryDialog from "../../_components/EditCategoryDialog";
 import AccountSection from "./AccountSection";
+import AgentAccessSection from "./AgentAccessSection";
 import BudgetsSection from "./BudgetsSection";
 import InviteLinkDialog from "./InviteLinkDialog";
 import MembersSection from "./MembersSection";
@@ -91,6 +92,8 @@ const ManagePageClient = () => {
               </Card>
             </section>
           )}
+
+          <AgentAccessSection canEdit={canEdit} />
 
           <MembersSection />
 
