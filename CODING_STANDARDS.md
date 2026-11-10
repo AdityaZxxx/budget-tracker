@@ -110,7 +110,7 @@ Nothing here is new. It is the sections above gathered into the order a reviewer
 
 ## Types are inferred
 
-Let the checker infer a type wherever it can. Annotate only where inference fails or where the type is the contract between two modules. `any` and `unknown` are not contracts. A function that takes or returns `unknown` has not parsed anything yet, so the boundary that receives the value parses it and the type that comes out is named. A caught error is the exception, and it is named `cause`.
+Let the checker infer a type wherever it can. Annotate only where inference fails or where the type is the contract between two modules. `any` and `unknown` are not contracts. A caught error is the exception, and it is named `cause`. A boundary that receives an unparsed value parses it and names the type that comes out.
 
 ## Comments are a last resort
 
