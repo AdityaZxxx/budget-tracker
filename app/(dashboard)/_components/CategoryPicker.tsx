@@ -3,7 +3,7 @@
 import { Category } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { useEffect, useId, useState } from "react";
+import { useId, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -37,10 +37,10 @@ const CategoryPicker = ({ type, onChange, id, ...ariaProps }: Props) => {
   const [value, setValue] = useState("");
   const listId = useId();
 
-  useEffect(() => {
-    if (!value) return;
-    onChange(value);
-  }, [onChange, value]);
+  const selectCategory = (name: string) => {
+    setValue(name);
+    onChange(name);
+  };
 
   const categoriesQuery = useQuery({
     queryKey: ["categories", type],
@@ -55,7 +55,7 @@ const CategoryPicker = ({ type, onChange, id, ...ariaProps }: Props) => {
   );
 
   const SuccessCallback = (category: Category) => {
-    setValue(category.name);
+    selectCategory(category.name);
     setOpen((prev) => !prev);
   };
 
@@ -102,7 +102,7 @@ const CategoryPicker = ({ type, onChange, id, ...ariaProps }: Props) => {
                   <CommandItem
                     key={category.name}
                     onSelect={() => {
-                      setValue(category.name);
+                      selectCategory(category.name);
                       setOpen((prev) => !prev);
                     }}
                   >

@@ -1,0 +1,662 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SKILL_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+REPO_ROOT="$(cd "$SKILL_DIR/../../.." && pwd)"
+
+STATE_DIR="$REPO_ROOT/.scratch/verify-sora"
+RUNS_DIR="$STATE_DIR/runs"
+ARTIFACTS_DIR="$STATE_DIR/artifacts"
+LOGS_DIR="$STATE_DIR/logs"
+CERT_ROOT="$STATE_DIR/certs"
+ACTIVE_FILE="$STATE_DIR/active.json"
+RUN_ENV="$STATE_DIR/run.env"
+
+PG_IMAGE="${SORA_VERIFY_PG_IMAGE:-public.ecr.aws/supabase/postgres:17.6.1.143}"
+PG_USER="postgres"
+PG_PASSWORD="postgres"
+DEFAULT_APP_PORT="3210"
+BETTER_AUTH_SECRET="sora-verify-$(openssl rand -hex 24)"
+EMAIL_DOMAIN="sora.test"
+PRIMARY_EMAIL="avery@$EMAIL_DOMAIN"
+PRIMARY_PASSWORD="sora-verify-pass"
+MEMBER_EMAIL="blake@$EMAIL_DOMAIN"
+MEMBER_PASSWORD="sora-verify-pass"
+
+usage() {
+  cat <<'USAGE'
+control-sora - launch, drive, and tear down a disposable Sora verification instance.
+
+Usage:
+  control-sora launch [--empty] [--prod] [--port <app-port>]
+  control-sora doctor [--json]
+  control-sora status
+  control-sora login [--as member]
+  control-sora browser <agent-browser args...>
+  control-sora cli <sora args...>
+  control-sora mcp <tool> [json-arguments]
+  control-sora reset [--empty]
+  control-sora path
+  control-sora stop
+  control-sora cleanup
+
+Environment:
+  SORA_VERIFY_PG_IMAGE   Postgres image (default: public.ecr.aws/supabase/postgres:17.6.1.143)
+  SORA_VERIFY_PORT       App port (or pass --port)
+  SORA_VERIFY_MODE       "dev" (default) or "prod"
+  SORA_VERIFY_RUN_ID     Stable run id (mostly for debugging)
+USAGE
+}
+
+die() {
+  printf 'control-sora: %s\n' "$*" >&2
+  exit 1
+}
+
+info() {
+  printf 'control-sora: %s\n' "$*"
+}
+
+json_get() {
+  node -e '
+    const fs = require("node:fs");
+    const [file, key] = process.argv.slice(1);
+    const value = JSON.parse(fs.readFileSync(file, "utf8"))[key];
+    process.stdout.write(value === undefined || value === null ? "" : String(value));
+  ' "$1" "$2"
+}
+
+json_set() {
+  node -e '
+    const fs = require("node:fs");
+    const [file, key, value] = process.argv.slice(1);
+    const parsed = JSON.parse(fs.readFileSync(file, "utf8"));
+    parsed[key] = value;
+    fs.writeFileSync(file, JSON.stringify(parsed, null, 2) + "\n");
+  ' "$1" "$2" "$3"
+}
+
+pick_port() {
+  node -e '
+    const net = require("node:net");
+    const server = net.createServer();
+    server.listen(0, "127.0.0.1", () => {
+      process.stdout.write(String(server.address().port));
+      server.close();
+    });
+  '
+}
+
+require_active() {
+  if [[ ! -f "$ACTIVE_FILE" ]]; then
+    die "No active run. Run: control-sora launch"
+  fi
+}
+
+load_active() {
+  require_active
+  RUN_ID="$(json_get "$ACTIVE_FILE" runId)"
+  APP_PID="$(json_get "$ACTIVE_FILE" pid)"
+  APP_PORT="$(json_get "$ACTIVE_FILE" appPort)"
+  PG_PORT="$(json_get "$ACTIVE_FILE" pgPort)"
+  BASE_URL="$(json_get "$ACTIVE_FILE" baseUrl)"
+  DB_NAME="$(json_get "$ACTIVE_FILE" dbName)"
+  SHADOW_DB_NAME="$(json_get "$ACTIVE_FILE" shadowDbName)"
+  PG_CONTAINER="$(json_get "$ACTIVE_FILE" containerName)"
+  PG_VOLUME="$(json_get "$ACTIVE_FILE" volumeName)"
+  CERT_DIR="$(json_get "$ACTIVE_FILE" certDir)"
+  APP_LOG="$(json_get "$ACTIVE_FILE" logFile)"
+  ARTIFACT_DIR="$(json_get "$ACTIVE_FILE" artifactDir)"
+  SEED_MODE="$(json_get "$ACTIVE_FILE" seedMode)"
+  APP_MODE="$(json_get "$ACTIVE_FILE" appMode)"
+  APP_MODE="${APP_MODE:-dev}"
+  STARTED_AT="$(json_get "$ACTIVE_FILE" startedAt)"
+  DB_URL="postgresql://$PG_USER:$PG_PASSWORD@127.0.0.1:$PG_PORT/$DB_NAME"
+  SHADOW_URL="postgresql://$PG_USER:$PG_PASSWORD@127.0.0.1:$PG_PORT/$SHADOW_DB_NAME"
+
+  if [[ ! -f "$RUN_ENV" ]]; then
+    die "Run environment is missing: $RUN_ENV"
+  fi
+  set -a
+  # shellcheck disable=SC1090
+  . "$RUN_ENV"
+  set +a
+}
+
+clear_active() {
+  rm -f "$ACTIVE_FILE" "$RUN_ENV"
+}
+
+stale_cleanup() {
+  if [[ -f "$ACTIVE_FILE" ]]; then
+    local pid
+    pid="$(json_get "$ACTIVE_FILE" pid)"
+    if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
+      die "A verification instance is already running (pid $pid). Run: control-sora stop"
+    fi
+    info "Removing stale run state from a previous run"
+    local container volume cert
+    container="$(json_get "$ACTIVE_FILE" containerName)"
+    volume="$(json_get "$ACTIVE_FILE" volumeName)"
+    cert="$(json_get "$ACTIVE_FILE" certDir)"
+    [[ -n "$container" ]] && docker rm -f "$container" >/dev/null 2>&1 || true
+    [[ -n "$volume" ]] && docker volume rm "$volume" >/dev/null 2>&1 || true
+    [[ -n "$cert" ]] && rm -rf "$cert"
+    clear_active
+  fi
+}
+
+ensure_tools() {
+  local missing=()
+  for tool in node pnpm psql curl openssl docker; do
+    command -v "$tool" >/dev/null 2>&1 || missing+=("$tool")
+  done
+  if ((${#missing[@]} > 0)); then
+    die "Missing required tools: ${missing[*]}"
+  fi
+  command -v agent-browser >/dev/null 2>&1 || die "Missing agent-browser CLI"
+  docker info >/dev/null 2>&1 || die "Docker daemon is not reachable"
+  if ! docker image inspect "$PG_IMAGE" >/dev/null 2>&1; then
+    info "Pulling $PG_IMAGE (first run only)"
+    docker pull "$PG_IMAGE" >/dev/null
+  fi
+}
+
+ensure_deps() {
+  if [[ ! -x "$REPO_ROOT/node_modules/.bin/next" ]]; then
+    info "Installing dependencies"
+    (cd "$REPO_ROOT" && pnpm install --frozen-lockfile)
+  fi
+  info "Generating Prisma client"
+  (cd "$REPO_ROOT" && pnpm exec prisma generate >/dev/null)
+}
+
+psql_admin() {
+  PGPASSWORD="$PG_PASSWORD" psql "postgresql://$PG_USER:$PG_PASSWORD@127.0.0.1:$PG_PORT/postgres?sslmode=require" -v ON_ERROR_STOP=1 "$@"
+}
+
+psql_db() {
+  PGPASSWORD="$PG_PASSWORD" psql "$DB_URL?sslmode=require" -v ON_ERROR_STOP=1 "$@"
+}
+
+start_postgres() {
+  info "Starting disposable TLS Postgres on 127.0.0.1:$PG_PORT"
+  mkdir -p "$CERT_DIR"
+  openssl req -new -x509 -days 1 -nodes -text \
+    -out "$CERT_DIR/server.crt" \
+    -keyout "$CERT_DIR/server.key" \
+    -subj "/CN=localhost" >/dev/null 2>&1
+  chmod 600 "$CERT_DIR/server.key"
+  docker run --rm -v "$CERT_DIR:/certs" --entrypoint chown \
+    "$PG_IMAGE" 100:101 /certs/server.key /certs/server.crt >/dev/null
+
+  docker volume create "$PG_VOLUME" >/dev/null
+  # The Supabase image's init script runs as supabase_admin, so that has to be
+  # the bootstrap superuser. It then creates the plain "postgres" role the app
+  # connects with.
+  docker run -d --name "$PG_CONTAINER" \
+    -e POSTGRES_USER=supabase_admin \
+    -e POSTGRES_PASSWORD="$PG_PASSWORD" \
+    -e POSTGRES_DB=postgres \
+    -p "127.0.0.1:$PG_PORT:5432" \
+    -v "$PG_VOLUME:/var/lib/postgresql/data" \
+    -v "$CERT_DIR:/certs:ro" \
+    "$PG_IMAGE" \
+    postgres -c "listen_addresses=*" -c ssl=on \
+    -c ssl_cert_file=/certs/server.crt \
+    -c ssl_key_file=/certs/server.key >/dev/null
+
+  local ready=0
+  for _ in $(seq 1 60); do
+    if psql_admin -tAc 'select 1' >/dev/null 2>&1; then
+      ready=1
+      break
+    fi
+    sleep 1
+  done
+  if [[ "$ready" != "1" ]]; then
+    docker logs "$PG_CONTAINER" 2>&1 | tail -20 >&2 || true
+    die "Postgres did not become ready"
+  fi
+
+  psql_admin -c "CREATE DATABASE \"$DB_NAME\"" >/dev/null
+  psql_admin -c "CREATE DATABASE \"$SHADOW_DB_NAME\"" >/dev/null
+}
+
+migrate() {
+  info "Applying migrations"
+  (cd "$REPO_ROOT" && POSTGRES_PRISMA_URL="$DB_URL" POSTGRES_URL_NON_POOLING="$SHADOW_URL" pnpm exec prisma migrate deploy >/dev/null)
+}
+
+build_app() {
+  local build_log="$LOGS_DIR/$RUN_ID.build.log"
+  info "Building Next.js"
+  if ! (cd "$REPO_ROOT" && pnpm exec next build >"$build_log" 2>&1); then
+    tail -30 "$build_log" >&2 || true
+    die "Next.js build failed, see $build_log"
+  fi
+}
+
+start_app() {
+  local mode_label="dev server"
+  if [[ "$APP_MODE" == "prod" ]]; then
+    build_app
+    mode_label="production server"
+  fi
+  info "Starting Next.js $mode_label on 127.0.0.1:$APP_PORT"
+  local pid_file="$STATE_DIR/app.pid"
+  rm -f "$pid_file"
+  local next_cmd=(dev --turbopack)
+  if [[ "$APP_MODE" == "prod" ]]; then
+    next_cmd=(start)
+  fi
+  (
+    cd "$REPO_ROOT"
+    setsid env \
+      POSTGRES_PRISMA_URL="$DB_URL" \
+      POSTGRES_URL_NON_POOLING="$SHADOW_URL" \
+      BETTER_AUTH_SECRET="$BETTER_AUTH_SECRET" \
+      BETTER_AUTH_URL="http://127.0.0.1:$APP_PORT" \
+      RESEND_API_KEY="" \
+      RESEND_FROM="" \
+      "$REPO_ROOT/node_modules/.bin/next" "${next_cmd[@]}" \
+      -H 127.0.0.1 -p "$APP_PORT" >"$APP_LOG" 2>&1 &
+    echo $! >"$pid_file"
+  )
+  APP_PID="$(cat "$pid_file")"
+
+  local ready=0
+  for _ in $(seq 1 90); do
+    if [[ "$(curl -s -o /dev/null -w '%{http_code}' "$BASE_URL/sign-in" || true)" == "200" ]]; then
+      ready=1
+      break
+    fi
+    sleep 1
+  done
+  if [[ "$ready" != "1" ]]; then
+    tail -40 "$APP_LOG" >&2 || true
+    die "Next.js did not become ready"
+  fi
+}
+
+build_cli() {
+  info "Building sora CLI"
+  (cd "$REPO_ROOT" && pnpm --filter sora-cli run build >/dev/null)
+}
+
+run_seed() {
+  info "Seeding household fixtures"
+  SORA_VERIFY_BASE_URL="$BASE_URL" \
+    SORA_VERIFY_DB_URL="$DB_URL" \
+    SORA_VERIFY_RUN_ID="$RUN_ID" \
+    SORA_VERIFY_STATE_DIR="$STATE_DIR" \
+    SORA_VERIFY_ARTIFACT_DIR="$ARTIFACT_DIR" \
+    SORA_VERIFY_EMAIL="$PRIMARY_EMAIL" \
+    SORA_VERIFY_PASSWORD="$PRIMARY_PASSWORD" \
+    SORA_VERIFY_MEMBER_EMAIL="$MEMBER_EMAIL" \
+    SORA_VERIFY_MEMBER_PASSWORD="$MEMBER_PASSWORD" \
+    node "$SCRIPT_DIR/seed.mjs"
+}
+
+write_active() {
+  local seed_mode="$1"
+  local started_at="$2"
+  cat >"$ACTIVE_FILE" <<JSON
+{
+  "runId": "$RUN_ID",
+  "pid": $APP_PID,
+  "appPort": $APP_PORT,
+  "pgPort": $PG_PORT,
+  "baseUrl": "$BASE_URL",
+  "dbName": "$DB_NAME",
+  "shadowDbName": "$SHADOW_DB_NAME",
+  "containerName": "$PG_CONTAINER",
+  "volumeName": "$PG_VOLUME",
+  "certDir": "$CERT_DIR",
+  "logFile": "$APP_LOG",
+  "artifactDir": "$ARTIFACT_DIR",
+  "seedMode": "$seed_mode",
+  "appMode": "$APP_MODE",
+  "startedAt": "$started_at"
+}
+JSON
+}
+
+cmd_launch() {
+  local empty=0
+  local port="${SORA_VERIFY_PORT:-$DEFAULT_APP_PORT}"
+  APP_MODE="${SORA_VERIFY_MODE:-dev}"
+  while (($# > 0)); do
+    case "$1" in
+      --empty) empty=1 ;;
+      --prod) APP_MODE="prod" ;;
+      --dev) APP_MODE="dev" ;;
+      --port)
+        shift
+        port="${1:-}"
+        [[ -n "$port" ]] || die "--port needs a value"
+        ;;
+      *) die "Unknown launch option: $1" ;;
+    esac
+    shift
+  done
+
+  ensure_tools
+  stale_cleanup
+  ensure_deps
+
+  RUN_ID="${SORA_VERIFY_RUN_ID:-$(date -u +%Y%m%dT%H%M%SZ)-$RANDOM}"
+  APP_PORT="$port"
+  PG_PORT="$(pick_port)"
+  BASE_URL="http://127.0.0.1:$APP_PORT"
+  DB_NAME="sora_verify_${RUN_ID//[^a-zA-Z0-9_]/_}"
+  SHADOW_DB_NAME="${DB_NAME}_shadow"
+  PG_CONTAINER="sora-verify-pg-$RUN_ID"
+  PG_VOLUME="sora-verify-pgdata-$RUN_ID"
+  CERT_DIR="$CERT_ROOT/$RUN_ID"
+  APP_LOG="$LOGS_DIR/$RUN_ID.log"
+  ARTIFACT_DIR="$ARTIFACTS_DIR/$RUN_ID"
+  DB_URL="postgresql://$PG_USER:$PG_PASSWORD@127.0.0.1:$PG_PORT/$DB_NAME"
+  SHADOW_URL="postgresql://$PG_USER:$PG_PASSWORD@127.0.0.1:$PG_PORT/$SHADOW_DB_NAME"
+
+  mkdir -p "$RUNS_DIR" "$ARTIFACT_DIR" "$LOGS_DIR" "$CERT_ROOT"
+  STARTED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+  start_postgres
+  migrate
+  start_app
+  build_cli
+
+  local seed_mode="seeded"
+  if [[ "$empty" == "1" ]]; then
+    seed_mode="empty"
+    : >"$RUN_ENV"
+  else
+    run_seed
+  fi
+  write_active "$seed_mode" "$STARTED_AT"
+
+  info "Ready"
+  printf '  URL:       %s\n' "$BASE_URL"
+  printf '  Run:       %s\n' "$RUN_ID"
+  printf '  Database:  %s (127.0.0.1:%s)\n' "$DB_NAME" "$PG_PORT"
+  printf '  Artifacts: %s\n' "$ARTIFACT_DIR"
+  printf '  Log:       %s\n' "$APP_LOG"
+  printf '  Next:      %s doctor\n' "${BASH_SOURCE[0]}"
+}
+
+cmd_doctor() {
+  require_active
+  load_active
+  local json=0
+  [[ "${1:-}" == "--json" ]] && json=1
+  local failures=0
+  local lines=()
+
+  check() {
+    local label="$1"
+    local ok="$2"
+    local detail="${3:-}"
+    if [[ "$ok" == "1" ]]; then
+      lines+=("PASS $label${detail:+ ($detail)}")
+    else
+      lines+=("FAIL $label${detail:+ ($detail)}")
+      failures=$((failures + 1))
+    fi
+  }
+
+  check "run state" 1 "$RUN_ID"
+  check "app mode" 1 "$APP_MODE"
+  if kill -0 "$APP_PID" 2>/dev/null; then
+    check "app process" 1 "pid $APP_PID"
+  else
+    check "app process" 0 "pid $APP_PID not running"
+  fi
+
+  local http_code
+  http_code="$(curl -s -o /dev/null -w '%{http_code}' "$BASE_URL/sign-in" || true)"
+  check "sign-in endpoint" "$([[ "$http_code" == "200" ]] && echo 1 || echo 0)" "HTTP $http_code"
+
+  local pg_ok=0
+  if PGPASSWORD="$PG_PASSWORD" psql "$DB_URL?sslmode=require" -tAc 'select 1' >/dev/null 2>&1; then
+    pg_ok=1
+  fi
+  check "TLS Postgres" "$pg_ok" "127.0.0.1:$PG_PORT/$DB_NAME"
+
+  local migration_count=""
+  if [[ "$pg_ok" == "1" ]]; then
+    migration_count="$(psql_db -tAc 'select count(*) from "_prisma_migrations" where finished_at is not null' 2>/dev/null | tr -d '[:space:]')"
+  fi
+  check "migrations" "$([[ -n "$migration_count" && "$migration_count" -gt 0 ]] && echo 1 || echo 0)" "${migration_count:-0} applied"
+
+  local pg_running
+  pg_running="$(docker inspect -f '{{.State.Running}}' "$PG_CONTAINER" 2>/dev/null || true)"
+  check "postgres container" "$([[ "$pg_running" == "true" ]] && echo 1 || echo 0)" "$PG_CONTAINER"
+
+  local port_owned=0
+  if command -v ss >/dev/null 2>&1; then
+    local pgid
+    pgid="$(ps -o pgid= -p "$APP_PID" 2>/dev/null | tr -d ' ')"
+    while read -r owner_pid; do
+      [[ -z "$owner_pid" ]] && continue
+      local owner_pgid
+      owner_pgid="$(ps -o pgid= -p "$owner_pid" 2>/dev/null | tr -d ' ')"
+      if [[ -n "$pgid" && "$owner_pgid" == "$pgid" ]]; then
+        port_owned=1
+        break
+      fi
+    done < <(ss -ltnp "sport = :$APP_PORT" 2>/dev/null | grep -oE 'pid=[0-9]+' | cut -d= -f2 | sort -u)
+  else
+    port_owned=1
+  fi
+  check "port ownership" "$port_owned" "port $APP_PORT"
+
+  if [[ "$SEED_MODE" == "seeded" ]]; then
+    local cli_output="" cli_ok=1
+    if ! cli_output="$(SORA_URL="$SORA_VERIFY_URL" SORA_TOKEN="$SORA_VERIFY_TOKEN" node "$REPO_ROOT/packages/sora-cli/dist/index.js" balance 2>&1)"; then
+      cli_ok=0
+    fi
+    check "CLI over MCP" "$cli_ok" "$(printf '%s' "$cli_output" | head -1)"
+  fi
+
+  local browser_version
+  browser_version="$(agent-browser --version 2>/dev/null || true)"
+  check "agent-browser" "$([[ -n "$browser_version" ]] && echo 1 || echo 0)" "$browser_version"
+
+  if [[ "$json" == "1" ]]; then
+    local status="ok"
+    [[ "$failures" -gt 0 ]] && status="fail"
+    node -e '
+      const [status, failures, ...lines] = process.argv.slice(1);
+      process.stdout.write(JSON.stringify({ status, failures: Number(failures), checks: lines }, null, 2) + "\n");
+    ' "$status" "$failures" "${lines[@]}"
+  else
+    printf '%s\n' "${lines[@]}"
+    if [[ "$failures" -gt 0 ]]; then
+      printf 'control-sora: doctor found %d problem(s)\n' "$failures" >&2
+      exit 1
+    fi
+    info "doctor passed"
+  fi
+}
+
+cmd_login() {
+  load_active
+  local email="$SORA_VERIFY_EMAIL"
+  local password="$SORA_VERIFY_PASSWORD"
+  if [[ "${1:-}" == "--as" ]]; then
+    [[ "${2:-}" == "member" ]] || die "--as currently supports only: member"
+    email="$SORA_VERIFY_MEMBER_EMAIL"
+    password="$SORA_VERIFY_MEMBER_PASSWORD"
+  fi
+
+  export AGENT_BROWSER_SESSION="sora-verify-$RUN_ID"
+  export SORA_ARTIFACTS="$ARTIFACT_DIR"
+
+  agent-browser open "$BASE_URL/sign-in" >/dev/null
+  local current
+  current="$(agent-browser get url 2>/dev/null || true)"
+  if [[ "$current" == "$BASE_URL" || "$current" == "$BASE_URL/" ]]; then
+    info "Already signed in"
+    return
+  fi
+
+  # The form is client-rendered, so the first paint of a cold browser can
+  # arrive before the fields exist.
+  local form_ready=0
+  for _ in $(seq 1 20); do
+    if agent-browser get count 'input[type=email]' 2>/dev/null | grep -q '^1$'; then
+      form_ready=1
+      break
+    fi
+    sleep 1
+  done
+  [[ "$form_ready" == "1" ]] || die "The sign-in form did not render"
+
+  agent-browser find label "Email" fill "$email" >/dev/null
+  agent-browser find label "Password" fill "$password" >/dev/null
+  agent-browser find role button click --name "Sign in" >/dev/null
+  # The sign-in redirects to the dashboard, or to the wizard when the
+  # household has no currency yet. Polling the URL is steadier than waiting
+  # for a piece of text, because the dashboard renders its cards late.
+  local landed=""
+  for _ in $(seq 1 30); do
+    current="$(agent-browser get url 2>/dev/null || true)"
+    if [[ "$current" == "$BASE_URL/" || "$current" == "$BASE_URL" ]]; then
+      landed="dashboard"
+      break
+    fi
+    if [[ "$current" == "$BASE_URL/wizard" ]]; then
+      landed="wizard"
+      break
+    fi
+    sleep 1
+  done
+  if [[ -z "$landed" ]]; then
+    agent-browser screenshot "$ARTIFACT_DIR/login-failure.png" >/dev/null 2>&1 || true
+    die "Sign-in did not reach the dashboard or wizard; see $ARTIFACT_DIR/login-failure.png"
+  fi
+  info "Signed in as $email ($landed)"
+}
+
+cmd_browser() {
+  load_active
+  export AGENT_BROWSER_SESSION="${AGENT_BROWSER_SESSION:-sora-verify-$RUN_ID}"
+  export SORA_ARTIFACTS="$ARTIFACT_DIR"
+  exec agent-browser "$@"
+}
+
+cmd_cli() {
+  load_active
+  export SORA_URL="${SORA_URL:-$SORA_VERIFY_URL}"
+  export SORA_TOKEN="${SORA_TOKEN:-$SORA_VERIFY_TOKEN}"
+  exec node "$REPO_ROOT/packages/sora-cli/dist/index.js" "$@"
+}
+
+cmd_mcp() {
+  load_active
+  export SORA_URL="${SORA_URL:-$SORA_VERIFY_URL}"
+  export SORA_TOKEN="${SORA_TOKEN:-$SORA_VERIFY_TOKEN}"
+  local tool="${1:-}"
+  [[ -n "$tool" ]] || die "Usage: control-sora mcp <tool> [json-arguments]"
+  shift
+  local args="${1:-{\}}"
+  exec node "$SCRIPT_DIR/mcp-call.mjs" "$tool" "$args"
+}
+
+cmd_reset() {
+  load_active
+  local empty=0
+  [[ "${1:-}" == "--empty" ]] && empty=1
+  info "Resetting database schema"
+  psql_db -c 'DROP SCHEMA public CASCADE; CREATE SCHEMA public;' >/dev/null
+  migrate
+  if [[ "$empty" == "1" ]]; then
+    : >"$RUN_ENV"
+    json_set "$ACTIVE_FILE" seedMode "empty"
+    info "Database reset to an empty instance; sign in again before driving"
+  else
+    run_seed
+    json_set "$ACTIVE_FILE" seedMode "seeded"
+    info "Database reset to seeded fixtures; sign in again before driving"
+  fi
+}
+
+cmd_stop() {
+  if [[ ! -f "$ACTIVE_FILE" ]]; then
+    info "No active run"
+    return
+  fi
+  load_active
+  info "Stopping run $RUN_ID"
+
+  if kill -0 "$APP_PID" 2>/dev/null; then
+    kill -TERM -- "-$APP_PID" 2>/dev/null || kill -TERM "$APP_PID" 2>/dev/null || true
+    for _ in $(seq 1 20); do
+      kill -0 "$APP_PID" 2>/dev/null || break
+      sleep 0.25
+    done
+    if kill -0 "$APP_PID" 2>/dev/null; then
+      kill -KILL -- "-$APP_PID" 2>/dev/null || kill -KILL "$APP_PID" 2>/dev/null || true
+    fi
+  fi
+
+  AGENT_BROWSER_SESSION="sora-verify-$RUN_ID" agent-browser close >/dev/null 2>&1 || true
+  docker rm -f "$PG_CONTAINER" >/dev/null 2>&1 || true
+  docker volume rm "$PG_VOLUME" >/dev/null 2>&1 || true
+  rm -rf "$CERT_DIR"
+
+  local stopped_at
+  stopped_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  cat >"$RUNS_DIR/$RUN_ID.json" <<JSON
+{
+  "runId": "$RUN_ID",
+  "startedAt": "$STARTED_AT",
+  "stoppedAt": "$stopped_at",
+  "seedMode": "$SEED_MODE",
+  "appMode": "$APP_MODE",
+  "baseUrl": "$BASE_URL",
+  "artifactDir": "$ARTIFACT_DIR",
+  "logFile": "$APP_LOG"
+}
+JSON
+  clear_active
+  info "Stopped; evidence remains in $ARTIFACT_DIR"
+}
+
+cmd_path() {
+  load_active
+  printf '%s\n' "$ARTIFACT_DIR"
+}
+
+cmd_status() {
+  require_active
+  cat "$ACTIVE_FILE"
+}
+
+main() {
+  local command="${1:-}"
+  [[ -n "$command" ]] || {
+    usage
+    exit 1
+  }
+  shift || true
+
+  case "$command" in
+    launch) cmd_launch "$@" ;;
+    doctor) cmd_doctor "$@" ;;
+    status) cmd_status ;;
+    login) cmd_login "$@" ;;
+    browser) cmd_browser "$@" ;;
+    cli) cmd_cli "$@" ;;
+    mcp) cmd_mcp "$@" ;;
+    reset) cmd_reset "$@" ;;
+    stop | cleanup) cmd_stop ;;
+    path) cmd_path ;;
+    help | --help | -h) usage ;;
+    *) die "Unknown command: $command" ;;
+  esac
+}
+
+main "$@"
