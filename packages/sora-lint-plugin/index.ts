@@ -8,6 +8,7 @@ import noHooklessUseFunction from "./rules/no-hookless-use-function.ts";
 import noLowValueComments from "./rules/no-low-value-comments.ts";
 import noManualMemo from "./rules/no-manual-memo.ts";
 import { noModuleMockingRule } from "./rules/no-module-mocking.ts";
+import noNativeTitleTooltip from "./rules/no-native-title-tooltip.ts";
 import { noObjectParametersRule } from "./rules/no-object-parameters.ts";
 import { noReduceAccumulatorCopyRule } from "./rules/no-reduce-accumulator-copy.ts";
 import { noReflectApplyRule } from "./rules/no-reflect-apply.ts";
@@ -53,6 +54,7 @@ export default definePlugin({
     "no-hookless-use-function": noHooklessUseFunction,
     "no-low-value-comments": noLowValueComments,
     "no-manual-memo": noManualMemo,
+    "no-native-title-tooltip": noNativeTitleTooltip,
     "no-unscoped-has": noUnscopedHas,
     "require-suppression-reason": requireSuppressionReason,
   },
