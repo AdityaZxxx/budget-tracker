@@ -51,6 +51,12 @@
     "import/no-namespace": "off",
 
     "sora/no-em-dash-copy": "error",
+    // The documented local-dev defaults. They are the only JS/TS string
+    // literals in committed code that name a machine-specific address.
+    "sora/no-hardcoded-localhost": [
+      "error",
+      { "allow": [".env.example", "app/layout.tsx", "packages/sora-cli"] }
+    ],
     "sora/no-hookless-use-function": "error",
     "sora/no-low-value-comments": "error",
     "sora/no-manual-memo": "error",
