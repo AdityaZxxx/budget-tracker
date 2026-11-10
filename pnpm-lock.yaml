@@ -173,6 +173,19 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
 
+  packages/sora-lint-plugin:
+    dependencies:
+      '@oxlint/plugins':
+        specifier: 1.91.0
+        version: 1.91.0
+    devDependencies:
+      '@types/node':
+        specifier: ^26.6.6
+        version: 26.6.6
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+
 packages:
 
   '@alloc/quick-lru@5.2.0':
@@ -937,6 +950,10 @@ packages:
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [x64]
     os: [win32]
+
+  '@oxlint/plugins@1.91.0':
+    resolution: {integrity: sha512-Fh+SOBxMu7/pbSk84WG4BN6npcxxlF4jWNQJ+S4IUNyvSVeQwOVTFQMD/Dx2EqBQ1lVeCADcJ+0rzT1BKQ9cUA==}
+    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
 
   '@prisma/adapter-pg@7.10.1':
     resolution: {integrity: sha512-EP9ruPYHjKP80WZlb5qVaEXKgZjJieBFjAxcBtQnDAHD6+16UN4keVmBh6L/RUpuDQT2FQRbvKNgq5d4Ix+IkQ==}
@@ -3735,6 +3752,8 @@ snapshots:
 
   '@oxlint/binding-win32-x64-msvc@1.91.0':
     optional: true
+
+  '@oxlint/plugins@1.91.0': {}
 
   '@prisma/adapter-pg@7.10.1':
     dependencies:

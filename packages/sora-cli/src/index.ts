@@ -110,10 +110,10 @@ function parseFlags(
   return { help: parsed.values.help === true, values };
 }
 
-function parseError(commandName: string, error: unknown): CliError {
+function parseError(commandName: string, cause: unknown): CliError {
   const code =
-    error instanceof Error && "code" in error
-      ? (error as NodeJS.ErrnoException).code
+    cause instanceof Error && "code" in cause
+      ? (cause as NodeJS.ErrnoException).code
       : undefined;
 
   if (code === "ERR_PARSE_ARGS_UNEXPECTED_POSITIONAL") {
@@ -122,7 +122,7 @@ function parseError(commandName: string, error: unknown): CliError {
     );
   }
 
-  const message = error instanceof Error ? error.message : String(error);
+  const message = cause instanceof Error ? cause.message : String(cause);
   const sentence = message.endsWith(".") ? message : `${message}.`;
 
   return new CliError(

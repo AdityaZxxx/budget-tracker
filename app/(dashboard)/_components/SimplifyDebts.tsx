@@ -38,14 +38,14 @@ const SimplifyDebts = ({ currency }: Props) => {
           <CardTitle className="text-xl">Simplify debts</CardTitle>
           <CardDescription>
             The fewest transfers that settle every balance. No money moves
-            inside the app — record what you paid as a Settlement.
+            inside the app. Record what you paid as a Settlement.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <SkeletonWrapper isLoading={debtsQuery.isLoading}>
             {transfers.length === 0 ? (
               <p className="py-4 text-center text-sm text-muted-foreground">
-                All settled up — no transfers needed.
+                All settled up. No transfers needed.
               </p>
             ) : (
               <div className="space-y-2">

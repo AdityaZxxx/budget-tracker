@@ -89,6 +89,10 @@ A change that makes existing guidance inaccurate updates that guidance in the sa
 
 Plans, research notes, and scratch files are not committed. `.scratch/` is gitignored for that reason.
 
+## Copy reads plainly
+
+Product copy is plain. A period, a comma, a colon, or parentheses where a dash would go, and no em dash in anything a user or an agent reads. The app should read like a person wrote it.
+
 ## A money diff walks a checklist
 
 Before a diff that reads or writes money is called done, point at each of these:
@@ -106,7 +110,7 @@ Nothing here is new. It is the sections above gathered into the order a reviewer
 
 ## Types are inferred
 
-Let the checker infer a type wherever it can. Annotate only where inference fails or where the type is the contract between two modules. `any` is not a type, it is a hole in the review, and `unknown` plus a narrowing is the fix.
+Let the checker infer a type wherever it can. Annotate only where inference fails or where the type is the contract between two modules. `any` and `unknown` are not contracts. A function that takes or returns `unknown` has not parsed anything yet, so the boundary that receives the value parses it and the type that comes out is named. A caught error is the exception, and it is named `cause`.
 
 ## Comments are a last resort
 
@@ -125,6 +129,8 @@ The working tree must pass the same checks CI runs. `pnpm run verify` is the sou
 The repo has no test suite, by decision (`docs/ROADMAP.md`). The build is the safety net for what compiles; behaviour is proved separately, by running the app.
 
 Lint and format are mechanical, and the tools own them: `oxlint` reports the rules, `oxfmt` decides the layout. Run `pnpm lint` and `pnpm fmt` before committing, and let the formatter rewrite the file rather than hand-tuning whitespace or import order.
+
+The rules that belong to the linter live in `packages/sora-lint-plugin`, so a rule that is mechanical is a rule there rather than a paragraph here.
 
 A pre-commit hook runs these on every commit: it formats the staged files, then runs `pnpm run verify`. The build stays in CI, because it is the slow one.
 

@@ -205,7 +205,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
       // The schema uses z.coerce, so its input type differs from the form
       // values; the values are already typed correctly client-side.
       onSubmit:
-        CreateTransactionSchema as unknown as StandardSchemaV1<CreateTransactionFormValues>,
+        CreateTransactionSchema as StandardSchemaV1<CreateTransactionFormValues>,
     },
     onSubmitInvalid: () => {
       document.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();

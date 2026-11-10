@@ -12,9 +12,10 @@
     "fmt:check": "oxfmt --check",
     "typecheck": "tsc --noEmit",
     "typecheck:cli": "pnpm --filter sora-cli run typecheck",
-    "verify": "pnpm run lint && pnpm run fmt:check && pnpm run typecheck && pnpm run typecheck:cli",
+    "verify": "pnpm run lint && pnpm run fmt:check && pnpm run typecheck && pnpm run typecheck:cli && pnpm run typecheck:lint-plugin",
     "postinstall": "prisma generate",
-    "prepare": "husky"
+    "prepare": "husky",
+    "typecheck:lint-plugin": "pnpm --filter sora-lint-plugin run typecheck"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

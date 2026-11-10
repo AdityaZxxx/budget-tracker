@@ -1,3 +1,5 @@
+import type { ToolArguments } from "./client.js";
+
 import { CliError } from "./cli-error.js";
 
 export type FlagValues = Record<string, string | undefined>;
@@ -13,7 +15,7 @@ export type Command = {
   tool: string;
   summary: string;
   flags: FlagSpec[];
-  build: (values: FlagValues) => Record<string, unknown>;
+  build: (values: FlagValues) => ToolArguments;
 };
 
 const amountFlag = flag(
@@ -63,31 +65,47 @@ export const COMMANDS: Record<string, Command> = {
     tool: "add_transaction",
     summary: "Record a shared expense Transaction.",
     flags: [amountFlag, categoryFlag, descriptionFlag, dateFlag],
-    build: (values) => ({
-      amount: parseAmount(requireValue(values, "amount", "add-expense")),
-      category: requireValue(values, "category", "add-expense"),
-      ...(values.description === undefined
-        ? {}
-        : { description: values.description }),
-      ...(values.date === undefined ? {} : { date: parseDate(values.date) }),
-      type: "expense",
-      shared: true,
-    }),
+    build: (values) => {
+      const args: ToolArguments = {
+        amount: parseAmount(requireValue(values, "amount", "add-expense")),
+        category: requireValue(values, "category", "add-expense"),
+        type: "expense",
+        shared: true,
+      };
+
+      if (values.description !== undefined) {
+        args.description = values.description;
+      }
+
+      if (values.date !== undefined) {
+        args.date = parseDate(values.date);
+      }
+
+      return args;
+    },
   },
   "add-income": {
     tool: "add_transaction",
     summary: "Record a shared income Transaction.",
     flags: [amountFlag, categoryFlag, descriptionFlag, dateFlag],
-    build: (values) => ({
-      amount: parseAmount(requireValue(values, "amount", "add-income")),
-      category: requireValue(values, "category", "add-income"),
-      ...(values.description === undefined
-        ? {}
-        : { description: values.description }),
-      ...(values.date === undefined ? {} : { date: parseDate(values.date) }),
-      type: "income",
-      shared: true,
-    }),
+    build: (values) => {
+      const args: ToolArguments = {
+        amount: parseAmount(requireValue(values, "amount", "add-income")),
+        category: requireValue(values, "category", "add-income"),
+        type: "income",
+        shared: true,
+      };
+
+      if (values.description !== undefined) {
+        args.description = values.description;
+      }
+
+      if (values.date !== undefined) {
+        args.date = parseDate(values.date);
+      }
+
+      return args;
+    },
   },
   balance: {
     tool: "get_balances",
@@ -118,8 +136,15 @@ export const COMMANDS: Record<string, Command> = {
     tool: "list_categories",
     summary: "List the Household's Categories.",
     flags: [categoryTypeFlag],
-    build: (values) =>
-      values.type === undefined ? {} : { type: categoryTypeOf(values.type) },
+    build: (values) => {
+      const args: ToolArguments = {};
+
+      if (values.type !== undefined) {
+        args.type = categoryTypeOf(values.type);
+      }
+
+      return args;
+    },
   },
 };
 
@@ -173,7 +198,7 @@ export function commandUsage(name: string, command: Command): string {
     .join(" ");
 
   return [
-    `sora ${name} — ${command.summary}`,
+    `sora ${name}: ${command.summary}`,
     "",
     "Usage:",
     `  sora ${name}${usageLine ? ` ${usageLine}` : ""}`,

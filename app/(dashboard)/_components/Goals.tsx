@@ -126,7 +126,7 @@ const Goals = ({
                       <p className="text-xs text-muted-foreground tabular-nums">
                         {formatter.format(goal.contributed)} of{" "}
                         {formatter.format(goal.target)}
-                        {goal.contributed >= goal.target && " — reached"}
+                        {goal.contributed >= goal.target && " (reached)"}
                       </p>
                     </div>
                   );

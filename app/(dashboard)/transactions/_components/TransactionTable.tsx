@@ -475,7 +475,7 @@ function getCategoryOptions(transactions: GetTransactionsHistoryResponseType) {
   return Array.from(categories.values());
 }
 
-function escapeCell(value: unknown) {
+function escapeCell(value: string) {
   const s = String(value ?? "");
   return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
