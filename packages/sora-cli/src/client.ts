@@ -1,16 +1,29 @@
+import type {
+  CallToolResult,
+  CompatibilityCallToolResult,
+} from "@modelcontextprotocol/sdk/types.js";
+
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
+import { z } from "zod";
+
+export type ToolArguments = Record<string, string | number | boolean>;
 
 export type ToolCall = {
   name: string;
-  arguments: Record<string, unknown>;
+  arguments: ToolArguments;
 };
 
 export type ToolOutcome = {
   text: string;
   isError: boolean;
 };
+
+const ContentPartSchema = z.union([
+  z.object({ type: z.literal("text"), text: z.string() }),
+  z.object({ type: z.string() }).loose(),
+]);
 
 // The endpoint answers application/json, which the transport handles on its
 // own, so connecting is all the handshake this CLI needs.
@@ -44,49 +57,49 @@ export async function callTool(
 }
 
 // The SDK types the tool result as a union that includes the compatibility
-// result, where the content is unknown, so the text parts are picked out
-// here instead of being assumed.
-function textFromContent(content: unknown): string {
-  if (!Array.isArray(content)) {
+// result, so the content is parsed here rather than assumed.
+function textFromContent(
+  content: CallToolResult["content"] | CompatibilityCallToolResult["content"],
+): string {
+  const parts = z.array(ContentPartSchema).safeParse(content);
+
+  if (!parts.success) {
     return "";
   }
 
-  return content
+  return parts.data
     .filter(
-      (part): part is { type: "text"; text: string } =>
-        typeof part === "object" &&
-        part !== null &&
-        (part as { type?: unknown }).type === "text",
+      (part): part is { type: "text"; text: string } => part.type === "text",
     )
     .map((part) => part.text)
     .join("\n");
 }
 
-function describeFailure(error: unknown, endpoint: string): string {
-  if (error instanceof McpError) {
-    return error.message;
+function describeFailure(cause: unknown, endpoint: string): string {
+  if (cause instanceof McpError) {
+    return cause.message;
   }
 
-  if (isStreamableHttpError(error)) {
-    if (error.code === 401) {
+  if (isStreamableHttpError(cause)) {
+    if (cause.code === 401) {
       return "The Sora server rejected the token. Check the token, and check that the Household has agent access turned on.";
     }
-    if (error.code === 403) {
+    if (cause.code === 403) {
       return "The token does not have access to this operation.";
     }
-    if (error.code === 404) {
+    if (cause.code === 404) {
       return `No Sora endpoint answered at ${endpoint}. Check SORA_URL.`;
     }
-    return `The Sora server answered with HTTP ${error.code}.`;
+    return `The Sora server answered with HTTP ${cause.code}.`;
   }
 
-  const cause = causeMessage(error);
+  const nested = causeMessageOf(cause);
 
-  if (cause) {
-    return `Could not reach the Sora server at ${endpoint}: ${cause}`;
+  if (nested) {
+    return `Could not reach the Sora server at ${endpoint}: ${nested}`;
   }
 
-  return error instanceof Error ? error.message : String(error);
+  return cause instanceof Error ? cause.message : String(cause);
 }
 
 function isStreamableHttpError(
@@ -99,23 +112,23 @@ function isStreamableHttpError(
   );
 }
 
-function causeMessage(error: unknown): string | null {
-  if (!(error instanceof Error) || !("cause" in error)) {
+function causeMessageOf(cause: unknown): string | null {
+  if (!(cause instanceof Error) || !("cause" in cause)) {
     return null;
   }
 
-  const cause = error.cause;
+  const nested = cause.cause;
 
-  if (cause instanceof AggregateError) {
-    const reasons = cause.errors.map((entry) =>
+  if (nested instanceof AggregateError) {
+    const reasons = nested.errors.map((entry) =>
       entry instanceof Error ? entry.message : String(entry),
     );
 
     return reasons.join(", ") || null;
   }
 
-  if (cause instanceof Error && cause.message) {
-    return cause.message;
+  if (nested instanceof Error && nested.message) {
+    return nested.message;
   }
 
   return null;

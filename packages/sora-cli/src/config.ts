@@ -63,10 +63,10 @@ async function readStoredConfig(): Promise<{ token?: string }> {
   return { token: typeof token === "string" ? token : undefined };
 }
 
-function isMissingFile(error: unknown): boolean {
+function isMissingFile(cause: unknown): boolean {
   return (
-    typeof error === "object" &&
-    error !== null &&
-    (error as NodeJS.ErrnoException).code === "ENOENT"
+    typeof cause === "object" &&
+    cause !== null &&
+    (cause as NodeJS.ErrnoException).code === "ENOENT"
   );
 }
