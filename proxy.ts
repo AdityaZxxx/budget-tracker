@@ -3,7 +3,6 @@ import type { NextRequest } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 import { NextResponse } from "next/server";
 
-const authPages = ["/sign-in", "/sign-up"];
 // Invite pages are public: accepting an invite is what signs a new user in.
 const publicPrefixes = ["/invite"];
 const protectedPrefixes = ["/transactions", "/manage", "/wizard"];
@@ -12,7 +11,6 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const sessionCookie = getSessionCookie(request);
 
-  const isAuthPage = authPages.some((page) => pathname.startsWith(page));
   const isPublic = publicPrefixes.some((prefix) => pathname.startsWith(prefix));
   const isAuthApi = pathname.startsWith("/api/auth");
   // Cron routes authenticate with a bearer secret instead of a session.
@@ -29,9 +27,10 @@ export function proxy(request: NextRequest) {
       protectedPrefixes.some((prefix) => pathname.startsWith(prefix)) ||
       (isApiRoute && !isAuthApi));
 
-  if (sessionCookie && isAuthPage) {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
+  // An auth page never redirects on cookie presence alone. The cookie can
+  // outlive the session it names, and the dashboard then sends the browser
+  // back here, so the two redirects used to bounce forever. The auth pages
+  // validate the session themselves before redirecting a signed-in Member.
 
   if (!sessionCookie && isProtected) {
     return NextResponse.redirect(new URL("/sign-in", request.url));
