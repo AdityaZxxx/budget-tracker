@@ -21,5 +21,11 @@
     "functions": ["cn"]
   },
   "sortPackageJson": false,
-  "ignorePatterns": [".next/**", "node_modules/**", "pnpm-lock.yaml"]
+  "ignorePatterns": [
+    ".next/**",
+    "node_modules/**",
+    "pnpm-lock.yaml",
+    "packages/sora-lint-plugin/rules/**",
+    "packages/sora-lint-plugin/shared/**"
+  ]
 }

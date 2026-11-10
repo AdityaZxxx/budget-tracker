@@ -124,6 +124,6 @@ export function registerGoalBudgetWriteTools(
   );
 }
 
-function errorMessage(error: unknown) {
-  return error instanceof Error ? error.message : String(error);
+function errorMessage(cause: unknown) {
+  return cause instanceof Error ? cause.message : String(cause);
 }

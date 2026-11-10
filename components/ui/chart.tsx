@@ -333,10 +333,18 @@ function getTooltipLabel({
   return <div className={cn("font-medium", labelClassName)}>{value}</div>;
 }
 
+type PayloadItem = {
+  payload?: PayloadItem;
+  dataKey?: string | number;
+  name?: string;
+  value?: string | number;
+  color?: string;
+};
+
 // Helper to extract item config from a payload.
 function getPayloadConfigFromPayload(
   config: ChartConfig,
-  payload: unknown,
+  payload: PayloadItem,
   key: string,
 ) {
   if (typeof payload !== "object" || payload === null) {

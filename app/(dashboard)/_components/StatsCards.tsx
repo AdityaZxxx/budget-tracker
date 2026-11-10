@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { TrendingDown, TrendingUp, Wallet } from "lucide-react";
-import { ReactNode, useMemo, useState } from "react";
+import { ReactNode, useState } from "react";
 import CountUp from "react-countup";
 
 import SkeletonWrapper from "@/components/SkeletonWrapper";
@@ -39,9 +39,7 @@ const StatsCards = ({ from, to, currency }: Props) => {
     refetchOnWindowFocus: true,
   });
 
-  const formatter = useMemo(() => {
-    return getFormatterForCurrency(currency ?? "USD");
-  }, [currency]);
+  const formatter = getFormatterForCurrency(currency ?? "USD");
 
   const { income = 0, expense = 0 } = statsQuery.data || {};
   const balance = income - expense;

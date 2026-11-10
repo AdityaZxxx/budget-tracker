@@ -2,7 +2,6 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { ArrowDownRight, ArrowUpRight, Users } from "lucide-react";
-import { useMemo } from "react";
 import CountUp from "react-countup";
 
 import SkeletonWrapper from "@/components/SkeletonWrapper";
@@ -30,9 +29,7 @@ const SharedSpendingCard = ({ currency }: Props) => {
     refetchOnWindowFocus: true,
   });
 
-  const formatter = useMemo(() => {
-    return getFormatterForCurrency(currency ?? "USD");
-  }, [currency]);
+  const formatter = getFormatterForCurrency(currency ?? "USD");
 
   const { thisMonth = 0, lastMonth = 0 } = spendingQuery.data ?? {};
   const difference = thisMonth - lastMonth;

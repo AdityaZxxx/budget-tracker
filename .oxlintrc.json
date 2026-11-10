@@ -26,11 +26,39 @@
       "version": "19.3"
     }
   },
-  "ignorePatterns": [".next/**", "node_modules/**", "next-env.d.ts"],
+  "ignorePatterns": [
+    ".next/**",
+    "node_modules/**",
+    "next-env.d.ts",
+    "packages/sora-lint-plugin/**"
+  ],
+  "jsPlugins": ["./packages/sora-lint-plugin/index.ts"],
   "rules": {
     // The project compiles JSX with the automatic runtime ("jsx": "react-jsx"),
     // so React no longer needs to be in scope.
     "react/react-in-jsx-scope": "off",
+
+    "sora/no-em-dash-copy": "error",
+    "sora/no-hookless-use-function": "error",
+    "sora/no-low-value-comments": "error",
+    "sora/no-manual-memo": "error",
+    "sora/no-native-title-tooltip": "error",
+    "sora/no-unscoped-has": "error",
+    "sora/require-suppression-reason": "error",
+    "sora/no-array-filter-map": "error",
+    "sora/no-chained-type-assertions": "error",
+    "sora/no-conditional-empty-object-spread": "error",
+    "sora/no-module-mocking": "error",
+    "sora/no-object-parameters": "error",
+    "sora/no-reduce-accumulator-copy": "error",
+    "sora/no-reflect-apply": "error",
+    "sora/no-reflect-get": "error",
+    "sora/no-shape-in-symbol-names": "error",
+    "sora/no-unknown-parameters": "error",
+    "sora/no-unknown-returns": "error",
+    "sora/no-unknown-type-aliases": "error",
+    "sora/no-unsafe-dictionary-type": "error",
+    "sora/no-widen-then-assert": "error",
 
     // Prisma's aggregate API names its result field with a leading underscore.
     "eslint/no-underscore-dangle": ["error", { "allow": ["_sum"] }],

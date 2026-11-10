@@ -89,8 +89,7 @@ const CreateGoalDialog = ({ trigger, currency }: Props) => {
       deadline: undefined as Date | undefined,
     },
     validators: {
-      onSubmit:
-        CreateGoalSchema as unknown as StandardSchemaV1<CreateGoalFormValues>,
+      onSubmit: CreateGoalSchema as StandardSchemaV1<CreateGoalFormValues>,
     },
     onSubmitInvalid: () => {
       document.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();

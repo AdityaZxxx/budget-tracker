@@ -237,10 +237,10 @@ const BudgetDialog = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="soft">
-                  Soft — warn at 80% and 100%
+                  Soft (warn at 80% and 100%)
                 </SelectItem>
                 <SelectItem value="hard">
-                  Hard — block expenses over the limit
+                  Hard (block expenses over the limit)
                 </SelectItem>
               </SelectContent>
             </Select>

@@ -10,7 +10,7 @@ import { getGoalsWithProgress } from "@/lib/goals";
 import { getBalanceStats, getTransactionsHistory } from "@/lib/transactions";
 
 import {
-  dateRangeShape,
+  dateRangeSchema,
   resolveDateRange,
   toolError,
   toolResult,
@@ -25,7 +25,7 @@ export function registerReadTools(server: McpServer, context: McpContext) {
       title: "Get overview",
       description:
         "Total income, expenses, and net balance for the Household over a date range. Counts shared Transactions only.",
-      inputSchema: dateRangeShape,
+      inputSchema: dateRangeSchema,
     },
     async ({ from, to }) => {
       try {
@@ -57,7 +57,7 @@ export function registerReadTools(server: McpServer, context: McpContext) {
       description:
         "Transactions in the Household over a date range. Includes the shared ones and the caller's own personal ones.",
       inputSchema: {
-        ...dateRangeShape,
+        ...dateRangeSchema,
         category: z
           .string()
           .optional()
@@ -228,6 +228,6 @@ export function registerReadTools(server: McpServer, context: McpContext) {
   );
 }
 
-function errorMessage(error: unknown) {
-  return error instanceof Error ? error.message : String(error);
+function errorMessage(cause: unknown) {
+  return cause instanceof Error ? cause.message : String(cause);
 }
