@@ -4,7 +4,9 @@ import { noArrayFilterMapRule } from "./rules/no-array-filter-map.ts";
 import { noChainedTypeAssertionsRule } from "./rules/no-chained-type-assertions.ts";
 import { noConditionalEmptyObjectSpreadRule } from "./rules/no-conditional-empty-object-spread.ts";
 import noEmDashCopy from "./rules/no-em-dash-copy.ts";
+import noHooklessUseFunction from "./rules/no-hookless-use-function.ts";
 import noLowValueComments from "./rules/no-low-value-comments.ts";
+import noManualMemo from "./rules/no-manual-memo.ts";
 import { noModuleMockingRule } from "./rules/no-module-mocking.ts";
 import { noObjectParametersRule } from "./rules/no-object-parameters.ts";
 import { noReduceAccumulatorCopyRule } from "./rules/no-reduce-accumulator-copy.ts";
@@ -15,7 +17,9 @@ import { noUnknownParametersRule } from "./rules/no-unknown-parameters.ts";
 import { noUnknownReturnsRule } from "./rules/no-unknown-returns.ts";
 import { noUnknownTypeAliasesRule } from "./rules/no-unknown-type-aliases.ts";
 import { noUnsafeDictionaryTypeRule } from "./rules/no-unsafe-dictionary-type.ts";
+import noUnscopedHas from "./rules/no-unscoped-has.ts";
 import { noWidenThenAssertRule } from "./rules/no-widen-then-assert.ts";
+import requireSuppressionReason from "./rules/require-suppression-reason.ts";
 
 // The anti-slop rules come from an ESLint-style plugin, so they are converted
 // before they join the oxlint-native rules.
@@ -46,6 +50,10 @@ export default definePlugin({
   rules: {
     ...antiSlopRules,
     "no-em-dash-copy": noEmDashCopy,
+    "no-hookless-use-function": noHooklessUseFunction,
     "no-low-value-comments": noLowValueComments,
+    "no-manual-memo": noManualMemo,
+    "no-unscoped-has": noUnscopedHas,
+    "require-suppression-reason": requireSuppressionReason,
   },
 });

@@ -39,7 +39,11 @@
     "react/react-in-jsx-scope": "off",
 
     "sora/no-em-dash-copy": "error",
+    "sora/no-hookless-use-function": "error",
     "sora/no-low-value-comments": "error",
+    "sora/no-manual-memo": "error",
+    "sora/no-unscoped-has": "error",
+    "sora/require-suppression-reason": "error",
     "sora/no-array-filter-map": "error",
     "sora/no-chained-type-assertions": "error",
     "sora/no-conditional-empty-object-spread": "error",

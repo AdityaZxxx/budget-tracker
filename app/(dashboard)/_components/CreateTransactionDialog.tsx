@@ -5,7 +5,7 @@ import { useStore, useForm, type StandardSchemaV1 } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
-import { ReactElement, ReactNode, useMemo, useState } from "react";
+import { ReactElement, ReactNode, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { toast } from "sonner";
 
@@ -155,7 +155,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
     refetchInterval: 30_000,
     refetchOnWindowFocus: true,
   });
-  const members = useMemo(() => membersQuery.data ?? [], [membersQuery.data]);
+  const members = membersQuery.data ?? [];
 
   const queryClient = useQueryClient();
 
@@ -252,24 +252,15 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
     );
   };
 
-  const previewShares = useMemo(() => {
-    if (!showSplitOptions || splitMode === "equal") {
-      return null;
-    }
-    return finalizeShares(
-      splitMode,
-      splitMode === "percent" ? splitPercents : splitAmounts,
-      members,
-      amountValue,
-    );
-  }, [
-    showSplitOptions,
-    splitMode,
-    splitPercents,
-    splitAmounts,
-    members,
-    amountValue,
-  ]);
+  const previewShares =
+    !showSplitOptions || splitMode === "equal"
+      ? null
+      : finalizeShares(
+          splitMode,
+          splitMode === "percent" ? splitPercents : splitAmounts,
+          members,
+          amountValue,
+        );
 
   const splitInvalid =
     previewShares !== null &&

@@ -9,6 +9,12 @@ MIT licensed, and both are vendored here with their licence text.
 - Licence: MIT, Copyright (c) 2026 T3 Tools Inc.
 - Vendored without change to the rule logic.
 
+## `rules/no-manual-memo.ts`, `rules/no-hookless-use-function.ts`, `rules/no-unscoped-has.ts`, `rules/require-suppression-reason.ts`
+
+- Source: https://github.com/pingdotgg/t3code, `oxlint-plugin-t3code/rules`
+- Licence: MIT, Copyright (c) 2026 T3 Tools Inc.
+- One change: `no-manual-memo` names `useStableCallback`, a helper that does not exist in this repo. The message says to keep one identity only where a child needs it instead.
+
 ## `rules/*.ts` (the rest), `shared/*.ts`, `vendor/eslint-stylistic/*`
 
 - Source: https://github.com/dmmulroy/anti-slop, `skills/install-anti-slop/assets/anti-slop`
