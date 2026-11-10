@@ -144,13 +144,21 @@ The skill's own rule holds here: never edit product code during a verification r
 
 ## Commit protocol
 
-One commit per ticket, on the current branch. Conventional Commits: a type, a short subject, no body, no implementation chatter. The subject says what changed, not what you did.
+One commit per ticket, on the branch the ticket is worked on. Conventional Commits: a type, a short subject, no body, no implementation chatter. The subject says what changed, not what you did.
 
 Formatting is the one split. The formatter's commit is mechanical and lands on its own, so a reviewer can skip it and read the change underneath.
 
-Work stays local. The remote exists, but pushes are not part of the flow.
+A ticket worked in the main session is committed after the session has read its own diff, and before the review a pull request carries. A ticket worked by a subagent commits on its own branch, because concurrent commits on one branch collide. A stack of branches wants a worktree each, so two of them cannot fight over the same checkout.
 
-A ticket worked in the main session is committed after its review. A ticket worked by a parallel subagent leaves its changes uncommitted for the main session to integrate, because concurrent commits on one branch collide.
+## Pull requests
+
+A pull request is the end of a ticket, not a favour. One concern carries one pull request, and tickets that serve the same concern travel together. A pull request that will be merged into a branch other than `main` is stacked on the one below it, and the stack merges from the bottom.
+
+The agent that worked the ticket commits and pushes the branch. A reviewer reads the diff after it is pushed, against the ticket's desired outcome, and the pull request opens once that review is clean. The order is commit, push, review, open.
+
+The body says the problem in a sentence or two, then how it was fixed, then the evidence: the commands that ran and what they printed, and the run that drove the app. A behaviour change that was not seen running has no evidence, and the body says so rather than claiming otherwise. It ends with `## Merge Danger`, a `**Door:**` line and a `**Blast Radius:**` line.
+
+A visual change carries a before and after capture. The capture is uploaded to the pull request, never committed to the repository.
 
 ## Keeping this file honest
 
