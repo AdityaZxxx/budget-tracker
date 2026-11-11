@@ -78,7 +78,6 @@ export function registerReadTools(server: McpServer, context: McpContext) {
         const transactions = await getTransactionsHistory(
           context.householdId,
           context.userId,
-          currency,
           range.from,
           range.to,
           { category, shared },

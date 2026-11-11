@@ -31,7 +31,6 @@ export async function GET(request: NextRequest) {
   const transactions = await getTransactionsHistory(
     result.household.id,
     result.session.user.id,
-    result.household.currency,
     queryParams.data.from,
     queryParams.data.to,
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import type { Household } from "@prisma/client";
 import type { ColumnFiltersState, SortingState } from "@tanstack/react-table";
 import type { LegacyColumnDef as ColumnDef } from "@tanstack/react-table/legacy";
 
@@ -53,7 +54,7 @@ import {
 import { useCallerRole } from "@/hooks/use-members";
 import { useSession } from "@/lib/auth-client";
 import { POLL_INTERVAL } from "@/lib/constants";
-import { dateToUtcDate } from "@/lib/helpers";
+import { dateToUtcDate, getFormatterForCurrency } from "@/lib/helpers";
 import { type GetTransactionsHistoryResponseType } from "@/lib/transactions";
 import { cn } from "@/lib/utils";
 
@@ -68,7 +69,9 @@ type TransactionHistoryRow = GetTransactionsHistoryResponseType[0];
 
 const emptyData: TransactionHistoryRow[] = [];
 
-export const columns: ColumnDef<TransactionHistoryRow>[] = [
+const buildColumns = (
+  formatAmount: (value: number) => string,
+): ColumnDef<TransactionHistoryRow>[] => [
   {
     id: "category",
     accessorKey: "category",
@@ -179,7 +182,7 @@ export const columns: ColumnDef<TransactionHistoryRow>[] = [
         )}
       >
         {row.original.type === "expense" ? "-" : "+"}
-        {row.original.formattedAmount}
+        {formatAmount(row.original.amount)}
       </p>
     ),
   },
@@ -193,6 +196,17 @@ export const columns: ColumnDef<TransactionHistoryRow>[] = [
 const TransactionTable = ({ from, to }: Props) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const householdQuery = useQuery<Household>({
+    queryKey: ["household"],
+    queryFn: () => fetch("/api/user-settings").then((res) => res.json()),
+    staleTime: POLL_INTERVAL,
+    refetchInterval: POLL_INTERVAL,
+    refetchOnWindowFocus: true,
+  });
+  const formatAmount = getFormatterForCurrency(
+    householdQuery.data?.currency ?? "USD",
+  ).format;
+  const columns = buildColumns(formatAmount);
 
   const history = useQuery<GetTransactionsHistoryResponseType>({
     queryKey: ["transactions", "history", from, to],
@@ -222,7 +236,11 @@ const TransactionTable = ({ from, to }: Props) => {
     getPaginationRowModel: getPaginationRowModel(),
   });
 
-  const csvData = getCsvData(history.data);
+  const csvData = getCsvData(
+    history.data,
+    formatAmount,
+    householdQuery.data?.currency ?? "USD",
+  );
 
   const csvHeaders = [
     { label: "Date", key: "Date" },
@@ -451,6 +469,8 @@ export default TransactionTable;
 
 function getCsvData(
   transactions: GetTransactionsHistoryResponseType | undefined,
+  formatAmount: (value: number) => string,
+  currency: string,
 ) {
   if (!transactions) return [];
 
@@ -461,9 +481,9 @@ function getCsvData(
     Type: transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1),
     Amount:
       transaction.type === "expense"
-        ? `-${transaction.formattedAmount}`
-        : transaction.formattedAmount,
-    Currency: transaction.formattedAmount.replace(/[^a-zA-Z]/g, ""),
+        ? `-${formatAmount(transaction.amount)}`
+        : formatAmount(transaction.amount),
+    Currency: currency,
   }));
 }
 
