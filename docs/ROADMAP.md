@@ -16,7 +16,7 @@ Product language lives in [GLOSSARY.md](../GLOSSARY.md); hard-to-reverse decisio
 - Auth: email verification and password reset via the Resend free tier, email/password primary, Google sign-in optional, Better Auth rate limiting on auth routes
 - Account deletion (cascades household data), full JSON/CSV export, /privacy page
 - Error monitoring and cookie-less analytics
-- No test suite by decision; the CI build is the safety net
+- No test suite by decision; the CI build covers what compiles, the lint plugin covers the mechanical rules, and behaviour is proved by running the app
 
 ## Phase 3 - Launch
 

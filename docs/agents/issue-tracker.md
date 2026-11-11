@@ -21,12 +21,12 @@ Status: open. Blocked by: 006.
 
 What the ticket must deliver, in the product language of `GLOSSARY.md`.
 
-Rules: `pnpm build` green; no commit; load-bearing comments only.
+Rules: `pnpm build` green; load-bearing comments only.
 ```
 
 - `Status:` carries the ticket's state. Build tickets use `open`, `in progress`, or `done`. A ticket that arrived from outside the build plan carries one of the role strings below.
 - `Blocked by: NN` lists the ticket numbers that must land first, so blockers-first order is mechanical rather than remembered.
-- `Rules:` restates the house rules for that ticket when it needs to stand alone in a fresh context.
+- `Rules:` restates the house rules for that ticket when it needs to stand alone in a fresh context. It does not decide whether the work is committed or pushed: the commit protocol and the pull request rules in `CODING_STANDARDS.md` decide that, and the commit lands on the branch the ticket is worked on.
 
 ## Triage labels
 
