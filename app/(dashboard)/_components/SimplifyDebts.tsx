@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { POLL_INTERVAL } from "@/lib/constants";
 import { getFormatterForCurrency } from "@/lib/helpers";
 
 import { getSimplifiedDebts } from "../_actions/balance";
@@ -25,7 +26,8 @@ const SimplifyDebts = ({ currency }: Props) => {
   const debtsQuery = useQuery({
     queryKey: ["simplified-debts"],
     queryFn: getSimplifiedDebts,
-    refetchInterval: 30_000,
+    staleTime: POLL_INTERVAL,
+    refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,
   });
 

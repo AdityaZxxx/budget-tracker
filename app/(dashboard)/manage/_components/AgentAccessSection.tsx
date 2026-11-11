@@ -54,7 +54,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { READ_ONLY_SCOPE, READ_WRITE_SCOPE } from "@/lib/constants";
+import {
+  POLL_INTERVAL,
+  READ_ONLY_SCOPE,
+  READ_WRITE_SCOPE,
+} from "@/lib/constants";
 
 import {
   type ApiTokenSummary,
@@ -70,7 +74,8 @@ const AgentAccessSection = ({ canEdit }: { canEdit: boolean }) => {
   const { data: household } = useQuery<Household>({
     queryKey: ["household"],
     queryFn: () => fetch("/api/user-settings").then((res) => res.json()),
-    refetchInterval: 30_000,
+    staleTime: POLL_INTERVAL,
+    refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,
   });
 
@@ -139,6 +144,7 @@ const ApiTokenList = ({ canEdit }: { canEdit: boolean }) => {
   const { data: tokens = [], isLoading } = useQuery<ApiTokenSummary[]>({
     queryKey: ["apiTokens"],
     queryFn: listApiTokens,
+    staleTime: POLL_INTERVAL,
   });
 
   const revokeMutation = useMutation({

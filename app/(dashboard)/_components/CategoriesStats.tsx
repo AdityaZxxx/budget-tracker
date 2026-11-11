@@ -8,6 +8,7 @@ import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { POLL_INTERVAL } from "@/lib/constants";
 import { dateToUtcDate, getFormatterForCurrency } from "@/lib/helpers";
 
 import { type GetCategoriesStatsResponseType } from "../../api/stats/categories/route";
@@ -39,7 +40,8 @@ const CategoriesStats = ({ from, to, currency }: Props) => {
       }
       return response.json();
     },
-    refetchInterval: 30_000,
+    staleTime: POLL_INTERVAL,
+    refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,
   });
 

@@ -92,12 +92,14 @@ export default function HistoryChart({ data, timeframe, formatter }: Props) {
           dataKey={"income"}
           fill="url(#incomeBar)"
           radius={4}
+          isAnimationActive={false}
           className="cursor-pointer"
         />
         <Bar
           dataKey={"expense"}
           fill="url(#expenseBar)"
           radius={4}
+          isAnimationActive={false}
           className="cursor-pointer"
         />
       </BarChart>
@@ -164,6 +166,7 @@ function TooltipRow({
           <CountUp
             duration={0.5}
             preserveValue
+            redraw={false}
             end={value}
             decimals={0}
             className="text-sm tabular-nums"

@@ -34,6 +34,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { type BudgetWithProgress } from "@/lib/budgets";
+import { POLL_INTERVAL } from "@/lib/constants";
 import { Currencies } from "@/lib/currencies";
 
 import { createBudget, updateBudget } from "../../_actions/budgets";
@@ -78,7 +79,8 @@ const BudgetDialog = ({
         }
         return res.json();
       }),
-    refetchInterval: 30_000,
+    staleTime: POLL_INTERVAL,
+    refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,
   });
 

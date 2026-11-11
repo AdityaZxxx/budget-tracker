@@ -6,6 +6,7 @@ import CountUp from "react-countup";
 
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Card } from "@/components/ui/card";
+import { POLL_INTERVAL } from "@/lib/constants";
 import { getFormatterForCurrency } from "@/lib/helpers";
 import { cn } from "@/lib/utils";
 
@@ -25,7 +26,8 @@ const SharedSpendingCard = ({ currency }: Props) => {
       }
       return response.json();
     },
-    refetchInterval: 30_000,
+    staleTime: POLL_INTERVAL,
+    refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,
   });
 

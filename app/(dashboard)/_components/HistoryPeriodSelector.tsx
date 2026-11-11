@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { POLL_INTERVAL } from "@/lib/constants";
 
 interface Props {
   period: Period;
@@ -31,7 +32,8 @@ const HistoryPeriodSelector = ({
   const historyPeriods = useQuery<GetHistoryPeriodsResponseType>({
     queryKey: ["overview", "history", "periods"],
     queryFn: () => fetch(`/api/history-periods`).then((res) => res.json()),
-    refetchInterval: 30_000,
+    staleTime: POLL_INTERVAL,
+    refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,
   });
   return (

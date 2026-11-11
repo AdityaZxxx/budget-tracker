@@ -9,6 +9,7 @@ import CountUp from "react-countup";
 
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Card } from "@/components/ui/card";
+import { POLL_INTERVAL } from "@/lib/constants";
 import { dateToUtcDate, getFormatterForCurrency } from "@/lib/helpers";
 import { type GetBalanceStatsResponseType } from "@/lib/transactions";
 
@@ -37,7 +38,8 @@ const StatsCards = ({ from, to, currency }: Props) => {
         throw error;
       }
     },
-    refetchInterval: 30_000,
+    staleTime: POLL_INTERVAL,
+    refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,
   });
 

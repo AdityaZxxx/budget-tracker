@@ -19,6 +19,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { POLL_INTERVAL } from "@/lib/constants";
 import { getFormatterForCurrency } from "@/lib/helpers";
 
 import { listGoals } from "../_actions/goals";
@@ -37,7 +38,8 @@ const Goals = ({
   const goalsQuery = useQuery({
     queryKey: ["goals"],
     queryFn: listGoals,
-    refetchInterval: 30_000,
+    staleTime: POLL_INTERVAL,
+    refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,
   });
 

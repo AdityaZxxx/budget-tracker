@@ -21,6 +21,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { POLL_INTERVAL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 import CreateCategoryDialog from "./CreateCategoryDialog";
@@ -47,7 +48,8 @@ const CategoryPicker = ({ type, onChange, id, ...ariaProps }: Props) => {
     queryKey: ["categories", type],
     queryFn: () =>
       fetch(`api/categories?type=${type}`).then((res) => res.json()),
-    refetchInterval: 30_000,
+    staleTime: POLL_INTERVAL,
+    refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,
   });
 

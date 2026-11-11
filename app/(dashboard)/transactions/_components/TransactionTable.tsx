@@ -52,6 +52,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useCallerRole } from "@/hooks/use-members";
 import { useSession } from "@/lib/auth-client";
+import { POLL_INTERVAL } from "@/lib/constants";
 import { dateToUtcDate } from "@/lib/helpers";
 import { type GetTransactionsHistoryResponseType } from "@/lib/transactions";
 import { cn } from "@/lib/utils";
@@ -204,7 +205,8 @@ const TransactionTable = ({ from, to }: Props) => {
       if (!response.ok) throw new Error("Failed to fetch transaction history");
       return response.json();
     },
-    refetchInterval: 30_000,
+    staleTime: POLL_INTERVAL,
+    refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,
   });
 
