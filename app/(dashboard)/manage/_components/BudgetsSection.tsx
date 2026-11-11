@@ -1,6 +1,7 @@
 "use client";
 
-import { Household } from "@prisma/client";
+import type { Household } from "@prisma/client";
+
 import { useQuery } from "@tanstack/react-query";
 import {
   MoreHorizontal,

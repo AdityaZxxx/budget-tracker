@@ -1,6 +1,6 @@
 import type { RowData } from "@tanstack/react-table";
+import type { LegacyColumn as Column } from "@tanstack/react-table/legacy";
 
-import { LegacyColumn as Column } from "@tanstack/react-table/legacy";
 import { ArrowDown, ArrowUp, ChevronsUpDown, EyeOff } from "lucide-react";
 
 import { Button } from "@/components/ui/button";

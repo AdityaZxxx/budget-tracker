@@ -4,6 +4,7 @@ import { noArrayFilterMapRule } from "./rules/no-array-filter-map.ts";
 import { noChainedTypeAssertionsRule } from "./rules/no-chained-type-assertions.ts";
 import { noConditionalEmptyObjectSpreadRule } from "./rules/no-conditional-empty-object-spread.ts";
 import noEmDashCopy from "./rules/no-em-dash-copy.ts";
+import noHardcodedLocalhost from "./rules/no-hardcoded-localhost.ts";
 import noHooklessUseFunction from "./rules/no-hookless-use-function.ts";
 import noLowValueComments from "./rules/no-low-value-comments.ts";
 import noManualMemo from "./rules/no-manual-memo.ts";
@@ -51,6 +52,7 @@ export default definePlugin({
   rules: {
     ...antiSlopRules,
     "no-em-dash-copy": noEmDashCopy,
+    "no-hardcoded-localhost": noHardcodedLocalhost,
     "no-hookless-use-function": noHooklessUseFunction,
     "no-low-value-comments": noLowValueComments,
     "no-manual-memo": noManualMemo,

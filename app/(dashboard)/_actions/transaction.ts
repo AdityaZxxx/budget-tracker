@@ -1,13 +1,12 @@
 "use server";
 
+import type { CreateTransactionSchemaType } from "@/schemas/transaction";
+
 import { redirect } from "next/navigation";
 
 import { assertFullMember, requireHousehold } from "@/lib/household";
 import { createTransaction } from "@/lib/transactions";
-import {
-  CreateTransactionSchema,
-  CreateTransactionSchemaType,
-} from "@/schemas/transaction";
+import { CreateTransactionSchema } from "@/schemas/transaction";
 
 export async function CreateTransaction(form: CreateTransactionSchemaType) {
   const parsedBody = CreateTransactionSchema.safeParse(form);

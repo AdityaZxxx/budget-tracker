@@ -1,11 +1,11 @@
 "use client";
 
 import type { ColumnFiltersState, SortingState } from "@tanstack/react-table";
+import type { LegacyColumnDef as ColumnDef } from "@tanstack/react-table/legacy";
 
 import { useQuery } from "@tanstack/react-query";
 import { flexRender } from "@tanstack/react-table";
 import {
-  LegacyColumnDef as ColumnDef,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
@@ -63,8 +63,9 @@ interface Props {
   to: Date;
 }
 
-const emptyData: any[] = [];
 type TransactionHistoryRow = GetTransactionsHistoryResponseType[0];
+
+const emptyData: TransactionHistoryRow[] = [];
 
 export const columns: ColumnDef<TransactionHistoryRow>[] = [
   {

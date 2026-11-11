@@ -1,8 +1,10 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 import { useQuery } from "@tanstack/react-query";
 import { TrendingDown, TrendingUp, Wallet } from "lucide-react";
-import { ReactNode, useState } from "react";
+import { useState } from "react";
 import CountUp from "react-countup";
 
 import SkeletonWrapper from "@/components/SkeletonWrapper";

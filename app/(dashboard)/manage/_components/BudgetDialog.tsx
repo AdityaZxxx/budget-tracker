@@ -1,9 +1,11 @@
 "use client";
 
-import { Category, Household } from "@prisma/client";
+import type { Category, Household } from "@prisma/client";
+import type { ReactElement, ReactNode } from "react";
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { ReactElement, ReactNode, useState } from "react";
+import { useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { toast } from "sonner";
 

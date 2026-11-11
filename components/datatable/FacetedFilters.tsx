@@ -1,6 +1,6 @@
 import type { RowData } from "@tanstack/react-table";
+import type { LegacyColumn as Column } from "@tanstack/react-table/legacy";
 
-import { LegacyColumn as Column } from "@tanstack/react-table/legacy";
 import { Check, PlusCircle } from "lucide-react";
 import * as React from "react";
 

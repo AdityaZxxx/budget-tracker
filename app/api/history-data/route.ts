@@ -1,10 +1,11 @@
+import type { Period, Timeframe } from "@/lib/types";
+
 import { getDaysInMonth } from "date-fns";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
-import { Period, Timeframe } from "@/lib/types";
 
 type HistoryData = {
   year: number;

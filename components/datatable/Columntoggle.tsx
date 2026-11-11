@@ -1,8 +1,8 @@
 "use client";
 
 import type { RowData } from "@tanstack/react-table";
+import type { LegacyTable as Table } from "@tanstack/react-table/legacy";
 
-import { LegacyTable as Table } from "@tanstack/react-table/legacy";
 import { Settings2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";

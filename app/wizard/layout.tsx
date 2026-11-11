@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 const layout = ({ children }: { children: ReactNode }) => {
   return (

@@ -1,6 +1,8 @@
 "use client";
 
-import { Category } from "@prisma/client";
+import type { TransactionType } from "@/lib/types";
+import type { Category } from "@prisma/client";
+
 import { useQuery } from "@tanstack/react-query";
 import {
   Link2,
@@ -39,7 +41,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useCallerRole } from "@/hooks/use-members";
-import { TransactionType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 import CreateCategoryDialog from "../../_components/CreateCategoryDialog";

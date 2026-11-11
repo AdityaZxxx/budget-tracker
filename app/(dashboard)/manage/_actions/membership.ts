@@ -1,5 +1,11 @@
 "use server";
 
+import type {
+  RemoveMemberSchemaType,
+  SetEmailDigestSchemaType,
+  SetMemberRoleSchemaType,
+} from "@/schemas/membership";
+
 import { redirect } from "next/navigation";
 
 import {
@@ -14,11 +20,8 @@ import { notify, notifyHouseholdExcept } from "@/lib/notifications";
 import prisma from "@/lib/prisma";
 import {
   RemoveMemberSchema,
-  RemoveMemberSchemaType,
   SetEmailDigestSchema,
-  SetEmailDigestSchemaType,
   SetMemberRoleSchema,
-  SetMemberRoleSchemaType,
 } from "@/schemas/membership";
 
 export async function listMembers() {
