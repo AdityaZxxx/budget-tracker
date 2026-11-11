@@ -1,0 +1,94 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release tag, for example v2026.11.11 or v1.2.0"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Check the tag does not exist yet
+        run: |
+          if git rev-parse "refs/tags/${{ inputs.version }}" >/dev/null 2>&1; then
+            echo "Tag ${{ inputs.version }} already exists." >&2
+            exit 1
+          fi
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 12
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 26
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run verify
+      - run: pnpm build
+        env:
+          POSTGRES_PRISMA_URL: postgresql://postgres:postgres@localhost:5432/postgres
+          POSTGRES_URL_NON_POOLING: postgresql://postgres:postgres@localhost:5432/postgres
+          BETTER_AUTH_SECRET: ci-dummy-secret-not-for-production
+          BETTER_AUTH_URL: http://localhost:3000
+
+      # Migrations land before the new code, so the previous app version keeps
+      # working against the new schema while the deploy rolls out. Migrations
+      # must stay additive within a release; destructive changes ship in a
+      # later release.
+      - name: Apply database migrations
+        run: pnpm exec prisma migrate deploy
+        env:
+          POSTGRES_PRISMA_URL: ${{ secrets.PRODUCTION_POSTGRES_URL_NON_POOLING }}
+          POSTGRES_URL_NON_POOLING: ${{ secrets.PRODUCTION_POSTGRES_URL_NON_POOLING }}
+
+      - name: Deploy to Vercel production
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          pnpm dlx vercel@latest pull --yes --environment=production --token="$VERCEL_TOKEN"
+          pnpm dlx vercel@latest build --prod --token="$VERCEL_TOKEN"
+          pnpm dlx vercel@latest deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+
+      - name: Smoke test production
+        env:
+          PRODUCTION_BASE_URL: ${{ vars.PRODUCTION_BASE_URL }}
+        run: |
+          for attempt in $(seq 1 30); do
+            if curl -fsS -o /dev/null "$PRODUCTION_BASE_URL/"; then
+              break
+            fi
+            if [ "$attempt" = "30" ]; then
+              echo "Production did not come up after deploy." >&2
+              exit 1
+            fi
+            sleep 10
+          done
+          status=$(curl -s -o /dev/null -w "%{http_code}" "$PRODUCTION_BASE_URL/api/cron/digest")
+          if [ "$status" != "401" ]; then
+            echo "Expected 401 from /api/cron/digest without credentials, got $status." >&2
+            exit 1
+          fi
+
+      - name: Tag and publish the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git tag -a "${{ inputs.version }}" -m "${{ inputs.version }}"
+          git push origin "${{ inputs.version }}"
+          gh release create "${{ inputs.version }}" --generate-notes --title "${{ inputs.version }}"

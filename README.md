@@ -89,3 +89,7 @@ Follow these instructions to get a copy of the project up and running on your lo
     ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## 📦 Releasing
+
+Merging to `main` never deploys. Publishing to production is a manual run of the Release workflow, which applies migrations, deploys, smoke tests, and tags the release. See [`docs/release.md`](docs/release.md).
