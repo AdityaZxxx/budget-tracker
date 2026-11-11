@@ -67,3 +67,14 @@ export async function createHouseholdGoal(
     },
   });
 }
+
+// Contribution transactions survive the goal; onDelete: SetNull clears their
+// goalId so the money stays in the ledger.
+export async function deleteHouseholdGoal(householdId: string, id: string) {
+  return await prisma.goal.delete({
+    where: {
+      id,
+      householdId,
+    },
+  });
+}
