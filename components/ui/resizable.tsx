@@ -38,7 +38,7 @@ function ResizableHandle({
     <ResizableHandlePrimitive
       data-slot="resizable-handle"
       className={cn(
-        "relative flex w-px items-center justify-center bg-border ring-offset-background after:absolute after:inset-y-0 after:left-1/2 after:w-1 after:-translate-x-1/2 focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-hidden data-[panel-group-direction=horizontal]:h-px data-[panel-group-direction=horizontal]:w-full data-[panel-group-direction=horizontal]:after:left-0 data-[panel-group-direction=horizontal]:after:h-1 data-[panel-group-direction=horizontal]:after:w-full data-[panel-group-direction=horizontal]:after:translate-x-0 data-[panel-group-direction=horizontal]:after:-translate-y-1/2 [&[data-panel-group-direction=horizontal]>div]:rotate-90",
+        "relative flex w-px items-center justify-center bg-border ring-offset-background after:absolute after:inset-y-0 after:left-1/2 after:w-1 after:-translate-x-1/2 focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-hidden focus-visible:ring-inset data-[panel-group-direction=horizontal]:h-px data-[panel-group-direction=horizontal]:w-full data-[panel-group-direction=horizontal]:after:left-0 data-[panel-group-direction=horizontal]:after:h-1 data-[panel-group-direction=horizontal]:after:w-full data-[panel-group-direction=horizontal]:after:translate-x-0 data-[panel-group-direction=horizontal]:after:-translate-y-1/2 [&[data-panel-group-direction=horizontal]>div]:rotate-90",
         className,
       )}
       {...props}

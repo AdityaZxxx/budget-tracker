@@ -3,7 +3,7 @@
 The rules in this package are vendored from two open source projects. Both are
 MIT licensed, and both are vendored here with their licence text.
 
-## `rules/no-em-dash-copy.ts`, `rules/no-low-value-comments.ts`
+## `rules/no-em-dash-copy.ts`, `rules/no-low-value-comments.ts`, `rules/no-outset-state-indicators.ts`
 
 - Source: https://github.com/pingdotgg/t3code, `oxlint-plugin-t3code/rules`
 - Licence: MIT, Copyright (c) 2026 T3 Tools Inc.
