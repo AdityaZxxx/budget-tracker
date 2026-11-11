@@ -5,7 +5,7 @@ import { z } from "zod";
 
 import { READ_WRITE_SCOPE, VIEW_ONLY_ROLE } from "@/lib/constants";
 import { recordSettlement } from "@/lib/settlements";
-import { createTransaction } from "@/lib/transactions";
+import { createTransaction, deleteTransaction } from "@/lib/transactions";
 
 import { parseDate, toolError, toolResult } from "./tools";
 
@@ -95,6 +95,39 @@ export function registerTransactionWriteTools(
           category: transaction.category,
           shared: transaction.shared,
         });
+      } catch (error) {
+        return toolError(errorMessage(error));
+      }
+    },
+  );
+
+  server.registerTool(
+    "delete_transaction",
+    {
+      title: "Delete transaction",
+      description:
+        "Delete a Transaction from the Household's ledger. The Household's balances and history rollups move with it. Use list_transactions to find the Transaction's id.",
+      inputSchema: {
+        id: z
+          .string()
+          .min(1)
+          .describe(
+            "Id of the Transaction to delete. Use list_transactions to see them.",
+          ),
+      },
+    },
+    async ({ id }) => {
+      if (context.scope !== READ_WRITE_SCOPE)
+        return toolError("This token is read-only.");
+      if (context.role === VIEW_ONLY_ROLE)
+        return toolError(
+          "View-only members cannot make changes in this household.",
+        );
+
+      try {
+        await deleteTransaction(context.householdId, id);
+
+        return toolResult({ deleted: id });
       } catch (error) {
         return toolError(errorMessage(error));
       }

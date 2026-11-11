@@ -3,9 +3,9 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 import { z } from "zod";
 
-import { setHouseholdBudget } from "@/lib/budgets";
+import { deleteHouseholdBudget, setHouseholdBudget } from "@/lib/budgets";
 import { READ_WRITE_SCOPE, VIEW_ONLY_ROLE } from "@/lib/constants";
-import { createHouseholdGoal } from "@/lib/goals";
+import { createHouseholdGoal, deleteHouseholdGoal } from "@/lib/goals";
 
 import { parseDate, toolError, toolResult } from "./tools";
 
@@ -17,6 +17,70 @@ export function registerGoalBudgetWriteTools(
   server: McpServer,
   context: McpContext,
 ) {
+  server.registerTool(
+    "delete_goal",
+    {
+      title: "Delete goal",
+      description:
+        "Delete a Goal from the Household. Transactions tagged with the Goal keep the money in the ledger and lose the tag. Use list_goals to find the Goal's id.",
+      inputSchema: {
+        id: z
+          .string()
+          .min(1)
+          .describe("Id of the Goal to delete. Use list_goals to see them."),
+      },
+    },
+    async ({ id }) => {
+      if (context.scope !== READ_WRITE_SCOPE)
+        return toolError("This token is read-only.");
+      if (context.role === VIEW_ONLY_ROLE)
+        return toolError(
+          "View-only members cannot make changes in this household.",
+        );
+
+      try {
+        await deleteHouseholdGoal(context.householdId, id);
+
+        return toolResult({ deleted: id });
+      } catch (error) {
+        return toolError(errorMessage(error));
+      }
+    },
+  );
+
+  server.registerTool(
+    "delete_budget",
+    {
+      title: "Delete budget",
+      description:
+        "Delete the Household's Budget for one expense Category. Use list_budgets to find the Budget's id.",
+      inputSchema: {
+        id: z
+          .string()
+          .min(1)
+          .describe(
+            "Id of the Budget to delete. Use list_budgets to see them.",
+          ),
+      },
+    },
+    async ({ id }) => {
+      if (context.scope !== READ_WRITE_SCOPE)
+        return toolError("This token is read-only.");
+      if (context.role === VIEW_ONLY_ROLE)
+        return toolError(
+          "View-only members cannot make changes in this household.",
+        );
+
+      try {
+        await deleteHouseholdBudget(context.householdId, id);
+
+        return toolResult({ deleted: id });
+      } catch (error) {
+        return toolError(errorMessage(error));
+      }
+    },
+  );
+
   server.registerTool(
     "create_goal",
     {
