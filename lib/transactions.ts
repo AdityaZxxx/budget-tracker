@@ -12,7 +12,6 @@ import { CreateTransactionSchema } from "@/schemas/transaction";
 export async function getTransactionsHistory(
   householdId: string,
   userId: string,
-  currency: string | null,
   from: Date,
   to: Date,
   filters?: {
@@ -20,12 +19,6 @@ export async function getTransactionsHistory(
     shared?: boolean;
   },
 ) {
-  if (!currency) {
-    throw new Error("household currency not set");
-  }
-
-  const formatter = getFormatterForCurrency(currency);
-
   const transactions = await prisma.transaction.findMany({
     where: {
       householdId,
@@ -41,7 +34,19 @@ export async function getTransactionsHistory(
     orderBy: {
       date: "asc",
     },
-    include: {
+    // Only the columns the Transaction History view reads; the route is
+    // polled, so its payload is paid for on every tick.
+    select: {
+      id: true,
+      date: true,
+      description: true,
+      amount: true,
+      type: true,
+      category: true,
+      categoryIcon: true,
+      shared: true,
+      addedById: true,
+      addedVia: true,
       addedBy: {
         select: {
           name: true,
@@ -50,11 +55,10 @@ export async function getTransactionsHistory(
     },
   });
 
-  return transactions.map(({ addedBy, ...transaction }) => ({
+  return transactions.map(({ addedBy, amount, ...transaction }) => ({
     ...transaction,
-    amount: transaction.amount.toNumber(),
+    amount: amount.toNumber(),
     addedByName: addedBy.name,
-    formattedAmount: formatter.format(transaction.amount.toNumber()),
   }));
 }
 
