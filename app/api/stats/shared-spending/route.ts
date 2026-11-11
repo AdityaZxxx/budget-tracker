@@ -42,7 +42,7 @@ async function getSharedSpending(householdId: string) {
   ]);
 
   return {
-    thisMonth: thisMonthTotal._sum.amount ?? 0,
-    lastMonth: lastMonthTotal._sum.amount ?? 0,
+    thisMonth: thisMonthTotal._sum.amount?.toNumber() ?? 0,
+    lastMonth: lastMonthTotal._sum.amount?.toNumber() ?? 0,
   };
 }

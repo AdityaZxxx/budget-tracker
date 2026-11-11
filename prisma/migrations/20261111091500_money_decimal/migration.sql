@@ -1,0 +1,8 @@
+ALTER TABLE "Transaction" ALTER COLUMN "amount" TYPE DECIMAL(65,30) USING "amount"::DECIMAL(65,30);
+ALTER TABLE "TransactionShare" ALTER COLUMN "amount" TYPE DECIMAL(65,30) USING "amount"::DECIMAL(65,30);
+ALTER TABLE "Goal" ALTER COLUMN "target" TYPE DECIMAL(65,30) USING "target"::DECIMAL(65,30);
+ALTER TABLE "MonthHistory" ALTER COLUMN "income" TYPE DECIMAL(65,30) USING "income"::DECIMAL(65,30),
+                           ALTER COLUMN "expense" TYPE DECIMAL(65,30) USING "expense"::DECIMAL(65,30);
+ALTER TABLE "YearHistory" ALTER COLUMN "income" TYPE DECIMAL(65,30) USING "income"::DECIMAL(65,30),
+                           ALTER COLUMN "expense" TYPE DECIMAL(65,30) USING "expense"::DECIMAL(65,30);
+ALTER TABLE "Budget" ALTER COLUMN "amount" TYPE DECIMAL(65,30) USING "amount"::DECIMAL(65,30);

@@ -104,7 +104,7 @@ export function registerTransactionWriteTools(
           currency: context.currency,
           date: transaction.date.toISOString(),
           description: transaction.description,
-          amount: transaction.amount,
+          amount: transaction.amount.toNumber(),
           type: transaction.type,
           category: transaction.category,
           shared: transaction.shared,
@@ -190,7 +190,7 @@ export function registerTransactionWriteTools(
           id: settlement.id,
           currency: context.currency,
           date: settlement.date.toISOString(),
-          amount: settlement.amount,
+          amount: settlement.amount.toNumber(),
           description: settlement.description,
           memberId: context.userId,
         });

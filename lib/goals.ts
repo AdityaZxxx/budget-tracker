@@ -1,3 +1,5 @@
+import { Prisma } from "@prisma/client";
+
 import prisma from "@/lib/prisma";
 import { CreateGoalSchema } from "@/schemas/goals";
 
@@ -27,12 +29,16 @@ export async function getGoalsWithProgress(householdId: string) {
   ]);
 
   const contributedByGoalId = new Map(
-    contributionSums.map((row) => [row.goalId, row._sum.amount ?? 0]),
+    contributionSums.map((row) => [
+      row.goalId,
+      row._sum.amount ?? new Prisma.Decimal(0),
+    ]),
   );
 
   return goals.map((goal) => ({
     ...goal,
-    contributed: contributedByGoalId.get(goal.id) ?? 0,
+    target: goal.target.toNumber(),
+    contributed: contributedByGoalId.get(goal.id)?.toNumber() ?? 0,
   }));
 }
 
@@ -58,7 +64,7 @@ export async function createHouseholdGoal(
 
   const { name, target, deadline } = parsed.data;
 
-  return await prisma.goal.create({
+  const goal = await prisma.goal.create({
     data: {
       householdId,
       name,
@@ -66,15 +72,19 @@ export async function createHouseholdGoal(
       deadline: deadline ?? null,
     },
   });
+
+  return { ...goal, target: goal.target.toNumber() };
 }
 
 // Contribution transactions survive the goal; onDelete: SetNull clears their
 // goalId so the money stays in the ledger.
 export async function deleteHouseholdGoal(householdId: string, id: string) {
-  return await prisma.goal.delete({
+  const goal = await prisma.goal.delete({
     where: {
       id,
       householdId,
     },
   });
+
+  return { ...goal, target: goal.target.toNumber() };
 }
