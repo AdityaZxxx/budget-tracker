@@ -186,6 +186,10 @@ model Transaction {
   goal   Goal?   @relation(fields: [goalId], references: [id], onDelete: SetNull)
 
   shares TransactionShare[]
+
+  @@index([householdId, date])
+  @@index([householdId, shared, type])
+  @@index([householdId, goalId])
 }
 
 model TransactionShare {
