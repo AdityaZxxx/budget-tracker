@@ -179,3 +179,12 @@ export async function setHouseholdBudget(
 
   return await createHouseholdBudget(householdId, input);
 }
+
+export async function deleteHouseholdBudget(householdId: string, id: string) {
+  return await prisma.budget.delete({
+    where: {
+      id,
+      householdId,
+    },
+  });
+}

@@ -395,3 +395,74 @@ export async function createTransaction(
 
   return created;
 }
+
+export async function deleteTransaction(householdId: string, id: string) {
+  const transaction = await prisma.transaction.findUnique({
+    where: {
+      householdId,
+      id,
+    },
+  });
+
+  if (!transaction) {
+    throw new Error("Bad request");
+  }
+
+  await prisma.$transaction([
+    prisma.transaction.delete({
+      where: {
+        id,
+        householdId,
+      },
+    }),
+    // Personal transactions were never counted in the household rollups.
+    ...(transaction.shared
+      ? [
+          prisma.monthHistory.update({
+            where: {
+              day_month_year_householdId: {
+                householdId,
+                day: transaction.date.getUTCDate(),
+                month: transaction.date.getUTCMonth(),
+                year: transaction.date.getUTCFullYear(),
+              },
+            },
+            data: {
+              ...(transaction.type === "expense" && {
+                expense: {
+                  decrement: transaction.amount,
+                },
+              }),
+              ...(transaction.type === "income" && {
+                income: {
+                  decrement: transaction.amount,
+                },
+              }),
+            },
+          }),
+
+          prisma.yearHistory.update({
+            where: {
+              month_year_householdId: {
+                householdId,
+                month: transaction.date.getUTCMonth(),
+                year: transaction.date.getUTCFullYear(),
+              },
+            },
+            data: {
+              ...(transaction.type === "expense" && {
+                expense: {
+                  decrement: transaction.amount,
+                },
+              }),
+              ...(transaction.type === "income" && {
+                income: {
+                  decrement: transaction.amount,
+                },
+              }),
+            },
+          }),
+        ]
+      : []),
+  ]);
+}

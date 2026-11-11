@@ -7,9 +7,12 @@ import type {
 
 import { redirect } from "next/navigation";
 
-import { createHouseholdGoal, getGoalsWithProgress } from "@/lib/goals";
+import {
+  createHouseholdGoal,
+  deleteHouseholdGoal,
+  getGoalsWithProgress,
+} from "@/lib/goals";
 import { assertFullMember, requireHousehold } from "@/lib/household";
-import prisma from "@/lib/prisma";
 import { CreateGoalSchema, DeleteGoalSchema } from "@/schemas/goals";
 
 export async function listGoals() {
@@ -48,14 +51,5 @@ export async function deleteGoal(form: DeleteGoalSchemaType) {
   }
   assertFullMember(result);
 
-  const { household } = result;
-
-  // Contribution transactions survive the goal; onDelete: SetNull clears
-  // their goalId so the money stays in the ledger.
-  return await prisma.goal.delete({
-    where: {
-      id: parsedBody.data.id,
-      householdId: household.id,
-    },
-  });
+  return await deleteHouseholdGoal(result.household.id, parsedBody.data.id);
 }

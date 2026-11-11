@@ -10,11 +10,11 @@ import { redirect } from "next/navigation";
 
 import {
   createHouseholdBudget,
+  deleteHouseholdBudget,
   getBudgetsWithProgress,
   updateHouseholdBudget,
 } from "@/lib/budgets";
 import { assertFullMember, requireHousehold } from "@/lib/household";
-import prisma from "@/lib/prisma";
 import {
   CreateBudgetSchema,
   DeleteBudgetSchema,
@@ -72,12 +72,5 @@ export async function deleteBudget(form: DeleteBudgetSchemaType) {
   }
   assertFullMember(result);
 
-  const { household } = result;
-
-  return await prisma.budget.delete({
-    where: {
-      id: parsedBody.data.id,
-      householdId: household.id,
-    },
-  });
+  return await deleteHouseholdBudget(result.household.id, parsedBody.data.id);
 }
