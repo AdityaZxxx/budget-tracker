@@ -6,6 +6,7 @@ import { z } from "zod";
 import { deleteHouseholdBudget, setHouseholdBudget } from "@/lib/budgets";
 import { READ_WRITE_SCOPE, VIEW_ONLY_ROLE } from "@/lib/constants";
 import { createHouseholdGoal, deleteHouseholdGoal } from "@/lib/goals";
+import { amountNumber } from "@/schemas/money";
 
 import { parseDate, toolError, toolResult } from "./tools";
 
@@ -41,7 +42,7 @@ export function registerGoalBudgetWriteTools(
       try {
         await deleteHouseholdGoal(context.householdId, id);
 
-        return toolResult({ deleted: id });
+        return toolResult({ deleted: id, memberId: context.userId });
       } catch (error) {
         return toolError(errorMessage(error));
       }
@@ -74,7 +75,7 @@ export function registerGoalBudgetWriteTools(
       try {
         await deleteHouseholdBudget(context.householdId, id);
 
-        return toolResult({ deleted: id });
+        return toolResult({ deleted: id, memberId: context.userId });
       } catch (error) {
         return toolError(errorMessage(error));
       }
@@ -93,11 +94,9 @@ export function registerGoalBudgetWriteTools(
           .min(1)
           .max(50)
           .describe("Name of the Goal, up to 50 characters."),
-        target: z
-          .number()
-          .positive()
-          .multipleOf(0.01)
-          .describe("Amount to save, in the Household's currency."),
+        target: amountNumber(false).describe(
+          "Amount to save, in the Household's currency.",
+        ),
         deadline: z
           .string()
           .regex(DEADLINE_PATTERN)
@@ -126,6 +125,7 @@ export function registerGoalBudgetWriteTools(
           name: goal.name,
           target: goal.target,
           deadline: goal.deadline?.toISOString() ?? null,
+          memberId: context.userId,
         });
       } catch (error) {
         return toolError(errorMessage(error));
@@ -146,11 +146,9 @@ export function registerGoalBudgetWriteTools(
           .describe(
             "Name of an expense Category in the Household. Use list_categories to see them.",
           ),
-        amount: z
-          .number()
-          .positive()
-          .multipleOf(0.01)
-          .describe("Monthly limit, in the Household's currency."),
+        amount: amountNumber(false).describe(
+          "Monthly limit, in the Household's currency.",
+        ),
         mode: z
           .enum(["soft", "hard"])
           .default("soft")
@@ -180,6 +178,7 @@ export function registerGoalBudgetWriteTools(
           category: budget.category,
           amount: budget.amount,
           mode: budget.mode,
+          memberId: context.userId,
         });
       } catch (error) {
         return toolError(errorMessage(error));

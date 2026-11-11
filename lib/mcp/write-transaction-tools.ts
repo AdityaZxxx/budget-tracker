@@ -6,6 +6,7 @@ import { z } from "zod";
 import { READ_WRITE_SCOPE, VIEW_ONLY_ROLE } from "@/lib/constants";
 import { recordSettlement } from "@/lib/settlements";
 import { createTransaction, deleteTransaction } from "@/lib/transactions";
+import { amountNumber, sharesArray } from "@/schemas/money";
 
 import { parseDate, toolError, toolResult } from "./tools";
 
@@ -23,11 +24,9 @@ export function registerTransactionWriteTools(
       description:
         "Add a Transaction to the Household's ledger: an expense or income, shared with the Household or personal to the caller. A shared Transaction counts towards the Household's balances and Budgets; a personal one stays with the caller.",
       inputSchema: {
-        amount: z
-          .number()
-          .positive()
-          .multipleOf(0.01)
-          .describe("Amount, in the Household's currency."),
+        amount: amountNumber(false).describe(
+          "Amount, in the Household's currency.",
+        ),
         description: z
           .string()
           .optional()
@@ -58,9 +57,23 @@ export function registerTransactionWriteTools(
           .describe(
             "Id of a Goal in the Household the Transaction contributes to.",
           ),
+        shares: sharesArray(false)
+          .optional()
+          .describe(
+            "Per-member split of a shared expense, as amounts in the Household's currency. The amounts must add up to the Transaction's amount. Use list_members to get the member ids.",
+          ),
       },
     },
-    async ({ amount, description, date, category, type, shared, goalId }) => {
+    async ({
+      amount,
+      description,
+      date,
+      category,
+      type,
+      shared,
+      goalId,
+      shares,
+    }) => {
       if (context.scope !== READ_WRITE_SCOPE)
         return toolError("This token is read-only.");
       if (context.role === VIEW_ONLY_ROLE)
@@ -80,6 +93,7 @@ export function registerTransactionWriteTools(
             type,
             shared,
             goalId: goalId || undefined,
+            shares,
             // The ledger keeps one answer to who added the Transaction.
             addedVia: "agent",
           },
@@ -94,6 +108,7 @@ export function registerTransactionWriteTools(
           type: transaction.type,
           category: transaction.category,
           shared: transaction.shared,
+          memberId: context.userId,
         });
       } catch (error) {
         return toolError(errorMessage(error));
@@ -127,7 +142,7 @@ export function registerTransactionWriteTools(
       try {
         await deleteTransaction(context.householdId, id);
 
-        return toolResult({ deleted: id });
+        return toolResult({ deleted: id, memberId: context.userId });
       } catch (error) {
         return toolError(errorMessage(error));
       }
@@ -147,11 +162,9 @@ export function registerTransactionWriteTools(
           .describe(
             "Id of the Member the caller paid back. Use get_balances to see them.",
           ),
-        amount: z
-          .number()
-          .positive()
-          .multipleOf(0.01)
-          .describe("Amount paid back, in the Household's currency."),
+        amount: amountNumber(false).describe(
+          "Amount paid back, in the Household's currency.",
+        ),
       },
     },
     async ({ memberId, amount }) => {
@@ -179,6 +192,7 @@ export function registerTransactionWriteTools(
           date: settlement.date.toISOString(),
           amount: settlement.amount,
           description: settlement.description,
+          memberId: context.userId,
         });
       } catch (error) {
         return toolError(errorMessage(error));

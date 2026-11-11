@@ -1,8 +1,10 @@
 import { z } from "zod";
 
+import { amountNumber } from "@/schemas/money";
+
 export const CreateGoalSchema = z.object({
   name: z.string().min(1, "Enter a name").max(50),
-  target: z.coerce.number().positive().multipleOf(0.01),
+  target: amountNumber(true),
   deadline: z.coerce.date().optional(),
 });
 

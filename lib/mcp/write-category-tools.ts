@@ -60,6 +60,7 @@ export function registerCategoryWriteTools(
           name: category.name,
           icon: category.icon,
           type: category.type,
+          memberId: context.userId,
         });
       } catch (error) {
         return toolError(errorMessage(error));
@@ -117,6 +118,7 @@ export function registerCategoryWriteTools(
           name: category.name,
           icon: category.icon,
           type: category.type,
+          memberId: context.userId,
         });
       } catch (error) {
         return toolError(errorMessage(error));
@@ -163,6 +165,7 @@ export function registerCategoryWriteTools(
           name: category.name,
           icon: category.icon,
           type: category.type,
+          memberId: context.userId,
         });
       } catch (error) {
         return toolError(errorMessage(error));
