@@ -1,10 +1,12 @@
 import { z } from "zod";
 
+import { amountNumber } from "@/schemas/money";
+
 export const BudgetModeSchema = z.enum(["soft", "hard"]);
 
 export const CreateBudgetSchema = z.object({
   category: z.string().min(1, "Select a category"),
-  amount: z.coerce.number().positive().multipleOf(0.01),
+  amount: amountNumber(true),
   mode: BudgetModeSchema,
 });
 
@@ -19,7 +21,7 @@ export type CreateBudgetSchemaType = {
 export const UpdateBudgetSchema = z.object({
   id: z.string().min(1),
   category: z.string().min(1, "Select a category"),
-  amount: z.coerce.number().positive().multipleOf(0.01),
+  amount: amountNumber(true),
   mode: BudgetModeSchema,
 });
 

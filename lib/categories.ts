@@ -1,5 +1,16 @@
+import type {
+  CreateCategorySchemaType,
+  DeleteCategorySchemaType,
+  UpdateCategorySchemaType,
+} from "@/schemas/categories";
+
 import { SETTLEMENT_CATEGORY_NAME } from "@/lib/constants";
 import prisma from "@/lib/prisma";
+import {
+  CreateCategorySchema,
+  DeleteCategorySchema,
+  UpdateCategorySchema,
+} from "@/schemas/categories";
 
 export async function getCategories(
   householdId: string,
@@ -16,6 +27,114 @@ export async function getCategories(
     },
     orderBy: {
       name: "asc",
+    },
+  });
+}
+
+export async function createHouseholdCategory(
+  householdId: string,
+  input: CreateCategorySchemaType,
+) {
+  const parsed = CreateCategorySchema.safeParse(input);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid category");
+  }
+
+  const { name, icon, type } = parsed.data;
+
+  return await prisma.category.create({
+    data: {
+      householdId,
+      name,
+      icon,
+      type,
+    },
+  });
+}
+
+export async function updateHouseholdCategory(
+  householdId: string,
+  input: UpdateCategorySchemaType,
+) {
+  const parsed = UpdateCategorySchema.safeParse(input);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid category");
+  }
+
+  const { originalName, name, icon, type } = parsed.data;
+
+  if (originalName === SETTLEMENT_CATEGORY_NAME) {
+    throw new Error("This category cannot be edited");
+  }
+
+  const existing = await prisma.category.findUnique({
+    where: {
+      name_householdId_type: {
+        householdId,
+        name: originalName,
+        type,
+      },
+    },
+  });
+
+  if (!existing) {
+    throw new Error("Category not found");
+  }
+
+  return await prisma.$transaction(async (tx) => {
+    const updated = await tx.category.update({
+      where: {
+        name_householdId_type: {
+          householdId,
+          name: originalName,
+          type,
+        },
+      },
+      data: { name, icon },
+    });
+
+    await tx.transaction.updateMany({
+      where: {
+        householdId,
+        category: originalName,
+        type,
+      },
+      data: {
+        ...(name !== originalName && { category: name }),
+        ...(icon !== existing.icon && { categoryIcon: icon }),
+      },
+    });
+
+    if (type === "expense" && name !== originalName) {
+      await tx.budget.updateMany({
+        where: {
+          householdId,
+          category: originalName,
+        },
+        data: { category: name },
+      });
+    }
+
+    return updated;
+  });
+}
+
+export async function deleteHouseholdCategory(
+  householdId: string,
+  input: DeleteCategorySchemaType,
+) {
+  const parsed = DeleteCategorySchema.safeParse(input);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid category");
+  }
+
+  return await prisma.category.delete({
+    where: {
+      name_householdId_type: {
+        householdId,
+        name: parsed.data.name,
+        type: parsed.data.type,
+      },
     },
   });
 }

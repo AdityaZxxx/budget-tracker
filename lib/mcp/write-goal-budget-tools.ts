@@ -3,9 +3,10 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 import { z } from "zod";
 
-import { setHouseholdBudget } from "@/lib/budgets";
+import { deleteHouseholdBudget, setHouseholdBudget } from "@/lib/budgets";
 import { READ_WRITE_SCOPE, VIEW_ONLY_ROLE } from "@/lib/constants";
-import { createHouseholdGoal } from "@/lib/goals";
+import { createHouseholdGoal, deleteHouseholdGoal } from "@/lib/goals";
+import { amountNumber } from "@/schemas/money";
 
 import { parseDate, toolError, toolResult } from "./tools";
 
@@ -18,6 +19,70 @@ export function registerGoalBudgetWriteTools(
   context: McpContext,
 ) {
   server.registerTool(
+    "delete_goal",
+    {
+      title: "Delete goal",
+      description:
+        "Delete a Goal from the Household. Transactions tagged with the Goal keep the money in the ledger and lose the tag. Use list_goals to find the Goal's id.",
+      inputSchema: {
+        id: z
+          .string()
+          .min(1)
+          .describe("Id of the Goal to delete. Use list_goals to see them."),
+      },
+    },
+    async ({ id }) => {
+      if (context.scope !== READ_WRITE_SCOPE)
+        return toolError("This token is read-only.");
+      if (context.role === VIEW_ONLY_ROLE)
+        return toolError(
+          "View-only members cannot make changes in this household.",
+        );
+
+      try {
+        await deleteHouseholdGoal(context.householdId, id);
+
+        return toolResult({ deleted: id, memberId: context.userId });
+      } catch (error) {
+        return toolError(errorMessage(error));
+      }
+    },
+  );
+
+  server.registerTool(
+    "delete_budget",
+    {
+      title: "Delete budget",
+      description:
+        "Delete the Household's Budget for one expense Category. Use list_budgets to find the Budget's id.",
+      inputSchema: {
+        id: z
+          .string()
+          .min(1)
+          .describe(
+            "Id of the Budget to delete. Use list_budgets to see them.",
+          ),
+      },
+    },
+    async ({ id }) => {
+      if (context.scope !== READ_WRITE_SCOPE)
+        return toolError("This token is read-only.");
+      if (context.role === VIEW_ONLY_ROLE)
+        return toolError(
+          "View-only members cannot make changes in this household.",
+        );
+
+      try {
+        await deleteHouseholdBudget(context.householdId, id);
+
+        return toolResult({ deleted: id, memberId: context.userId });
+      } catch (error) {
+        return toolError(errorMessage(error));
+      }
+    },
+  );
+
+  server.registerTool(
     "create_goal",
     {
       title: "Create goal",
@@ -29,11 +94,9 @@ export function registerGoalBudgetWriteTools(
           .min(1)
           .max(50)
           .describe("Name of the Goal, up to 50 characters."),
-        target: z
-          .number()
-          .positive()
-          .multipleOf(0.01)
-          .describe("Amount to save, in the Household's currency."),
+        target: amountNumber(false).describe(
+          "Amount to save, in the Household's currency.",
+        ),
         deadline: z
           .string()
           .regex(DEADLINE_PATTERN)
@@ -62,6 +125,7 @@ export function registerGoalBudgetWriteTools(
           name: goal.name,
           target: goal.target,
           deadline: goal.deadline?.toISOString() ?? null,
+          memberId: context.userId,
         });
       } catch (error) {
         return toolError(errorMessage(error));
@@ -82,11 +146,9 @@ export function registerGoalBudgetWriteTools(
           .describe(
             "Name of an expense Category in the Household. Use list_categories to see them.",
           ),
-        amount: z
-          .number()
-          .positive()
-          .multipleOf(0.01)
-          .describe("Monthly limit, in the Household's currency."),
+        amount: amountNumber(false).describe(
+          "Monthly limit, in the Household's currency.",
+        ),
         mode: z
           .enum(["soft", "hard"])
           .default("soft")
@@ -116,6 +178,7 @@ export function registerGoalBudgetWriteTools(
           category: budget.category,
           amount: budget.amount,
           mode: budget.mode,
+          memberId: context.userId,
         });
       } catch (error) {
         return toolError(errorMessage(error));

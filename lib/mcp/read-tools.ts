@@ -7,6 +7,7 @@ import { getMemberBalances } from "@/lib/balances";
 import { getBudgetsWithProgress } from "@/lib/budgets";
 import { getCategories } from "@/lib/categories";
 import { getGoalsWithProgress } from "@/lib/goals";
+import prisma from "@/lib/prisma";
 import { getBalanceStats, getTransactionsHistory } from "@/lib/transactions";
 
 import {
@@ -189,6 +190,41 @@ export function registerReadTools(server: McpServer, context: McpContext) {
             target: goal.target,
             contributed: goal.contributed,
             deadline: goal.deadline?.toISOString() ?? null,
+          })),
+        });
+      } catch (error) {
+        return toolError(errorMessage(error));
+      }
+    },
+  );
+
+  server.registerTool(
+    "list_members",
+    {
+      title: "List members",
+      description:
+        "Every member of the Household with their id, name and role. Use these ids for transactions, settlements and shares.",
+      inputSchema: {},
+    },
+    async () => {
+      try {
+        const memberships = await prisma.householdMembership.findMany({
+          where: {
+            householdId: context.householdId,
+          },
+          include: {
+            user: true,
+          },
+          orderBy: {
+            joinedAt: "asc",
+          },
+        });
+
+        return toolResult({
+          members: memberships.map((membership) => ({
+            id: membership.userId,
+            name: membership.user.name,
+            role: membership.role,
           })),
         });
       } catch (error) {

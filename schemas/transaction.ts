@@ -1,12 +1,9 @@
 import { z } from "zod";
 
-const TransactionShareSchema = z.object({
-  userId: z.string().min(1),
-  amount: z.coerce.number().nonnegative().multipleOf(0.01),
-});
+import { amountNumber, sharesArray } from "@/schemas/money";
 
 export const CreateTransactionSchema = z.object({
-  amount: z.coerce.number().positive().multipleOf(0.01),
+  amount: amountNumber(true),
   description: z.string().optional(),
   date: z.coerce.date(),
   category: z.string().min(1, "Select a category"),
@@ -14,7 +11,7 @@ export const CreateTransactionSchema = z.object({
   shared: z.boolean().default(true),
   // Empty string means no goal (the form's unset value).
   goalId: z.string().optional(),
-  shares: z.array(TransactionShareSchema).optional(),
+  shares: sharesArray(true).optional(),
 });
 
 export type CreateTransactionSchemaType = {
