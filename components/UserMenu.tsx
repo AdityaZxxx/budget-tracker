@@ -54,7 +54,7 @@ export default function UserMenu() {
                 <button
                   type="button"
                   aria-label="Open user menu"
-                  className="rounded-full ring-offset-background outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  className="rounded-full ring-offset-background outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
                 />
               }
             />

@@ -11,6 +11,7 @@ import noManualMemo from "./rules/no-manual-memo.ts";
 import { noModuleMockingRule } from "./rules/no-module-mocking.ts";
 import noNativeTitleTooltip from "./rules/no-native-title-tooltip.ts";
 import { noObjectParametersRule } from "./rules/no-object-parameters.ts";
+import noOutsetStateIndicators from "./rules/no-outset-state-indicators.ts";
 import { noReduceAccumulatorCopyRule } from "./rules/no-reduce-accumulator-copy.ts";
 import { noReflectApplyRule } from "./rules/no-reflect-apply.ts";
 import { noReflectGetRule } from "./rules/no-reflect-get.ts";
@@ -57,6 +58,7 @@ export default definePlugin({
     "no-low-value-comments": noLowValueComments,
     "no-manual-memo": noManualMemo,
     "no-native-title-tooltip": noNativeTitleTooltip,
+    "no-outset-state-indicators": noOutsetStateIndicators,
     "no-unscoped-has": noUnscopedHas,
     "require-suppression-reason": requireSuppressionReason,
   },

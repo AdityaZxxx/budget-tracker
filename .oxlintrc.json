@@ -61,6 +61,7 @@
     "sora/no-low-value-comments": "error",
     "sora/no-manual-memo": "error",
     "sora/no-native-title-tooltip": "error",
+    "sora/no-outset-state-indicators": "error",
     "sora/no-unscoped-has": "error",
     "sora/require-suppression-reason": "error",
     "sora/no-array-filter-map": "error",
