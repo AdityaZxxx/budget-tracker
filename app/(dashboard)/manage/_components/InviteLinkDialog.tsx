@@ -26,6 +26,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { POLL_INTERVAL } from "@/lib/constants";
 
 import {
   createInviteLink,
@@ -58,6 +59,7 @@ const InviteLinkDialog = ({ trigger }: Props) => {
     queryKey: ["inviteLinks"],
     queryFn: listInviteLinks,
     enabled: open,
+    staleTime: POLL_INTERVAL,
   });
 
   const createMutation = useMutation({

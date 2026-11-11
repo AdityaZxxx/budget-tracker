@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { POLL_INTERVAL } from "@/lib/constants";
 import { getFormatterForCurrency } from "@/lib/helpers";
 
 import { getHouseholdBalances } from "../_actions/balance";
@@ -28,7 +29,8 @@ const Balances = ({ currency, canEdit = true }: Props) => {
   const balancesQuery = useQuery({
     queryKey: ["balances"],
     queryFn: getHouseholdBalances,
-    refetchInterval: 30_000,
+    staleTime: POLL_INTERVAL,
+    refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,
   });
 

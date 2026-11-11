@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { useSession } from "@/lib/auth-client";
-import { VIEW_ONLY_ROLE } from "@/lib/constants";
+import { POLL_INTERVAL, VIEW_ONLY_ROLE } from "@/lib/constants";
 
 import { listMembers } from "../app/(dashboard)/manage/_actions/membership";
 
@@ -9,7 +9,8 @@ export function useMembers() {
   return useQuery({
     queryKey: ["householdMembers"],
     queryFn: listMembers,
-    refetchInterval: 30_000,
+    staleTime: POLL_INTERVAL,
+    refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,
   });
 }

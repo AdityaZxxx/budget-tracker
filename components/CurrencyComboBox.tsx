@@ -24,6 +24,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { POLL_INTERVAL } from "@/lib/constants";
 
 import { UpdateUserCurrency } from "../app/wizard/_actions/userSettings";
 import { Currencies } from "../lib/currencies";
@@ -37,7 +38,8 @@ export function CurrencyComboBox() {
   const household = useQuery<Household>({
     queryKey: ["household"],
     queryFn: () => fetch("/api/user-settings").then((res) => res.json()),
-    refetchInterval: 30_000,
+    staleTime: POLL_INTERVAL,
+    refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,
   });
 

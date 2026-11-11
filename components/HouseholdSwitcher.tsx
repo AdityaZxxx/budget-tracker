@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { POLL_INTERVAL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 import {
@@ -58,7 +59,8 @@ export default function HouseholdSwitcher() {
       }
       return response.json();
     },
-    refetchInterval: 30_000,
+    staleTime: POLL_INTERVAL,
+    refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,
   });
 

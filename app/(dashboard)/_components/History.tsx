@@ -11,6 +11,7 @@ import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { POLL_INTERVAL } from "@/lib/constants";
 import { getFormatterForCurrency } from "@/lib/helpers";
 
 import HistoryPeriodSelector from "./HistoryPeriodSelector";
@@ -44,7 +45,8 @@ const History = ({ currency }: { currency: string | null }) => {
       }
       return response.json();
     },
-    refetchInterval: 30_000,
+    staleTime: POLL_INTERVAL,
+    refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,
   });
 

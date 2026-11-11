@@ -45,6 +45,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useSession } from "@/lib/auth-client";
+import { POLL_INTERVAL } from "@/lib/constants";
 import { Currencies } from "@/lib/currencies";
 import { dateToUtcDate, getFormatterForCurrency } from "@/lib/helpers";
 import { cn } from "@/lib/utils";
@@ -119,7 +120,8 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
   const household = useQuery<Household>({
     queryKey: ["household"],
     queryFn: () => fetch("/api/user-settings").then((res) => res.json()),
-    refetchInterval: 30_000,
+    staleTime: POLL_INTERVAL,
+    refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,
   });
 
@@ -134,7 +136,8 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
   const goalsQuery = useQuery({
     queryKey: ["goals"],
     queryFn: listGoals,
-    refetchInterval: 30_000,
+    staleTime: POLL_INTERVAL,
+    refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,
   });
 
@@ -143,7 +146,8 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
   const memberCountQuery = useQuery({
     queryKey: ["memberCount"],
     queryFn: getHouseholdMemberCount,
-    refetchInterval: 30_000,
+    staleTime: POLL_INTERVAL,
+    refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,
   });
   const knownMemberCount = memberCountQuery.data;
@@ -154,7 +158,8 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
     queryKey: ["householdMembers"],
     queryFn: listMembers,
     enabled: knownMemberCount !== undefined && knownMemberCount > 1,
-    refetchInterval: 30_000,
+    staleTime: POLL_INTERVAL,
+    refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,
   });
   const members = membersQuery.data ?? [];

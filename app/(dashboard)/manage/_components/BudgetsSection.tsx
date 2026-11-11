@@ -39,6 +39,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { type BudgetWithProgress } from "@/lib/budgets";
+import { POLL_INTERVAL } from "@/lib/constants";
 import { getFormatterForCurrency } from "@/lib/helpers";
 import { cn } from "@/lib/utils";
 
@@ -50,7 +51,8 @@ const BudgetsSection = ({ canEdit }: { canEdit: boolean }) => {
   const household = useQuery<Household>({
     queryKey: ["household"],
     queryFn: () => fetch("/api/user-settings").then((res) => res.json()),
-    refetchInterval: 30_000,
+    staleTime: POLL_INTERVAL,
+    refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,
   });
 
@@ -62,7 +64,8 @@ const BudgetsSection = ({ canEdit }: { canEdit: boolean }) => {
   } = useQuery({
     queryKey: ["budgets"],
     queryFn: listBudgets,
-    refetchInterval: 30_000,
+    staleTime: POLL_INTERVAL,
+    refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,
   });
 

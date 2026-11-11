@@ -31,7 +31,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useSession } from "@/lib/auth-client";
-import { FULL_MEMBER_ROLE, VIEW_ONLY_ROLE } from "@/lib/constants";
+import {
+  FULL_MEMBER_ROLE,
+  POLL_INTERVAL,
+  VIEW_ONLY_ROLE,
+} from "@/lib/constants";
 
 import {
   listMembers,
@@ -49,6 +53,7 @@ const MembersSection = () => {
   const { data: members = [], isLoading } = useQuery({
     queryKey: ["householdMembers"],
     queryFn: listMembers,
+    staleTime: POLL_INTERVAL,
   });
 
   const callerRole = members.find(
