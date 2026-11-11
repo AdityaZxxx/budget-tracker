@@ -1,5 +1,6 @@
 import type { TransactionType } from "@/lib/types";
 
+import { Prisma } from "@prisma/client";
 import { after } from "next/server";
 
 import { getMonthSpentByCategory } from "@/lib/budgets";
@@ -51,8 +52,9 @@ export async function getTransactionsHistory(
 
   return transactions.map(({ addedBy, ...transaction }) => ({
     ...transaction,
+    amount: transaction.amount.toNumber(),
     addedByName: addedBy.name,
-    formattedAmount: formatter.format(transaction.amount),
+    formattedAmount: formatter.format(transaction.amount.toNumber()),
   }));
 }
 
@@ -81,9 +83,11 @@ export async function getBalanceStats(
   });
 
   return {
-    expense: totals.find((t) => t.type === "expense")?._sum.amount || 0,
+    expense:
+      totals.find((t) => t.type === "expense")?._sum.amount?.toNumber() ?? 0,
 
-    income: totals.find((t) => t.type === "income")?._sum.amount || 0,
+    income:
+      totals.find((t) => t.type === "income")?._sum.amount?.toNumber() ?? 0,
   };
 }
 
@@ -231,23 +235,29 @@ export async function createTransaction(
 
     if (budget) {
       const spentByCategory = await getMonthSpentByCategory(householdId, date);
-      const spentBefore = spentByCategory.get(categoryRow.name) ?? 0;
-      const spentAfter = spentBefore + amount;
-      const beforePercent = (spentBefore / budget.amount) * 100;
-      const afterPercent = (spentAfter / budget.amount) * 100;
+      const spentBefore =
+        spentByCategory.get(categoryRow.name) ?? new Prisma.Decimal(0);
+      const spentAfter = spentBefore.plus(amount);
+      const budgetAmount = budget.amount;
+      const beforePercent = budgetAmount.isZero()
+        ? 0
+        : spentBefore.div(budgetAmount).times(100).toNumber();
+      const afterPercent = budgetAmount.isZero()
+        ? 0
+        : spentAfter.div(budgetAmount).times(100).toNumber();
 
-      if (budget.mode === "hard" && spentAfter > budget.amount) {
+      if (budget.mode === "hard" && spentAfter.gt(budgetAmount)) {
         throw new Error(
-          `Hard budget exceeded for ${categoryRow.name}: the monthly limit is ${formatAmount(budget.amount)} and ${formatAmount(spentBefore)} is already spent, so this ${formatAmount(amount)} expense would bring the month to ${formatAmount(spentAfter)}.`,
+          `Hard budget exceeded for ${categoryRow.name}: the monthly limit is ${formatAmount(budgetAmount.toNumber())} and ${formatAmount(spentBefore.toNumber())} is already spent, so this ${formatAmount(amount)} expense would bring the month to ${formatAmount(spentAfter.toNumber())}.`,
         );
       }
 
       // One notification per transaction: report the highest threshold
       // crossed (100% covers a jump straight past 80%).
       if (beforePercent < 100 && afterPercent >= 100) {
-        thresholdMessage = `${categoryRow.name} budget reached 100% of ${formatAmount(budget.amount)} this month (${formatAmount(spentAfter)} spent).`;
+        thresholdMessage = `${categoryRow.name} budget reached 100% of ${formatAmount(budgetAmount.toNumber())} this month (${formatAmount(spentAfter.toNumber())} spent).`;
       } else if (beforePercent < 80 && afterPercent >= 80) {
-        thresholdMessage = `${categoryRow.name} budget reached 80% of ${formatAmount(budget.amount)} this month (${formatAmount(spentAfter)} spent).`;
+        thresholdMessage = `${categoryRow.name} budget reached 80% of ${formatAmount(budgetAmount.toNumber())} this month (${formatAmount(spentAfter.toNumber())} spent).`;
       }
     }
   }
@@ -370,9 +380,12 @@ export async function createTransaction(
           amount: true,
         },
       });
-      const contributedTotal = contributed._sum.amount ?? 0;
-      const contributedBefore = contributedTotal - amount;
-      if (contributedBefore >= goal.target || contributedTotal < goal.target) {
+      const contributedTotal = contributed._sum.amount ?? new Prisma.Decimal(0);
+      const contributedBefore = contributedTotal.minus(amount);
+      if (
+        contributedBefore.gte(goal.target) ||
+        contributedTotal.lt(goal.target)
+      ) {
         return;
       }
 
@@ -388,7 +401,7 @@ export async function createTransaction(
         householdId,
         members.map((member) => member.userId),
         "goal_reached",
-        `${goal.name} reached its target: ${formatAmount(contributedTotal)} of ${formatAmount(goal.target)}.`,
+        `${goal.name} reached its target: ${formatAmount(contributedTotal.toNumber())} of ${formatAmount(goal.target.toNumber())}.`,
       );
     });
   }

@@ -91,13 +91,25 @@ export async function GET() {
       joinedAt: member.joinedAt,
       emailDigest: member.emailDigest,
     })),
-    transactions,
+    transactions: transactions.map((transaction) => ({
+      ...transaction,
+      amount: transaction.amount.toNumber(),
+    })),
     categories,
-    goals,
-    budgets,
+    goals: goals.map((goal) => ({
+      ...goal,
+      target: goal.target.toNumber(),
+    })),
+    budgets: budgets.map((budget) => ({
+      ...budget,
+      amount: budget.amount.toNumber(),
+    })),
     notifications,
     inviteLinks,
-    transactionShares,
+    transactionShares: transactionShares.map((share) => ({
+      ...share,
+      amount: share.amount.toNumber(),
+    })),
   };
 
   return new Response(JSON.stringify(payload, null, 2), {

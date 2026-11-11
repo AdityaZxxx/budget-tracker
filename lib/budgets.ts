@@ -1,3 +1,5 @@
+import { Prisma } from "@prisma/client";
+
 import { SETTLEMENT_CATEGORY_NAME } from "@/lib/constants";
 import prisma from "@/lib/prisma";
 import { CreateBudgetSchema, UpdateBudgetSchema } from "@/schemas/budgets";
@@ -43,7 +45,7 @@ export function sharedSpendingFilter(
 export async function getMonthSpentByCategory(
   householdId: string,
   date: Date,
-): Promise<Map<string, number>> {
+): Promise<Map<string, Prisma.Decimal>> {
   const { from, to } = monthRangeFor(date);
   const rows = await prisma.transaction.groupBy({
     by: ["category"],
@@ -52,7 +54,9 @@ export async function getMonthSpentByCategory(
       amount: true,
     },
   });
-  return new Map(rows.map((row) => [row.category, row._sum.amount ?? 0]));
+  return new Map(
+    rows.map((row) => [row.category, row._sum.amount ?? new Prisma.Decimal(0)]),
+  );
 }
 
 export async function getBudgetsWithProgress(householdId: string) {
@@ -69,13 +73,16 @@ export async function getBudgetsWithProgress(householdId: string) {
   ]);
 
   return budgets.map((budget) => {
-    const spent = spentByCategory.get(budget.category) ?? 0;
-    const percent = (spent / budget.amount) * 100;
+    const spent = spentByCategory.get(budget.category) ?? new Prisma.Decimal(0);
+    const remaining = budget.amount.minus(spent);
     return {
       ...budget,
-      spent,
-      remaining: Math.round((budget.amount - spent) * 100) / 100,
-      percent: Math.round(percent * 100) / 100,
+      amount: budget.amount.toNumber(),
+      spent: spent.toNumber(),
+      remaining: remaining.toDecimalPlaces(2).toNumber(),
+      percent: budget.amount.isZero()
+        ? 0
+        : spent.div(budget.amount).times(100).toDecimalPlaces(2).toNumber(),
     };
   });
 }
@@ -124,7 +131,7 @@ export async function createHouseholdBudget(
   const { category, amount, mode } = parsed.data;
   const expenseCategory = await findExpenseCategory(householdId, category);
 
-  return await prisma.budget.create({
+  const budget = await prisma.budget.create({
     data: {
       householdId,
       category: expenseCategory.name,
@@ -132,6 +139,8 @@ export async function createHouseholdBudget(
       mode,
     },
   });
+
+  return { ...budget, amount: budget.amount.toNumber() };
 }
 
 export async function updateHouseholdBudget(
@@ -146,7 +155,7 @@ export async function updateHouseholdBudget(
   const { id, category, amount, mode } = parsed.data;
   const expenseCategory = await findExpenseCategory(householdId, category);
 
-  return await prisma.budget.update({
+  const budget = await prisma.budget.update({
     where: {
       id,
       householdId,
@@ -157,6 +166,8 @@ export async function updateHouseholdBudget(
       mode,
     },
   });
+
+  return { ...budget, amount: budget.amount.toNumber() };
 }
 
 export async function setHouseholdBudget(
@@ -181,10 +192,12 @@ export async function setHouseholdBudget(
 }
 
 export async function deleteHouseholdBudget(householdId: string, id: string) {
-  return await prisma.budget.delete({
+  const budget = await prisma.budget.delete({
     where: {
       id,
       householdId,
     },
   });
+
+  return { ...budget, amount: budget.amount.toNumber() };
 }

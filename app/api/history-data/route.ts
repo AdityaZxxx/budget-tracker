@@ -89,8 +89,8 @@ async function getYearHistoryData(householdId: string, year: number) {
     history.push({
       year,
       month: i,
-      expense: monthData?.expense || 0,
-      income: monthData?.income || 0,
+      expense: monthData?.expense?.toNumber() ?? 0,
+      income: monthData?.income?.toNumber() ?? 0,
     });
   }
   return history;
@@ -117,8 +117,8 @@ async function getMonthHistoryData(
   for (let i = 1; i <= daysInMonth; i++) {
     const dayData = dataMap.get(i);
     history.push({
-      expense: dayData?.expense || 0,
-      income: dayData?.income || 0,
+      expense: dayData?.expense?.toNumber() ?? 0,
+      income: dayData?.income?.toNumber() ?? 0,
       year,
       month,
       day: i,

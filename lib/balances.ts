@@ -1,8 +1,12 @@
+import { Prisma } from "@prisma/client";
+
 import {
   SETTLEMENT_CATEGORY_NAME,
   SETTLEMENT_DESCRIPTION_PREFIX,
 } from "@/lib/constants";
 import prisma from "@/lib/prisma";
+
+const { Decimal } = Prisma;
 
 async function loadBalanceInputs(householdId: string) {
   const [memberships, sharedExpenses, settlements, expenseShares] =
@@ -66,7 +70,7 @@ async function loadBalanceInputs(householdId: string) {
 
   const sharesByTransactionId = new Map<
     string,
-    { userId: string; amount: number }[]
+    { userId: string; amount: Prisma.Decimal }[]
   >();
   for (const share of expenseShares) {
     const shares = sharesByTransactionId.get(share.transactionId);
@@ -88,12 +92,15 @@ async function loadBalanceInputs(householdId: string) {
 }
 
 function sharesOwedForExpense(
-  expense: { id: string; amount: number },
+  expense: { id: string; amount: Prisma.Decimal },
   memberships: { user: { id: string } }[],
-  sharesByTransactionId: Map<string, { userId: string; amount: number }[]>,
+  sharesByTransactionId: Map<
+    string,
+    { userId: string; amount: Prisma.Decimal }[]
+  >,
   memberCount: number,
 ) {
-  const owed = new Map<string, number>();
+  const owed = new Map<string, Prisma.Decimal>();
   const shares = sharesByTransactionId.get(expense.id);
   if (shares) {
     for (const share of shares) {
@@ -102,7 +109,7 @@ function sharesOwedForExpense(
     return owed;
   }
 
-  const even = expense.amount / memberCount;
+  const even = expense.amount.div(memberCount);
   for (const membership of memberships) {
     owed.set(membership.user.id, even);
   }
@@ -136,7 +143,7 @@ export async function getMemberBalances(householdId: string, callerId: string) {
     .filter((membership) => membership.user.id !== callerId)
     .map((membership) => {
       const otherId = membership.user.id;
-      let balance = 0;
+      let balance = new Decimal(0);
 
       for (const expense of sharedExpenses) {
         const owed = sharesOwedForExpense(
@@ -145,13 +152,13 @@ export async function getMemberBalances(householdId: string, callerId: string) {
           sharesByTransactionId,
           memberCount,
         );
-        const callerShare = owed.get(callerId) ?? 0;
-        const otherShare = owed.get(otherId) ?? 0;
+        const callerShare = owed.get(callerId) ?? new Decimal(0);
+        const otherShare = owed.get(otherId) ?? new Decimal(0);
 
         if (expense.addedById === otherId) {
-          balance += callerShare;
+          balance = balance.plus(callerShare);
         } else if (expense.addedById === callerId) {
-          balance -= otherShare;
+          balance = balance.minus(otherShare);
         }
       }
 
@@ -163,16 +170,16 @@ export async function getMemberBalances(householdId: string, callerId: string) {
         if (!payeeId) continue;
 
         if (settlement.addedById === callerId && payeeId === otherId) {
-          balance -= settlement.amount;
+          balance = balance.minus(settlement.amount);
         } else if (settlement.addedById === otherId && payeeId === callerId) {
-          balance += settlement.amount;
+          balance = balance.plus(settlement.amount);
         }
       }
 
       return {
         userId: otherId,
         name: membership.user.name,
-        balance: Math.round(balance * 100) / 100,
+        balance: balance.toDecimalPlaces(2).toNumber(),
       };
     });
 }
@@ -201,8 +208,8 @@ export async function getSimplifiedTransfers(
     memberships.map((membership) => [membership.user.name, membership.user.id]),
   );
 
-  const netReceivableByUserId = new Map<string, number>(
-    memberships.map((membership) => [membership.user.id, 0]),
+  const netReceivableByUserId = new Map<string, Prisma.Decimal>(
+    memberships.map((membership) => [membership.user.id, new Decimal(0)]),
   );
 
   for (const expense of sharedExpenses) {
@@ -213,14 +220,16 @@ export async function getSimplifiedTransfers(
       memberCount,
     );
     for (const [userId, amount] of owed) {
-      if (userId === expense.addedById || amount === 0) continue;
+      if (userId === expense.addedById || amount.isZero()) continue;
       netReceivableByUserId.set(
         expense.addedById,
-        (netReceivableByUserId.get(expense.addedById) ?? 0) + amount,
+        (netReceivableByUserId.get(expense.addedById) ?? new Decimal(0)).plus(
+          amount,
+        ),
       );
       netReceivableByUserId.set(
         userId,
-        (netReceivableByUserId.get(userId) ?? 0) - amount,
+        (netReceivableByUserId.get(userId) ?? new Decimal(0)).minus(amount),
       );
     }
   }
@@ -230,54 +239,59 @@ export async function getSimplifiedTransfers(
     if (!payeeId) continue;
     netReceivableByUserId.set(
       settlement.addedById,
-      (netReceivableByUserId.get(settlement.addedById) ?? 0) +
+      (netReceivableByUserId.get(settlement.addedById) ?? new Decimal(0)).plus(
         settlement.amount,
+      ),
     );
     netReceivableByUserId.set(
       payeeId,
-      (netReceivableByUserId.get(payeeId) ?? 0) - settlement.amount,
+      (netReceivableByUserId.get(payeeId) ?? new Decimal(0)).minus(
+        settlement.amount,
+      ),
     );
   }
 
-  const EPSILON = 0.005;
+  const EPSILON = new Decimal("0.005");
   const creditors = memberships
     .map((membership) => ({
       id: membership.user.id,
       name: membership.user.name,
-      amount: netReceivableByUserId.get(membership.user.id) ?? 0,
+      amount: netReceivableByUserId.get(membership.user.id) ?? new Decimal(0),
     }))
-    .filter((member) => member.amount > EPSILON)
-    .toSorted((a, b) => b.amount - a.amount);
+    .filter((member) => member.amount.gt(EPSILON))
+    .toSorted((a, b) => b.amount.cmp(a.amount));
   const debtors = memberships
     .map((membership) => ({
       id: membership.user.id,
       name: membership.user.name,
-      amount: netReceivableByUserId.get(membership.user.id) ?? 0,
+      amount: netReceivableByUserId.get(membership.user.id) ?? new Decimal(0),
     }))
-    .filter((member) => member.amount < -EPSILON)
-    .toSorted((a, b) => a.amount - b.amount);
+    .filter((member) => member.amount.lt(-EPSILON))
+    .toSorted((a, b) => a.amount.cmp(b.amount));
 
   const transfers: SimplifiedTransfer[] = [];
   while (creditors.length > 0 && debtors.length > 0) {
     const creditor = creditors[0];
     const debtor = debtors[0];
-    const amount =
-      Math.round(Math.min(creditor.amount, -debtor.amount) * 100) / 100;
-    if (amount <= 0) break;
+    const amount = creditor.amount.lt(debtor.amount.neg())
+      ? creditor.amount
+      : debtor.amount.neg();
+    const rounded = amount.toDecimalPlaces(2);
+    if (rounded.lte(0)) break;
 
     transfers.push({
       fromUserId: debtor.id,
       fromName: debtor.name,
       toUserId: creditor.id,
       toName: creditor.name,
-      amount,
+      amount: rounded.toNumber(),
     });
 
-    creditor.amount -= amount;
-    debtor.amount += amount;
+    creditor.amount = creditor.amount.minus(rounded);
+    debtor.amount = debtor.amount.plus(rounded);
 
-    if (creditor.amount <= EPSILON) creditors.shift();
-    if (-debtor.amount <= EPSILON) debtors.shift();
+    if (creditor.amount.lte(EPSILON)) creditors.shift();
+    if (debtor.amount.neg().lte(EPSILON)) debtors.shift();
   }
 
   return transfers;

@@ -65,5 +65,11 @@ async function getCategoriesStats(householdId: string, from: Date, to: Date) {
     },
   });
 
-  return stats;
+  return stats.map((row) => ({
+    ...row,
+    _sum: {
+      ...row._sum,
+      amount: row._sum.amount?.toNumber() ?? 0,
+    },
+  }));
 }
