@@ -12,8 +12,6 @@ import {
 
 export function ThemeSwitcherBtn() {
   const { resolvedTheme, setTheme } = useTheme();
-  const label =
-    resolvedTheme === "dark" ? "Switch to light theme" : "Switch to dark theme";
 
   return (
     <Tooltip>
@@ -26,15 +24,15 @@ export function ThemeSwitcherBtn() {
             onClick={() =>
               setTheme(resolvedTheme === "dark" ? "light" : "dark")
             }
-            aria-label={label}
+            aria-label="Toggle theme"
           />
         }
       >
         <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-[transform,opacity] duration-300 dark:scale-0 dark:-rotate-90" />
         <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-[transform,opacity] duration-300 dark:scale-100 dark:rotate-0" />
-        <span className="sr-only">{label}</span>
+        <span className="sr-only">Toggle theme</span>
       </TooltipTrigger>
-      <TooltipContent>{label}</TooltipContent>
+      <TooltipContent>Toggle theme</TooltipContent>
     </Tooltip>
   );
 }
