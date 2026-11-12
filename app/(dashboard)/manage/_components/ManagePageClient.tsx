@@ -5,6 +5,7 @@ import type { Category } from "@prisma/client";
 
 import { useQuery } from "@tanstack/react-query";
 import {
+  ChevronDown,
   Link2,
   MoreHorizontal,
   Pencil,
@@ -136,6 +137,8 @@ const ManagePageClient = () => {
 
 export default ManagePageClient;
 
+const COLLAPSED_CATEGORIES = 6;
+
 function CategoryList({
   type,
   canEdit,
@@ -143,6 +146,7 @@ function CategoryList({
   type: TransactionType;
   canEdit: boolean;
 }) {
+  const [expanded, setExpanded] = useState(false);
   const {
     data: categories = [],
     isLoading,
@@ -234,14 +238,40 @@ function CategoryList({
           ) : categories.length === 0 ? (
             <EmptyState type={type} />
           ) : (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-              {categories.map((category) => (
-                <CategoryCard
-                  key={category.name}
-                  category={category}
-                  canEdit={canEdit}
-                />
-              ))}
+            <div className="space-y-3">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                {(expanded
+                  ? categories
+                  : categories.slice(0, COLLAPSED_CATEGORIES)
+                ).map((category) => (
+                  <CategoryCard
+                    key={category.name}
+                    category={category}
+                    canEdit={canEdit}
+                  />
+                ))}
+              </div>
+              {categories.length > COLLAPSED_CATEGORIES && (
+                <Button
+                  variant="ghost"
+                  className="w-full justify-between text-muted-foreground"
+                  aria-expanded={expanded}
+                  onClick={() => setExpanded((current) => !current)}
+                >
+                  <span className="text-sm">
+                    {expanded
+                      ? "Show fewer"
+                      : `Show all ${categories.length} ${type} categories`}
+                  </span>
+                  <ChevronDown
+                    className={cn(
+                      "h-4 w-4 transition-transform",
+                      expanded && "rotate-180",
+                    )}
+                    aria-hidden="true"
+                  />
+                </Button>
+              )}
             </div>
           )}
         </CardContent>

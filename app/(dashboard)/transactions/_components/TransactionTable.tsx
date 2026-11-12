@@ -206,6 +206,7 @@ const buildColumns = (
   {
     id: "actions",
     enableHiding: false,
+    header: () => <span className="sr-only">Actions</span>,
     cell: ({ row }) => <RowActions transaction={row.original} />,
   },
 ];
@@ -422,6 +423,12 @@ const TransactionTable = ({ from, to }: Props) => {
               onValueChange={(value) =>
                 setPagination({ pageIndex: 0, pageSize: Number(value) })
               }
+              items={Object.fromEntries(
+                PAGE_SIZE_OPTIONS.map((size) => [
+                  String(size),
+                  `${size} / page`,
+                ]),
+              )}
             >
               <SelectTrigger aria-label="Rows per page" className="h-10 sm:h-9">
                 <SelectValue />

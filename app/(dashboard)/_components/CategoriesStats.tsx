@@ -124,6 +124,7 @@ function CategoriesCard({ data, type, formatter, total }: CategoriesCardProps) {
                     </div>
                     <Progress
                       value={percentage}
+                      aria-label={`${item.category} share`}
                       indicatorClassName={
                         type === "income"
                           ? "bg-emerald-600 dark:bg-emerald-400"

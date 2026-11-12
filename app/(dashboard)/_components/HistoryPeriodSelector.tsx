@@ -89,7 +89,7 @@ function YearSelector({
         setPeriod({ month: period.month, year: parseInt(value) });
       }}
     >
-      <SelectTrigger className="w-[180px]">
+      <SelectTrigger className="w-[180px]" aria-label="Year">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
@@ -118,7 +118,7 @@ function MonthSelector({
         setPeriod({ year: period.year, month: parseInt(value) });
       }}
     >
-      <SelectTrigger className="w-[180px]">
+      <SelectTrigger className="w-[180px]" aria-label="Month">
         <SelectValue>
           {(value) => monthName(period.year, parseInt(value))}
         </SelectValue>

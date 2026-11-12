@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "./button";
 import { Calendar } from "./calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
+import { ScrollArea } from "./scroll-area";
 import {
   Sheet,
   SheetContent,
@@ -331,13 +332,15 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
           <SheetContent
             side="bottom"
             showCloseButton={false}
-            className="max-h-[85dvh] overflow-y-auto rounded-t-2xl bg-background px-4 pb-6"
+            className="px-4 pb-4"
           >
             <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-border" />
             <SheetHeader className="p-0 pb-2 text-left">
               <SheetTitle>Date range</SheetTitle>
             </SheetHeader>
-            {pickerContent}
+            <ScrollArea viewportClassName="max-h-[75dvh]">
+              {pickerContent}
+            </ScrollArea>
           </SheetContent>
         </Sheet>
       </>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, ChevronDown, House, Loader2, Plus } from "lucide-react";
+import { ChevronDown, House, Loader2, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -44,7 +44,13 @@ type HouseholdsResponse = {
   }[];
 };
 
-export default function HouseholdSwitcher() {
+interface HouseholdSwitcherProps {
+  variant?: "default" | "row";
+}
+
+export default function HouseholdSwitcher({
+  variant = "default",
+}: HouseholdSwitcherProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [createOpen, setCreateOpen] = useState(false);
@@ -102,19 +108,49 @@ export default function HouseholdSwitcher() {
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-1.5"
-              aria-label="Switch household"
-            />
+            variant === "row" ? (
+              <Button
+                variant="ghost"
+                className="h-16 w-full justify-start gap-3 px-3 font-normal"
+                aria-label="Switch household"
+              />
+            ) : (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-1.5"
+                aria-label="Switch household"
+              />
+            )
           }
         >
-          <House className="h-4 w-4" />
-          <span className="max-w-32 truncate">
-            {active?.name ?? "Household"}
-          </span>
-          <ChevronDown className="h-3.5 w-3.5 opacity-50" />
+          {variant === "row" ? (
+            <>
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                <House className="h-4 w-4" />
+              </span>
+              <span className="flex min-w-0 flex-1 flex-col gap-0.5 text-left">
+                <span className="truncate text-sm leading-5 font-medium">
+                  {active?.name ?? "Household"}
+                </span>
+                {active && (
+                  <span className="text-xs leading-4 text-muted-foreground">
+                    {active.memberCount}{" "}
+                    {active.memberCount === 1 ? "member" : "members"}
+                  </span>
+                )}
+              </span>
+              <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
+            </>
+          ) : (
+            <>
+              <House className="h-4 w-4" />
+              <span className="max-w-32 truncate">
+                {active?.name ?? "Household"}
+              </span>
+              <ChevronDown className="h-3.5 w-3.5 opacity-50" />
+            </>
+          )}
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-60">
           <DropdownMenuGroup>
@@ -129,18 +165,22 @@ export default function HouseholdSwitcher() {
                 key={household.id}
                 disabled={isSwitching || household.id === activeId}
                 onClick={() => switchTo(household.id)}
-                className="gap-2"
+                aria-current={household.id === activeId ? "true" : undefined}
+                className={cn(
+                  "gap-2",
+                  household.id === activeId &&
+                    "bg-accent text-accent-foreground data-disabled:opacity-100",
+                )}
               >
-                <Check
-                  className={cn(
-                    "h-4 w-4 shrink-0",
-                    household.id === activeId ? "opacity-100" : "opacity-0",
-                  )}
-                />
                 <span className="min-w-0 flex-1 truncate">
                   {household.name ?? "My household"}
                 </span>
-                <span className="text-xs text-muted-foreground tabular-nums">
+                <span
+                  className={cn(
+                    "text-xs text-muted-foreground tabular-nums",
+                    household.id === activeId && "text-accent-foreground/70",
+                  )}
+                >
                   {household.memberCount}
                 </span>
               </DropdownMenuItem>
@@ -176,7 +216,7 @@ export default function HouseholdSwitcher() {
               }}
             />
           </Field>
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter>
             <DialogClose
               render={
                 <Button

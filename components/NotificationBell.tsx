@@ -19,6 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Tooltip,
   TooltipContent,
@@ -105,7 +106,7 @@ const NotificationBell = () => {
               No notifications yet
             </p>
           ) : (
-            <div className="max-h-80 overflow-y-auto">
+            <ScrollArea viewportClassName="max-h-80">
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
@@ -129,7 +130,7 @@ const NotificationBell = () => {
                   </p>
                 </div>
               ))}
-            </div>
+            </ScrollArea>
           )}
         </DropdownMenuContent>
       </DropdownMenu>

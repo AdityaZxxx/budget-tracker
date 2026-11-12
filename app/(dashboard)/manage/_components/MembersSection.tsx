@@ -174,6 +174,10 @@ const MembersSection = () => {
                                 role,
                               });
                             }}
+                            items={{
+                              [FULL_MEMBER_ROLE]: "Full edit",
+                              [VIEW_ONLY_ROLE]: "View only",
+                            }}
                           >
                             <SelectTrigger
                               className="w-32"

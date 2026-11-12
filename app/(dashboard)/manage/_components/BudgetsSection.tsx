@@ -231,6 +231,7 @@ function BudgetCard({
         </div>
         <Progress
           value={Math.min(budget.percent, 100)}
+          aria-label={`${budget.category} budget used`}
           indicatorClassName={cn(
             overLimit && "bg-rose-500",
             nearLimit && "bg-amber-500",
