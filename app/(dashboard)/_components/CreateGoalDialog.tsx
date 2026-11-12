@@ -263,7 +263,7 @@ const CreateGoalDialog = ({ trigger, currency }: Props) => {
             }}
           </form.Field>
 
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter>
             <DialogClose
               render={
                 <Button

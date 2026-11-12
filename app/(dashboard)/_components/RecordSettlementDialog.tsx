@@ -112,6 +112,9 @@ const RecordSettlementDialog = ({ trigger, members, currency }: Props) => {
                 if (value === null) return;
                 setMemberId(value);
               }}
+              items={Object.fromEntries(
+                members.map((member) => [member.userId, member.name]),
+              )}
             >
               <SelectTrigger id="settlement-member" className="w-full">
                 <SelectValue placeholder="Select member" />
@@ -149,7 +152,7 @@ const RecordSettlementDialog = ({ trigger, members, currency }: Props) => {
             </FieldDescription>
           </Field>
 
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter>
             <DialogClose
               render={
                 <Button

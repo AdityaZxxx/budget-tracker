@@ -482,6 +482,12 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                       if (value === null) return;
                       field.handleChange(value === "none" ? "" : value);
                     }}
+                    items={{
+                      none: "No goal",
+                      ...Object.fromEntries(
+                        goals.map((goal) => [goal.id, goal.name]),
+                      ),
+                    }}
                   >
                     <SelectTrigger id={field.name} className="w-full">
                       <SelectValue placeholder="No goal" />
@@ -540,6 +546,11 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                   onValueChange={(value) => {
                     if (value === null) return;
                     setSplitMode(value as SplitMode);
+                  }}
+                  items={{
+                    equal: "Equally",
+                    amounts: "By amount",
+                    percent: "By percent",
                   }}
                 >
                   <SelectTrigger
@@ -619,7 +630,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
             </div>
           )}
 
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter>
             <DialogClose
               render={
                 <Button

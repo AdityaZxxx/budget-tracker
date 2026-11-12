@@ -370,6 +370,10 @@ const CreateApiTokenDialog = ({
                     if (value === null) return;
                     setScope(value as TokenScope);
                   }}
+                  items={{
+                    [READ_ONLY_SCOPE]: "Read only",
+                    [READ_WRITE_SCOPE]: "Read and write",
+                  }}
                 >
                   <SelectTrigger id="token-scope" className="w-full">
                     <SelectValue />

@@ -179,6 +179,14 @@ const BudgetDialog = ({
                 if (value === null) return;
                 setCategory(value);
               }}
+              items={Object.fromEntries(
+                (categoriesQuery.data ?? []).map((expenseCategory) => [
+                  expenseCategory.name,
+                  <>
+                    {expenseCategory.icon} {expenseCategory.name}
+                  </>,
+                ]),
+              )}
             >
               <SelectTrigger id="budget-category" className="w-full">
                 <SelectValue placeholder="Select an expense category" />
@@ -235,6 +243,10 @@ const BudgetDialog = ({
                 if (value === null) return;
                 setMode(value as "soft" | "hard");
               }}
+              items={{
+                soft: "Soft (warn at 80% and 100%)",
+                hard: "Hard (block expenses over the limit)",
+              }}
             >
               <SelectTrigger id="budget-mode" className="w-full">
                 <SelectValue />
@@ -253,7 +265,7 @@ const BudgetDialog = ({
             </FieldDescription>
           </Field>
 
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter>
             <DialogClose
               render={
                 <Button
