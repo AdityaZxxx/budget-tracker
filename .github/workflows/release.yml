@@ -50,10 +50,12 @@ jobs:
       # must stay additive within a release; destructive changes ship in a
       # later release.
       - name: Apply database migrations
+        # POSTGRES_URL_NON_POOLING stays unset here: prisma.config.ts feeds it
+        # to shadowDatabaseUrl, and pointing it at the production database
+        # makes every migrate command abort with P3025 before running.
         run: pnpm exec prisma migrate deploy
         env:
           POSTGRES_PRISMA_URL: ${{ secrets.PRODUCTION_POSTGRES_URL_NON_POOLING }}
-          POSTGRES_URL_NON_POOLING: ${{ secrets.PRODUCTION_POSTGRES_URL_NON_POOLING }}
 
       - name: Deploy to Vercel production
         env:
