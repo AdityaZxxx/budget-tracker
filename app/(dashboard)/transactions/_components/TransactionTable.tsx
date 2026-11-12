@@ -1,7 +1,11 @@
 "use client";
 
 import type { Household } from "@prisma/client";
-import type { ColumnFiltersState, SortingState } from "@tanstack/react-table";
+import type {
+  ColumnFiltersState,
+  PaginationState,
+  SortingState,
+} from "@tanstack/react-table";
 import type { LegacyColumnDef as ColumnDef } from "@tanstack/react-table/legacy";
 
 import { useQuery } from "@tanstack/react-query";
@@ -16,6 +20,7 @@ import {
 import {
   ChevronLeft,
   ChevronRight,
+  ChevronsLeft,
   ChevronsRight,
   DownloadIcon,
   MoreHorizontal,
@@ -38,6 +43,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -68,6 +80,7 @@ interface Props {
 type TransactionHistoryRow = GetTransactionsHistoryResponseType[0];
 
 const emptyData: TransactionHistoryRow[] = [];
+const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
 const buildColumns = (
   formatAmount: (value: number) => string,
@@ -155,27 +168,31 @@ const buildColumns = (
     ),
     filterFn: (row, id, value) => value.includes(row.getValue(id)),
     cell: ({ row }) => (
-      <div
+      <Badge
         className={cn(
-          "w-fit rounded-full px-4 py-1 text-sm font-medium capitalize",
+          "border-transparent px-2.5 text-xs font-medium capitalize",
           row.original.type === "income"
             ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400"
             : "bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-400",
         )}
       >
         {row.original.type}
-      </div>
+      </Badge>
     ),
   },
   {
     accessorKey: "amount",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Amount" />
+      <DataTableColumnHeader
+        column={column}
+        title="Amount"
+        className="w-full justify-end"
+      />
     ),
     cell: ({ row }) => (
       <p
         className={cn(
-          "text-sm font-medium tabular-nums",
+          "text-right text-sm font-medium tabular-nums",
           row.original.type === "income"
             ? "text-emerald-700 dark:text-emerald-400"
             : "text-rose-600 dark:text-rose-400",
@@ -196,6 +213,10 @@ const buildColumns = (
 const TransactionTable = ({ from, to }: Props) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  });
   const householdQuery = useQuery<Household>({
     queryKey: ["household"],
     queryFn: () => fetch("/api/user-settings").then((res) => res.json()),
@@ -228,13 +249,17 @@ const TransactionTable = ({ from, to }: Props) => {
     data: history.data || emptyData,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    state: { sorting, columnFilters },
+    state: { sorting, columnFilters, pagination },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onPaginationChange: setPagination,
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
+
+  const totalRows = table.getFilteredRowModel().rows.length;
+  const pageCount = Math.max(table.getPageCount(), 1);
 
   const csvData = getCsvData(
     history.data,
@@ -305,30 +330,21 @@ const TransactionTable = ({ from, to }: Props) => {
 
         <div className="flex items-center gap-2">
           <DataTableViewOptions table={table} />
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="gap-1"
-                  onClick={downloadCsv}
-                />
-              }
-            >
-              <DownloadIcon className="h-3.5 w-3.5" />
-              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                Export CSV
-              </span>
-            </TooltipTrigger>
-            <TooltipContent>Export CSV</TooltipContent>
-          </Tooltip>
+          <Button
+            type="button"
+            variant="outline"
+            className="h-10 sm:h-9"
+            onClick={downloadCsv}
+            disabled={csvData.length === 0}
+          >
+            <DownloadIcon />
+            <span className="sr-only sm:not-sr-only">Export CSV</span>
+          </Button>
         </div>
       </div>
 
       <SkeletonWrapper isLoading={history.isLoading}>
-        <div className="rounded-lg border">
+        <div className="relative rounded-lg border">
           <Table>
             <TableHeader className="bg-muted/50">
               {table.getHeaderGroups().map((headerGroup) => (
@@ -349,11 +365,7 @@ const TransactionTable = ({ from, to }: Props) => {
             <TableBody>
               {table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                    className="hover:bg-muted/50"
-                  >
+                  <TableRow key={row.id}>
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
                         {flexRender(
@@ -397,68 +409,72 @@ const TransactionTable = ({ from, to }: Props) => {
               )}
             </TableBody>
           </Table>
+          {/* Scroll cue; the table always overflows below xl. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-y-0 right-0 w-10 rounded-r-lg bg-gradient-to-l from-background via-background/60 to-transparent xl:hidden"
+          />
         </div>
-        <div className="flex items-center justify-end space-x-2">
-          <Tooltip>
-            <TooltipTrigger render={<span className="hidden lg:inline-flex" />}>
-              <Button
-                variant="outline"
-                size="icon"
-                className="size-8"
-                onClick={() => table.setPageIndex(0)}
-                disabled={!table.getCanPreviousPage()}
-              >
-                <span className="sr-only">Go to first page</span>
-                <ChevronLeft />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Go to first page</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger render={<span className="inline-flex" />}>
-              <Button
-                variant="outline"
-                size="icon"
-                className="size-8"
-                onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
-              >
-                <span className="sr-only">Go to previous page</span>
-                <ChevronLeft />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Go to previous page</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger render={<span className="inline-flex" />}>
-              <Button
-                variant="outline"
-                size="icon"
-                className="size-8"
-                onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
-              >
-                <span className="sr-only">Go to next page</span>
-                <ChevronRight />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Go to next page</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger render={<span className="hidden lg:inline-flex" />}>
-              <Button
-                variant="outline"
-                size="icon"
-                className="size-8"
-                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                disabled={!table.getCanNextPage()}
-              >
-                <span className="sr-only">Go to last page</span>
-                <ChevronsRight />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Go to last page</TooltipContent>
-          </Tooltip>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <Select
+              value={String(pagination.pageSize)}
+              onValueChange={(value) =>
+                setPagination({ pageIndex: 0, pageSize: Number(value) })
+              }
+            >
+              <SelectTrigger aria-label="Rows per page" className="h-10 sm:h-9">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {PAGE_SIZE_OPTIONS.map((size) => (
+                  <SelectItem key={size} value={String(size)}>
+                    {size} / page
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-sm whitespace-nowrap text-muted-foreground tabular-nums">
+              Page {pagination.pageIndex + 1} of {pageCount}
+              <span className="hidden sm:inline">
+                : {totalRows} {totalRows === 1 ? "row" : "rows"}
+              </span>
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <PageButton
+              label="Go to first page"
+              className="hidden lg:inline-flex"
+              onClick={() => table.setPageIndex(0)}
+              disabled={!table.getCanPreviousPage()}
+            >
+              <ChevronsLeft />
+            </PageButton>
+            <PageButton
+              label="Go to previous page"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              <ChevronLeft />
+            </PageButton>
+            <PageButton
+              label="Go to next page"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              <ChevronRight />
+            </PageButton>
+            <PageButton
+              label="Go to last page"
+              className="hidden lg:inline-flex"
+              onClick={() =>
+                table.setPageIndex(Math.max(table.getPageCount() - 1, 0))
+              }
+              disabled={!table.getCanNextPage()}
+            >
+              <ChevronsRight />
+            </PageButton>
+          </div>
         </div>
       </SkeletonWrapper>
     </div>
@@ -501,6 +517,40 @@ function getCategoryOptions(transactions: GetTransactionsHistoryResponseType) {
 function escapeCell(value: string) {
   const s = String(value ?? "");
   return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+function PageButton({
+  label,
+  className,
+  disabled,
+  onClick,
+  children,
+}: {
+  label: string;
+  className?: string;
+  disabled: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={<span className={cn("inline-flex", className)} />}
+      >
+        <Button
+          variant="outline"
+          size="icon"
+          className="size-10"
+          onClick={onClick}
+          disabled={disabled}
+        >
+          <span className="sr-only">{label}</span>
+          {children}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  );
 }
 
 function AddedByCell({ transaction }: { transaction: TransactionHistoryRow }) {
@@ -549,7 +599,13 @@ function RowActions({ transaction }: { transaction: TransactionHistoryRow }) {
           <TooltipTrigger
             render={
               <DropdownMenuTrigger
-                render={<Button variant={"ghost"} className="h-8 w-8 p-0" />}
+                render={
+                  <Button
+                    variant={"ghost"}
+                    size="icon"
+                    className="max-sm:size-10"
+                  />
+                }
               />
             }
           >

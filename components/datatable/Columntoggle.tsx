@@ -28,7 +28,7 @@ export function DataTableViewOptions<TData extends RowData>({
           <Button
             variant="outline"
             size="sm"
-            className="ml-auto hidden h-8 lg:flex"
+            className="ml-auto hidden h-9 lg:flex"
           >
             <Settings2 />
             View
