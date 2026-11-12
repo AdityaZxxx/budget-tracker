@@ -6,7 +6,7 @@ Read the one the task names. They do not all need to be read.
 
 - **Tickets** - picking up, writing, or ordering work: `docs/agents/issue-tracker.md`
 - **Vocabulary** - naming a domain concept, or a change that might contradict an ADR: `docs/agents/domain.md`
-- **Standards** - reviewing a diff or committing: `CODING_STANDARDS.md`
+- **Standards** - reviewing a diff, committing, or opening a pull request: `CODING_STANDARDS.md`
 - **Money diff** - changing how money is read or written: "A money diff walks a checklist" in `CODING_STANDARDS.md`
 - **Proof** - driving the real app: the `verify-sora` skill (`.agents/skills/verify-sora/SKILL.md`)
 - **Map drift** - the verification feature map no longer matches the app: the `maintain-verification-skill` skill (`.agents/skills/maintain-verification-skill/SKILL.md`)
