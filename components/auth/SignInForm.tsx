@@ -59,7 +59,7 @@ export default function SignInForm({ next }: { next?: string }) {
       title="Sign in"
       description="Enter your email and password to access your account"
       next={next}
-      alternate={{
+      crossLink={{
         prompt: "Don't have an account?",
         label: "Sign up",
         href: "/sign-up",

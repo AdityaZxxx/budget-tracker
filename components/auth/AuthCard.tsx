@@ -18,7 +18,7 @@ interface AuthCardProps {
   title: string;
   description: string;
   next?: string;
-  alternate: { href: string; label: string; prompt: string };
+  crossLink: { href: string; label: string; prompt: string };
   children: ReactNode;
 }
 
@@ -26,12 +26,12 @@ const AuthCard = ({
   title,
   description,
   next,
-  alternate,
+  crossLink,
   children,
 }: AuthCardProps) => {
-  const alternateHref = next
-    ? `${alternate.href}?next=${encodeURIComponent(next)}`
-    : alternate.href;
+  const crossLinkHref = next
+    ? `${crossLink.href}?next=${encodeURIComponent(next)}`
+    : crossLink.href;
 
   return (
     <Card className="w-full">
@@ -51,13 +51,13 @@ const AuthCard = ({
         </div>
         <GoogleSignInButton callbackURL={next ?? "/"} />
         <p className="text-center text-sm text-muted-foreground">
-          {alternate.prompt}{" "}
-          <AuthLink href={alternateHref}>{alternate.label}</AuthLink>
+          {crossLink.prompt}{" "}
+          <AuthLink href={crossLinkHref}>{crossLink.label}</AuthLink>
         </p>
         <p className="text-center text-sm text-muted-foreground">
           <AuthLink
             href="/privacy"
-            className="inline-flex min-h-6 items-center"
+            className="inline-flex min-h-10 items-center"
           >
             Privacy policy
           </AuthLink>

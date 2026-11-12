@@ -61,7 +61,7 @@ export default function SignUpForm({ next }: { next?: string }) {
       title="Sign up"
       description="Create an account to start tracking your budget"
       next={next}
-      alternate={{
+      crossLink={{
         prompt: "Already have an account?",
         label: "Sign in",
         href: "/sign-in",
