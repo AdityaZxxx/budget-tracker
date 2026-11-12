@@ -45,7 +45,7 @@ export function DataTableFacetedFilter<TData extends RowData, TValue>({
     <Popover>
       <PopoverTrigger
         render={
-          <Button variant="outline" size="sm" className="h-8 border-dashed" />
+          <Button variant="outline" className="h-10 border-dashed sm:h-9" />
         }
       >
         <PlusCircle />
@@ -84,7 +84,7 @@ export function DataTableFacetedFilter<TData extends RowData, TValue>({
           </>
         )}
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0" align="start">
+      <PopoverContent className="w-max max-w-72 min-w-56 p-0" align="start">
         <Command>
           <CommandInput placeholder={title} />
           <CommandList>
@@ -120,7 +120,7 @@ export function DataTableFacetedFilter<TData extends RowData, TValue>({
                     {option.icon && (
                       <option.icon className="size-4 text-muted-foreground" />
                     )}
-                    <span>{option.label}</span>
+                    <span className="min-w-0 truncate">{option.label}</span>
                     {facets?.get(option.value) && (
                       <span className="ml-auto flex size-4 items-center justify-center font-mono text-xs text-muted-foreground">
                         {facets.get(option.value)}
