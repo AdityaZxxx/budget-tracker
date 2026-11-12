@@ -1,25 +1,16 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 
-import GoogleSignInButton from "./GoogleSignInButton";
+import AuthCard from "./AuthCard";
+import AuthField from "./AuthField";
+import AuthSubmitButton from "./AuthSubmitButton";
 
 const signUpSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -66,135 +57,91 @@ export default function SignUpForm({ next }: { next?: string }) {
   });
 
   return (
-    <Card className="w-[min(400px,calc(100vw-2rem))]">
-      <CardHeader>
-        <CardTitle className="text-2xl">Sign up</CardTitle>
-        <CardDescription>
-          Create an account to start tracking your budget
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            form.handleSubmit();
-          }}
-          className="space-y-4"
-        >
-          <form.Field name="name">
-            {(field) => {
-              const isInvalid =
-                field.state.meta.isTouched && !field.state.meta.isValid;
-              return (
-                <Field data-invalid={isInvalid}>
-                  <FieldLabel htmlFor={field.name}>Name</FieldLabel>
-                  <Input
-                    id={field.name}
-                    name={field.name}
-                    autoComplete="name"
-                    placeholder="Your name"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    aria-invalid={isInvalid}
-                    aria-describedby={
-                      isInvalid ? `${field.name}-error` : undefined
-                    }
-                  />
-                  {isInvalid && (
-                    <FieldError
-                      id={`${field.name}-error`}
-                      errors={field.state.meta.errors}
-                    />
-                  )}
-                </Field>
-              );
-            }}
-          </form.Field>
-          <form.Field name="email">
-            {(field) => {
-              const isInvalid =
-                field.state.meta.isTouched && !field.state.meta.isValid;
-              return (
-                <Field data-invalid={isInvalid}>
-                  <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-                  <Input
-                    id={field.name}
-                    name={field.name}
-                    type="email"
-                    autoComplete="email"
-                    placeholder="you@example.com"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    aria-invalid={isInvalid}
-                    aria-describedby={
-                      isInvalid ? `${field.name}-error` : undefined
-                    }
-                  />
-                  {isInvalid && (
-                    <FieldError
-                      id={`${field.name}-error`}
-                      errors={field.state.meta.errors}
-                    />
-                  )}
-                </Field>
-              );
-            }}
-          </form.Field>
-          <form.Field name="password">
-            {(field) => {
-              const isInvalid =
-                field.state.meta.isTouched && !field.state.meta.isValid;
-              return (
-                <Field data-invalid={isInvalid}>
-                  <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                  <Input
-                    id={field.name}
-                    name={field.name}
-                    type="password"
-                    autoComplete="new-password"
-                    placeholder="••••••••"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    aria-invalid={isInvalid}
-                    aria-describedby={
-                      isInvalid ? `${field.name}-error` : undefined
-                    }
-                  />
-                  {isInvalid && (
-                    <FieldError
-                      id={`${field.name}-error`}
-                      errors={field.state.meta.errors}
-                    />
-                  )}
-                </Field>
-              );
-            }}
-          </form.Field>
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Creating account…" : "Sign up"}
-          </Button>
-        </form>
-        <div className="my-4 flex items-center gap-2">
-          <div className="h-px flex-1 bg-border" />
-          <span className="text-xs text-muted-foreground">or</span>
-          <div className="h-px flex-1 bg-border" />
-        </div>
-        <GoogleSignInButton callbackURL={next ?? "/"} />
-        <p className="mt-4 text-center text-sm text-muted-foreground">
-          Already have an account?{" "}
-          <Link
-            href={
-              next ? `/sign-in?next=${encodeURIComponent(next)}` : "/sign-in"
-            }
-            className="underline underline-offset-4"
-          >
-            Sign in
-          </Link>
-        </p>
-      </CardContent>
-    </Card>
+    <AuthCard
+      title="Sign up"
+      description="Create an account to start tracking your budget"
+      next={next}
+      alternate={{
+        prompt: "Already have an account?",
+        label: "Sign in",
+        href: "/sign-in",
+      }}
+    >
+      <form
+        method="post"
+        noValidate
+        onSubmit={(e) => {
+          e.preventDefault();
+          form.handleSubmit();
+        }}
+        className="flex flex-col gap-4"
+        aria-busy={isLoading}
+      >
+        <form.Field name="name">
+          {(field) => (
+            <AuthField
+              name="name"
+              label="Name"
+              autoComplete="name"
+              autoCapitalize="words"
+              enterKeyHint="next"
+              placeholder="Your name"
+              value={field.state.value}
+              onChange={field.handleChange}
+              onBlur={field.handleBlur}
+              isInvalid={
+                field.state.meta.isTouched && !field.state.meta.isValid
+              }
+              errors={field.state.meta.errors}
+            />
+          )}
+        </form.Field>
+        <form.Field name="email">
+          {(field) => (
+            <AuthField
+              name="email"
+              label="Email"
+              type="email"
+              autoComplete="email"
+              inputMode="email"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              enterKeyHint="next"
+              placeholder="you@example.com"
+              value={field.state.value}
+              onChange={field.handleChange}
+              onBlur={field.handleBlur}
+              isInvalid={
+                field.state.meta.isTouched && !field.state.meta.isValid
+              }
+              errors={field.state.meta.errors}
+            />
+          )}
+        </form.Field>
+        <form.Field name="password">
+          {(field) => (
+            <AuthField
+              name="password"
+              label="Password"
+              type="password"
+              autoComplete="new-password"
+              enterKeyHint="done"
+              placeholder="At least 8 characters"
+              value={field.state.value}
+              onChange={field.handleChange}
+              onBlur={field.handleBlur}
+              isInvalid={
+                field.state.meta.isTouched && !field.state.meta.isValid
+              }
+              errors={field.state.meta.errors}
+            />
+          )}
+        </form.Field>
+        <AuthSubmitButton pending={isLoading} pendingLabel="Creating account…">
+          Sign up
+        </AuthSubmitButton>
+      </form>
+    </AuthCard>
   );
 }
