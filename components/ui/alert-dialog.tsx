@@ -42,9 +42,11 @@ function AlertDialogOverlay({
 function AlertDialogContent({
   className,
   size = "default",
+  viewportClassName,
   children,
   ...props
 }: AlertDialogPrimitive.Popup.Props & {
+  viewportClassName?: string;
   size?: "default" | "sm";
 }) {
   return (
@@ -61,7 +63,10 @@ function AlertDialogContent({
       >
         <ScrollArea
           className="rounded-[inherit]"
-          viewportClassName="grid gap-6 overscroll-contain p-6 *:min-w-0 max-h-[calc(100dvh-2rem)]"
+          viewportClassName={cn(
+            "grid max-h-[calc(100dvh-2rem)] gap-6 overscroll-contain p-6 *:min-w-0",
+            viewportClassName,
+          )}
         >
           {children}
         </ScrollArea>

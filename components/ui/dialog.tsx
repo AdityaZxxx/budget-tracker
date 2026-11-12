@@ -47,10 +47,12 @@ function DialogOverlay({
 
 function DialogContent({
   className,
+  viewportClassName,
   children,
   showCloseButton = true,
   ...props
 }: DialogPrimitive.Popup.Props & {
+  viewportClassName?: string;
   showCloseButton?: boolean;
 }) {
   return (
@@ -66,7 +68,10 @@ function DialogContent({
       >
         <ScrollArea
           className="rounded-[inherit]"
-          viewportClassName="grid gap-6 overscroll-contain p-6 *:min-w-0 max-h-[calc(100dvh-2rem)]"
+          viewportClassName={cn(
+            "grid max-h-[calc(100dvh-2rem)] gap-6 overscroll-contain p-6 *:min-w-0",
+            viewportClassName,
+          )}
         >
           {children}
         </ScrollArea>

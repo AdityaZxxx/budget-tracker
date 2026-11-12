@@ -6,6 +6,7 @@ import {
   LogOut,
   Menu,
   Settings,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -20,7 +21,14 @@ import NotificationBell from "./NotificationBell";
 import { ThemeSwitcherBtn } from "./ThemeSwitcherBtn";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button, buttonVariants } from "./ui/button";
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "./ui/sheet";
+import { ScrollArea } from "./ui/scroll-area";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+  SheetClose,
+} from "./ui/sheet";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { useSignOut } from "./use-sign-out";
 import UserMenu from "./UserMenu";
@@ -100,12 +108,20 @@ function MobileMenu() {
         <SheetContent
           className="flex w-[320px] max-w-[calc(100vw-2rem)] flex-col gap-0 p-0"
           side="left"
+          showCloseButton={false}
         >
           <SheetTitle className="sr-only">Navigation menu</SheetTitle>
           <header className="flex h-16 items-center justify-between border-b px-4">
             <Logo />
+            <SheetClose
+              render={
+                <Button variant="ghost" size="icon" aria-label="Close menu" />
+              }
+            >
+              <X />
+            </SheetClose>
           </header>
-          <div className="flex-1 overflow-y-auto p-3">
+          <ScrollArea className="flex-1" viewportClassName="h-full p-3">
             <p className="px-2 pb-1 text-xs font-medium text-muted-foreground">
               Household
             </p>
@@ -134,7 +150,7 @@ function MobileMenu() {
                 );
               })}
             </nav>
-          </div>
+          </ScrollArea>
           <footer className="flex flex-col gap-3 border-t p-3">
             {session && (
               <div className="flex items-center gap-3 px-2 py-2">
