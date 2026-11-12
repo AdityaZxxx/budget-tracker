@@ -87,10 +87,8 @@ jobs:
             exit 1
           fi
 
-      - name: Tag and publish the release
+      # gh creates the tag through the API, so the runner needs no git identity.
+      - name: Publish the release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git tag -a "${{ inputs.version }}" -m "${{ inputs.version }}"
-          git push origin "${{ inputs.version }}"
-          gh release create "${{ inputs.version }}" --generate-notes --title "${{ inputs.version }}"
+        run: gh release create "${{ inputs.version }}" --target main --title "${{ inputs.version }}" --generate-notes
