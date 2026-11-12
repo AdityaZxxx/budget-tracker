@@ -1,5 +1,6 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -8,7 +9,12 @@ import { authClient } from "@/lib/auth-client";
 
 function GoogleIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
+    <svg
+      viewBox="0 0 24 24"
+      className="size-4"
+      aria-hidden="true"
+      focusable="false"
+    >
       <path
         fill="#4285F4"
         d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"
@@ -54,11 +60,19 @@ export default function GoogleSignInButton({
     <Button
       type="button"
       variant="outline"
-      className="w-full"
+      className="h-10 w-full gap-2 sm:h-9"
       disabled={isLoading}
+      aria-busy={isLoading}
       onClick={handleGoogleSignIn}
     >
-      <GoogleIcon />
+      {isLoading ? (
+        <Loader2
+          className="size-4 animate-spin motion-reduce:animate-none"
+          aria-hidden="true"
+        />
+      ) : (
+        <GoogleIcon />
+      )}
       {isLoading ? "Redirecting to Google…" : "Continue with Google"}
     </Button>
   );
