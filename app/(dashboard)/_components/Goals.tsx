@@ -124,7 +124,10 @@ const Goals = ({
                           )}
                         </div>
                       </div>
-                      <Progress value={progress} />
+                      <Progress
+                        value={progress}
+                        aria-label={`${goal.name} goal progress`}
+                      />
                       <p className="text-xs text-muted-foreground tabular-nums">
                         {formatter.format(goal.contributed)} of{" "}
                         {formatter.format(goal.target)}
