@@ -1,8 +1,6 @@
 "use client";
 
 import { LogOut } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
 import { authClient } from "@/lib/auth-client";
 
@@ -17,10 +15,11 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import { useSignOut } from "./use-sign-out";
 
 export default function UserMenu() {
-  const router = useRouter();
   const { data: session } = authClient.useSession();
+  const signOut = useSignOut();
 
   if (!session) {
     return null;
@@ -32,17 +31,6 @@ export default function UserMenu() {
     .join("")
     .slice(0, 2)
     .toUpperCase();
-
-  const handleSignOut = async () => {
-    const { error } = await authClient.signOut();
-    if (error) {
-      toast.error(error.message || "Failed to sign out");
-      return;
-    }
-    toast.success("Signed out");
-    router.push("/sign-in");
-    router.refresh();
-  };
 
   return (
     <Tooltip>
@@ -82,7 +70,7 @@ export default function UserMenu() {
             </DropdownMenuLabel>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleSignOut}>
+          <DropdownMenuItem onClick={signOut}>
             <LogOut className="mr-2 h-4 w-4" />
             Sign out
           </DropdownMenuItem>
