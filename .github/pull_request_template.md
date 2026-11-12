@@ -9,7 +9,7 @@
 - **Before:** <what was wrong, or the failing output>
   **After:** <the command that ran and what it printed>
 
-Docs-only changes state that the app is unchanged and nothing was run. Behaviour changes show the run that drove the app.
+Docs-only changes state that the app is unchanged and nothing was run. Behaviour changes show the run that drove the app. Visual changes attach before and after captures, uploaded to the pull request, never committed to the repository.
 
 ## Merge Danger
 
