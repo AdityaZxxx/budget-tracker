@@ -154,11 +154,13 @@ A ticket worked in the main session is committed after the session has read its 
 
 A pull request is the end of a ticket, not a favour. One concern carries one pull request, and tickets that serve the same concern travel together.
 
-The agent that worked the ticket commits and pushes the branch. A reviewer reads the diff after it is pushed, against the ticket's desired outcome, and the pull request opens once that review is clean. The order is commit, push, review, open, merge.
+The agent that worked the ticket commits and pushes the branch. A reviewer reads the diff after it is pushed, against the ticket's desired outcome, and the pull request opens once that review is clean. The order is commit, push, review, open.
 
 The body is `.github/pull_request_template.md` filled end to end; every section answered, nothing deleted, nothing left as a prompt. The `pr` skill is how to write it well (picking Summary's one visual, what counts as evidence); the template is what the body must carry. Whatever the body says, a visual change attaches before and after captures to the pull request, never to the repository.
 
-Squash merge is the only merge onto `main`. When the review is clean and CI is green, the agent that opened the pull request merges it (`gh pr merge --squash --delete-branch`); it does not wait for a human to say so. A pull request blocked on review, failing checks, or a one-way door is not merged; the agent says what it is waiting on instead of merging anyway. A pull request merged into a branch other than `main` is stacked on the one below it, and the stack merges from the bottom.
+Attaching the captures is a CLI operation: `gh pr edit <n> --attach './before.png#the alt text'` uploads an image (or video) to the pull request, up to 50 files per command. `gh` rewrites matching local references in the body (`![alt](./before.png)`) to the uploaded asset URLs, and paths in a `--body-file` resolve relative to the file's directory, falling back to the working directory; absolute paths are not rewritten. Alt text is the part after `#`; without it, the filename is used. `--attach` alone keeps the existing body and appends the attachments to it. On older `gh` releases without the flag, attach in the web editor instead.
+
+Squash merge is the only merge onto `main`, and a human owns it. The agent does not merge on its own; it opens the pull request and stops. A human approves the merge, or tells the agent to merge or to keep waiting, and the agent acts on that instruction alone. A pull request blocked on review, failing checks, or a one-way door is not merged either way; the agent says what it is waiting on instead of merging anyway. A pull request merged into a branch other than `main` is stacked on the one below it, and the stack merges from the bottom.
 
 ## Keeping this file honest
 
