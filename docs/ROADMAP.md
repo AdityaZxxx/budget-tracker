@@ -10,6 +10,8 @@ Product language lives in [GLOSSARY.md](../GLOSSARY.md); hard-to-reverse decisio
 - M2 Splits: shared vs personal transactions, per-pair net balance, settlement recorded as a transaction
 - M3 Goals: household target, optional deadline, contribution transactions
 - M4 Budgets + notifications: monthly per-category Budget (soft or hard per budget), in-app notification bell + optional email digest
+- M5 Solo first-class (ADR 0005): hide household chrome for a one-member household, drop the shared/personal toggle (solo transactions store `shared: true`), solo-aware copy in wizard, dashboard, and empty states
+- M6 Solo features (ADR 0005): Insights section on the dashboard (savings rate this month, net trend over six months), recurring items with the Upcoming bills dashboard list, unusual spending notifications, safe-to-spend (remaining budget tally)
 
 ## Phase 2 - Hardening before any real user
 
