@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, ChevronDown, House, Loader2, Plus } from "lucide-react";
+import { ChevronDown, House, Loader2, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -129,18 +129,22 @@ export default function HouseholdSwitcher() {
                 key={household.id}
                 disabled={isSwitching || household.id === activeId}
                 onClick={() => switchTo(household.id)}
-                className="gap-2"
+                aria-current={household.id === activeId ? "true" : undefined}
+                className={cn(
+                  "gap-2",
+                  household.id === activeId &&
+                    "bg-accent text-accent-foreground data-disabled:opacity-100",
+                )}
               >
-                <Check
-                  className={cn(
-                    "h-4 w-4 shrink-0",
-                    household.id === activeId ? "opacity-100" : "opacity-0",
-                  )}
-                />
                 <span className="min-w-0 flex-1 truncate">
                   {household.name ?? "My household"}
                 </span>
-                <span className="text-xs text-muted-foreground tabular-nums">
+                <span
+                  className={cn(
+                    "text-xs text-muted-foreground tabular-nums",
+                    household.id === activeId && "text-accent-foreground/70",
+                  )}
+                >
                   {household.memberCount}
                 </span>
               </DropdownMenuItem>
@@ -176,7 +180,7 @@ export default function HouseholdSwitcher() {
               }}
             />
           </Field>
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter>
             <DialogClose
               render={
                 <Button
