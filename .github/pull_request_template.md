@@ -2,9 +2,7 @@
 
 <the problem in a sentence or two, then how the diff fixes it>
 
-```text
-<the smallest view that makes the change clear: a diff sketch, a tree, or a pseudocode of the rule>
-```
+<optional: the smallest view that makes the change clear; pick one or none. a diff sketch, a file tree, a pseudocode of the rule, or a mermaid diagram>
 
 ## Evidence
 
