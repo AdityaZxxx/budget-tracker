@@ -332,13 +332,13 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
           <SheetContent
             side="bottom"
             showCloseButton={false}
-            className="rounded-t-2xl bg-background"
+            className="px-4 pb-4"
           >
             <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-border" />
             <SheetHeader className="p-0 pb-2 text-left">
               <SheetTitle>Date range</SheetTitle>
             </SheetHeader>
-            <ScrollArea viewportClassName="max-h-[75dvh] px-4 pb-4">
+            <ScrollArea viewportClassName="max-h-[75dvh]">
               {pickerContent}
             </ScrollArea>
           </SheetContent>
