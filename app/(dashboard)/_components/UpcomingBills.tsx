@@ -188,7 +188,7 @@ const UpcomingBills = ({ currency, canEdit }: Props) => {
                 {visible.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
+                    className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 py-3 first:pt-0 last:pb-0"
                   >
                     <span className="flex min-w-0 items-center gap-3">
                       <span
@@ -245,7 +245,7 @@ const UpcomingBills = ({ currency, canEdit }: Props) => {
                             trigger={
                               <Button
                                 variant="ghost"
-                                size="icon-sm"
+                                size="icon-lg"
                                 aria-label={`Edit ${item.name}`}
                               >
                                 <Pencil className="h-4 w-4" />
@@ -254,7 +254,7 @@ const UpcomingBills = ({ currency, canEdit }: Props) => {
                           />
                           <Button
                             variant="ghost"
-                            size="icon-sm"
+                            size="icon-lg"
                             aria-label={
                               item.paused
                                 ? `Resume ${item.name}`
@@ -275,7 +275,7 @@ const UpcomingBills = ({ currency, canEdit }: Props) => {
                           </Button>
                           <Button
                             variant="ghost"
-                            size="icon-sm"
+                            size="icon-lg"
                             aria-label={`Delete ${item.name}`}
                             onClick={() => setDeleteTarget(item)}
                           >
