@@ -152,7 +152,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
   });
   const knownMemberCount = memberCountQuery.data;
   const showSharedToggle =
-    knownMemberCount === undefined || knownMemberCount > 1;
+    knownMemberCount !== undefined && knownMemberCount > 1;
 
   const membersQuery = useQuery({
     queryKey: ["householdMembers"],
@@ -225,6 +225,10 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
       mutate({
         ...value,
         date: dateToUtcDate(value.date),
+        shared:
+          knownMemberCount !== undefined && knownMemberCount > 1
+            ? value.shared
+            : true,
         shares: buildShares(value),
       });
     },
