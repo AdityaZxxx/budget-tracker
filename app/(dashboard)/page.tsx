@@ -11,6 +11,7 @@ import Balances from "./_components/Balances";
 import CreateTransactionDialog from "./_components/CreateTransactionDialog";
 import Goals from "./_components/Goals";
 import History from "./_components/History";
+import Insights from "./_components/Insights";
 import Overview from "./_components/Overview";
 import SharedSpendingCard from "./_components/SharedSpendingCard";
 import SimplifyDebts from "./_components/SimplifyDebts";
@@ -80,6 +81,7 @@ const DashboardPage = async () => {
       </div>
       {canEdit && <AddMemberCta memberCount={memberCount} />}
       <Overview currency={household.currency} />
+      <Insights currency={household.currency} />
       <UpcomingBills currency={household.currency} canEdit={canEdit} />
       {memberCount > 1 && <SharedSpendingCard currency={household.currency} />}
       {memberCount > 1 && (
