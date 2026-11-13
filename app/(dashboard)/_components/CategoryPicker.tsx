@@ -30,13 +30,20 @@ interface Props {
   type: TransactionType;
   onChange: (value: string) => void;
   id?: string;
+  value?: string;
   "aria-invalid"?: boolean;
   "aria-describedby"?: string;
 }
 
-const CategoryPicker = ({ type, onChange, id, ...ariaProps }: Props) => {
+const CategoryPicker = ({
+  type,
+  onChange,
+  id,
+  value: initialValue,
+  ...ariaProps
+}: Props) => {
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(initialValue ?? "");
   const listId = useId();
 
   const selectCategory = (name: string) => {
