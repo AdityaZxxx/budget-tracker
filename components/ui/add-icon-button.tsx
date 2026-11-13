@@ -21,7 +21,7 @@ const AddIconButton = ({
       render={
         <Button
           variant={variant}
-          size="icon-lg"
+          size="icon"
           aria-label={label}
           className={cn(className)}
           {...rest}
