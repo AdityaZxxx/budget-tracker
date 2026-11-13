@@ -62,6 +62,12 @@ export function registerTransactionWriteTools(
           .describe(
             "Per-member split of a shared expense, as amounts in the Household's currency. The amounts must add up to the Transaction's amount. Use list_members to get the member ids.",
           ),
+        recurringItemId: z
+          .string()
+          .optional()
+          .describe(
+            "Id of a Recurring item in the Household this Transaction records. Optional; carries the item as posted for this occurrence.",
+          ),
       },
     },
     async ({
@@ -73,6 +79,7 @@ export function registerTransactionWriteTools(
       shared,
       goalId,
       shares,
+      recurringItemId,
     }) => {
       if (context.scope !== READ_WRITE_SCOPE)
         return toolError("This token is read-only.");
@@ -94,6 +101,7 @@ export function registerTransactionWriteTools(
             shared,
             goalId: goalId || undefined,
             shares,
+            recurringItemId,
             // The ledger keeps one answer to who added the Transaction.
             addedVia: "agent",
           },

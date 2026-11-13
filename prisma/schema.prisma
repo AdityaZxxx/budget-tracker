@@ -55,6 +55,7 @@ model Household {
   monthHistory MonthHistory[]
   yearHistory  YearHistory[]
   apiTokens    ApiToken[]
+  recurringItems RecurringItem[]
 }
 
 model HouseholdMembership {
@@ -200,6 +201,32 @@ model TransactionShare {
   amount        Decimal
 
   @@id([transactionId, userId])
+}
+
+// A household-level definition of a repeating income or expense. It is a
+// reminder, never a ledger entry: members record the real transaction from
+// the list when it comes due. lastPostedAt is the moment the member last
+// confirmed one; an item is due when it has no posting for the occurrence
+// on or before today.
+model RecurringItem {
+  id          String    @id @default(uuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  name        String
+  amount      Decimal
+  category    String
+  categoryIcon String
+  type        String    @default("expense")
+  frequency   String
+  weekday     Int?
+  dayOfMonth  Int?
+  startDate   DateTime?
+  endDate     DateTime?
+  paused      Boolean   @default(false)
+  lastPostedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([householdId])
 }
 
 model Goal {

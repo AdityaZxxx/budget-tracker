@@ -21,8 +21,17 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
   assertFullMember(result);
 
   const { session, household } = result;
-  const { amount, category, date, description, type, shared, goalId, shares } =
-    parsedBody.data;
+  const {
+    amount,
+    category,
+    date,
+    description,
+    type,
+    shared,
+    goalId,
+    shares,
+    recurringItemId,
+  } = parsedBody.data;
 
   await createTransaction(household.id, session.user.id, {
     amount,
@@ -33,5 +42,6 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
     shared,
     goalId: goalId || undefined,
     shares,
+    recurringItemId,
   });
 }

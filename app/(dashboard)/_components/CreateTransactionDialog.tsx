@@ -60,6 +60,17 @@ import CategoryPicker from "./CategoryPicker";
 interface Props {
   trigger: ReactNode;
   type: TransactionType;
+  // Prefills the form for posting a due recurring item; the member adjusts
+  // the real date, description, and amount before confirming.
+  initialValues?: {
+    description?: string;
+    category?: string;
+    amount?: number;
+    type?: TransactionType;
+    date?: Date;
+    shared?: boolean;
+  };
+  recurringItemId?: string;
 }
 
 type CreateTransactionFormValues = {
@@ -111,8 +122,14 @@ function finalizeShares(
   return rounded.filter((share) => share.amount > 0);
 }
 
-const CreateTransactionDialog = ({ trigger, type }: Props) => {
+const CreateTransactionDialog = ({
+  trigger,
+  type,
+  initialValues,
+  recurringItemId,
+}: Props) => {
   const [open, setOpen] = useState(false);
+  const dialogType = initialValues?.type ?? type;
   // The default transaction date is today. It is read once per component
   // instance so rendering stays pure and the value cannot drift mid-edit.
   const [initialDate] = useState(() => new Date());
@@ -181,6 +198,9 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
       queryClient.invalidateQueries({
         queryKey: ["goals"],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["recurringItems"],
+      });
 
       setOpen(false);
     },
@@ -200,12 +220,12 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
 
   const form = useForm({
     defaultValues: {
-      description: "",
-      category: "",
-      amount: 0,
-      type,
-      date: initialDate,
-      shared: true,
+      description: initialValues?.description ?? "",
+      category: initialValues?.category ?? "",
+      amount: initialValues?.amount ?? 0,
+      type: dialogType,
+      date: initialValues?.date ?? initialDate,
+      shared: initialValues?.shared ?? true,
       goalId: "",
     },
     validators: {
@@ -230,6 +250,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
             ? value.shared
             : true,
         shares: buildShares(value),
+        recurringItemId,
       });
     },
   });
@@ -240,7 +261,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
   const { data: session } = useSession();
 
   const showSplitOptions =
-    type === "expense" &&
+    dialogType === "expense" &&
     knownMemberCount !== undefined &&
     knownMemberCount > 1 &&
     sharedValue;
@@ -295,12 +316,12 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
             <span
               className={cn(
                 "m-1",
-                type === "income"
+                dialogType === "income"
                   ? "text-income-foreground"
                   : "text-expense-foreground",
               )}
             >
-              {type}
+              {dialogType}
             </span>
             transaction
           </DialogTitle>
@@ -397,7 +418,8 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                     <FieldLabel htmlFor={field.name}>Category</FieldLabel>
                     <CategoryPicker
                       id={field.name}
-                      type={type}
+                      type={dialogType}
+                      value={field.state.value || undefined}
                       onChange={(value) => field.handleChange(value)}
                       aria-invalid={isInvalid}
                       aria-describedby={
@@ -475,7 +497,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
             </form.Field>
           </div>
 
-          {type === "expense" && goals.length > 0 && (
+          {dialogType === "expense" && goals.length > 0 && (
             <form.Field name="goalId">
               {(field) => (
                 <Field>

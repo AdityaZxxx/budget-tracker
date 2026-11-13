@@ -12,6 +12,9 @@ export const CreateTransactionSchema = z.object({
   // Empty string means no goal (the form's unset value).
   goalId: z.string().optional(),
   shares: sharesArray(true).optional(),
+  // Set when the member is recording a due recurring item from the dashboard;
+  // stamps that item's lastPostedAt after the transaction lands.
+  recurringItemId: z.string().min(1).optional(),
 });
 
 export type CreateTransactionSchemaType = {
@@ -23,6 +26,7 @@ export type CreateTransactionSchemaType = {
   shared: boolean;
   goalId?: string;
   shares?: { userId: string; amount: number }[];
+  recurringItemId?: string;
 };
 export type CreateTransactionSchemaOutput = z.output<
   typeof CreateTransactionSchema

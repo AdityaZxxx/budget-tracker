@@ -14,6 +14,7 @@ import History from "./_components/History";
 import Overview from "./_components/Overview";
 import SharedSpendingCard from "./_components/SharedSpendingCard";
 import SimplifyDebts from "./_components/SimplifyDebts";
+import UpcomingBills from "./_components/UpcomingBills";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -79,6 +80,7 @@ const DashboardPage = async () => {
       </div>
       {canEdit && <AddMemberCta memberCount={memberCount} />}
       <Overview currency={household.currency} />
+      <UpcomingBills currency={household.currency} canEdit={canEdit} />
       {memberCount > 1 && <SharedSpendingCard currency={household.currency} />}
       {memberCount > 1 && (
         <Balances currency={household.currency} canEdit={canEdit} />
