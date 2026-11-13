@@ -12,9 +12,8 @@ import {
   tableFeatures,
 } from "@tanstack/react-table";
 
-// Shared feature registration for this app's tables. v9 bundles nothing by
-// default: every feature and its row model must be registered here. The core
-// row model is automatic.
+// v9 bundles nothing: every feature and its row model is registered here.
+// The core row model is automatic, so there is no core slot to add.
 export const appTableFeatures = tableFeatures({
   columnFilteringFeature,
   columnVisibilityFeature,

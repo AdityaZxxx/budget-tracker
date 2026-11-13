@@ -114,10 +114,9 @@ const buildColumns = (formatAmount: (value: number) => string) =>
         <Tooltip>
           <TooltipTrigger
             render={
-              // A button, not a div: the tooltip reveals the description that
-              // the cell truncates, so the trigger has to be reachable by
-              // keyboard. The button defaults are neutralised to keep it
-              // looking like the plain text it replaces.
+              // A button, not a div: the truncated description needs a
+              // keyboard-reachable trigger for its tooltip; the defaults are
+              // neutralised so it reads as plain text.
               <button
                 type="button"
                 aria-label={row.original.description}
