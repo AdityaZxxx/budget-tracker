@@ -1,4 +1,8 @@
-import { FULL_MEMBER_ROLE, SETTLEMENT_CATEGORY_NAME } from "@/lib/constants";
+import {
+  FULL_MEMBER_ROLE,
+  SETTLEMENT_CATEGORY_NAME,
+  UNUSUAL_SPENDING_TYPE,
+} from "@/lib/constants";
 import { getFormatterForCurrency } from "@/lib/helpers";
 import { notifyMembers } from "@/lib/notifications";
 import prisma from "@/lib/prisma";
@@ -118,7 +122,7 @@ export async function evaluateUnusualSpending(
   await notifyMembers(
     transaction.householdId,
     recipients.map((recipient) => recipient.userId),
-    "unusual_spending",
+    UNUSUAL_SPENDING_TYPE,
     message,
   );
   return { notified: recipients.length };
