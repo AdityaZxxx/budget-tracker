@@ -275,7 +275,7 @@ const GoalFormDialog = ({
                               isInvalid ? `${field.name}-error` : undefined
                             }
                             className={cn(
-                              "w-full pl-3 text-left font-normal",
+                              "min-w-0 flex-1 pl-3 text-left font-normal",
                               !field.state.value && "text-muted-foreground",
                             )}
                             variant={"outline"}
@@ -305,6 +305,7 @@ const GoalFormDialog = ({
                         variant="ghost"
                         size="sm"
                         onClick={() => field.handleChange(undefined)}
+                        className="shrink-0"
                       >
                         Clear
                       </Button>
