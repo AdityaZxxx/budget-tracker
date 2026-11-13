@@ -3,7 +3,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Wallet } from "lucide-react";
 import { useReducedMotion } from "motion/react";
-import Link from "next/link";
 import CountUp from "react-countup";
 
 import SkeletonWrapper from "@/components/SkeletonWrapper";
@@ -13,6 +12,7 @@ import { POLL_INTERVAL } from "@/lib/constants";
 import { getFormatterForCurrency } from "@/lib/helpers";
 
 import { listBudgets } from "../_actions/budgets";
+import BudgetDialog from "../manage/_components/BudgetDialog";
 
 interface Props {
   currency: string | null;
@@ -51,14 +51,13 @@ const SafeToSpend = ({ currency }: Props) => {
                 No budgets yet. Create one to see what is safe to spend this
                 month.
               </p>
-              <Button
-                variant="outline"
-                size="sm"
-                nativeButton={false}
-                render={<Link href="/manage" />}
-              >
-                Create a budget
-              </Button>
+              <BudgetDialog
+                trigger={
+                  <Button variant="outline" size="sm">
+                    Create a budget
+                  </Button>
+                }
+              />
             </div>
           ) : (
             <div className="flex flex-wrap items-center justify-between gap-4">
