@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 const AddIconButton = ({
   label,
   className,
-  variant = "outline",
+  variant = "ghost",
   ...rest
 }: ComponentProps<typeof Button> & { label: string }) => (
   <Tooltip>
@@ -21,7 +21,7 @@ const AddIconButton = ({
       render={
         <Button
           variant={variant}
-          size="icon"
+          size="icon-sm"
           aria-label={label}
           className={cn(className)}
           {...rest}
