@@ -12,6 +12,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
+import { useHouseholds } from "@/hooks/use-households";
 import { authClient } from "@/lib/auth-client";
 
 import { cn } from "../lib/utils";
@@ -75,6 +76,10 @@ const items = [
 function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const { data: session } = authClient.useSession();
+  const householdsQuery = useHouseholds();
+  const showSwitcher =
+    !householdsQuery.isSuccess ||
+    (householdsQuery.data?.households.length ?? 0) > 1;
   const signOut = useSignOut();
   const pathname = usePathname();
   const initials = session?.user.name
@@ -122,10 +127,14 @@ function MobileMenu() {
             </SheetClose>
           </header>
           <ScrollArea className="flex-1" viewportClassName="h-full p-3">
-            <p className="px-2 pb-1 text-xs font-medium text-muted-foreground">
-              Household
-            </p>
-            <HouseholdSwitcher variant="row" />
+            {showSwitcher && (
+              <>
+                <p className="px-2 pb-1 text-xs font-medium text-muted-foreground">
+                  Household
+                </p>
+                <HouseholdSwitcher variant="row" />
+              </>
+            )}
             <p className="px-2 pt-6 pb-1 text-xs font-medium text-muted-foreground">
               Menu
             </p>

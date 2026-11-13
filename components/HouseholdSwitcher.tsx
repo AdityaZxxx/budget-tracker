@@ -82,6 +82,12 @@ export default function HouseholdSwitcher({
     },
   });
 
+  const showSwitcher = !householdsQuery.isSuccess || households.length > 1;
+
+  if (!showSwitcher) {
+    return null;
+  }
+
   return (
     <>
       <DropdownMenu>
