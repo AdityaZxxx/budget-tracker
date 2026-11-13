@@ -30,7 +30,8 @@
     ".next/**",
     "node_modules/**",
     "next-env.d.ts",
-    "packages/sora-lint-plugin/**"
+    "packages/sora-lint-plugin/**",
+    "components/evilcharts/**"
   ],
   "jsPlugins": ["./packages/sora-lint-plugin/index.ts"],
   "rules": {
