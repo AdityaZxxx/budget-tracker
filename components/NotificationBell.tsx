@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
-import { Bell, CheckCheck } from "lucide-react";
+import { Bell, CheckCheck, TriangleAlert } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -25,7 +25,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { POLL_INTERVAL } from "@/lib/constants";
+import { POLL_INTERVAL, UNUSUAL_SPENDING_TYPE } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 const NotificationBell = () => {
@@ -42,6 +42,10 @@ const NotificationBell = () => {
   const unreadCount = notifications.filter(
     (notification) => !notification.readAt,
   ).length;
+  const hasUnreadWarning = notifications.some(
+    (notification) =>
+      !notification.readAt && notification.type === UNUSUAL_SPENDING_TYPE,
+  );
 
   const { mutate: markRead, isPending } = useMutation({
     mutationFn: markAllRead,
@@ -76,7 +80,12 @@ const NotificationBell = () => {
         >
           <Bell />
           {unreadCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-white">
+            <span
+              className={cn(
+                "absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-semibold text-white",
+                hasUnreadWarning ? "bg-amber-500" : "bg-destructive",
+              )}
+            >
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}
@@ -107,29 +116,43 @@ const NotificationBell = () => {
             </p>
           ) : (
             <ScrollArea viewportClassName="max-h-80">
-              {notifications.map((notification) => (
-                <div
-                  key={notification.id}
-                  className={cn(
-                    "flex flex-col gap-0.5 px-2 py-2",
-                    !notification.readAt && "bg-accent/50",
-                  )}
-                >
-                  <p
+              {notifications.map((notification) => {
+                const isWarning = notification.type === UNUSUAL_SPENDING_TYPE;
+                return (
+                  <div
+                    key={notification.id}
                     className={cn(
-                      "text-sm",
-                      !notification.readAt && "font-medium",
+                      "flex items-start gap-2 px-2 py-2",
+                      !notification.readAt &&
+                        (isWarning ? "bg-amber-500/10" : "bg-accent/50"),
                     )}
                   >
-                    {notification.message}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {formatDistanceToNow(new Date(notification.createdAt), {
-                      addSuffix: true,
-                    })}
-                  </p>
-                </div>
-              ))}
+                    {isWarning && (
+                      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-amber-500/15">
+                        <TriangleAlert
+                          aria-hidden="true"
+                          className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400"
+                        />
+                      </span>
+                    )}
+                    <div className="flex min-w-0 flex-col gap-0.5">
+                      <p
+                        className={cn(
+                          "text-sm",
+                          !notification.readAt && "font-medium",
+                        )}
+                      >
+                        {notification.message}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(new Date(notification.createdAt), {
+                          addSuffix: true,
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
             </ScrollArea>
           )}
         </DropdownMenuContent>

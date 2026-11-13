@@ -16,6 +16,10 @@ export const DEFAULT_HOUSEHOLD_NAME = "My household";
 export const READ_ONLY_SCOPE = "read-only";
 export const READ_WRITE_SCOPE = "read-write";
 
+// Written by the unusual-spending evaluator; the bell renders these with a
+// warning treatment.
+export const UNUSUAL_SPENDING_TYPE = "unusual_spending";
+
 // System category for settlement transactions; hidden from category
 // stats and pickers because it is not spending.
 export const SETTLEMENT_CATEGORY_NAME = "Settlement";
