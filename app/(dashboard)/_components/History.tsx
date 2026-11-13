@@ -4,7 +4,7 @@ import type { HistoryChartRow, SeriesKey } from "./HistoryChart";
 import type { Period, Timeframe } from "@/lib/types";
 
 import { useQuery } from "@tanstack/react-query";
-import { TrendingUp } from "lucide-react";
+import { ChartNoAxesColumn } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useState } from "react";
 
@@ -115,7 +115,7 @@ const History = ({ currency }: { currency: string | null }) => {
         <CardShellHeader
           title="History"
           action={
-            <div className="flex flex-wrap items-center justify-end gap-2">
+            <div className="flex flex-wrap items-center justify-start gap-2">
               <HistoryPeriodSelector
                 period={period}
                 setPeriod={setPeriod}
@@ -158,7 +158,7 @@ const History = ({ currency }: { currency: string | null }) => {
               </ScrollArea>
             ) : (
               <EmptyState
-                icon={TrendingUp}
+                icon={ChartNoAxesColumn}
                 hint="No data for this period. Try a different period or add new transactions."
                 className="min-h-[300px]"
               />
