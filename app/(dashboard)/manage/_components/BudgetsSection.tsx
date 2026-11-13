@@ -81,7 +81,7 @@ const BudgetsSection = ({ canEdit }: { canEdit: boolean }) => {
             <div>
               <CardTitle className="text-xl">Budgets</CardTitle>
               <CardDescription>
-                Monthly spending limits per category for shared expenses
+                Monthly spending limits per category
               </CardDescription>
             </div>
             {canEdit && (

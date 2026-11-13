@@ -44,7 +44,7 @@ const HouseholdSection = ({ canEdit }: { canEdit: boolean }) => {
   const { mutate: rename, isPending } = useMutation({
     mutationFn: () => renameHousehold(name),
     onSuccess: () => {
-      toast.success("Household renamed", {
+      toast.success("Space renamed", {
         id: "rename-household",
       });
 
@@ -54,7 +54,7 @@ const HouseholdSection = ({ canEdit }: { canEdit: boolean }) => {
       setOpen(false);
     },
     onError: () => {
-      toast.error("Unable to rename household. Try again.", {
+      toast.error("Unable to rename. Try again.", {
         id: "rename-household",
       });
     },
@@ -64,9 +64,9 @@ const HouseholdSection = ({ canEdit }: { canEdit: boolean }) => {
     <section>
       <Card className="transition-all hover:shadow-md">
         <CardHeader>
-          <CardTitle className="text-xl">Household</CardTitle>
+          <CardTitle className="text-xl">Your space</CardTitle>
           <CardDescription>
-            Rename the space your household keeps its money in
+            Rename the space where you keep your money
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -101,7 +101,7 @@ const HouseholdSection = ({ canEdit }: { canEdit: boolean }) => {
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Rename household</DialogTitle>
+                    <DialogTitle>Rename your space</DialogTitle>
                   </DialogHeader>
                   <Field>
                     <FieldLabel htmlFor="household-rename">Name</FieldLabel>

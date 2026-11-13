@@ -228,7 +228,7 @@ const BudgetDialog = ({
               allowNegative={false}
             />
             <FieldDescription className="text-xs sm:text-sm">
-              How much the household can spend in this category per month
+              Monthly limit for this category
             </FieldDescription>
             {errors.amount && (
               <FieldError id="budget-amount-error">{errors.amount}</FieldError>

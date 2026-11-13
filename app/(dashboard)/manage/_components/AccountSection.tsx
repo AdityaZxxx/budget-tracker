@@ -22,8 +22,8 @@ const AccountSection = () => {
           <CardHeader>
             <CardTitle className="text-xl">Your data</CardTitle>
             <CardDescription>
-              Download everything your household has stored in Sora, or read how
-              we handle it
+              Download everything you have stored in Sora, or read how we handle
+              it
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">

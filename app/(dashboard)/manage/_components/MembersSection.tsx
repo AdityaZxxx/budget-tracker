@@ -233,17 +233,22 @@ const MembersSection = () => {
         </CardContent>
         <Separator />
         <CardFooter>
-          <LeaveHouseholdDialog
-            trigger={
-              <Button
-                variant="outline"
-                className="w-full gap-2 text-destructive hover:text-destructive sm:w-auto"
-              >
-                <LogOut className="h-4 w-4" />
-                Leave household
-              </Button>
-            }
-          />
+          {!isLoading && (
+            <LeaveHouseholdDialog
+              memberCount={members.length}
+              trigger={
+                <Button
+                  variant="outline"
+                  className="w-full gap-2 text-destructive hover:text-destructive sm:w-auto"
+                >
+                  <LogOut className="h-4 w-4" />
+                  {members.length === 1
+                    ? "Delete this space"
+                    : "Leave household"}
+                </Button>
+              }
+            />
+          )}
         </CardFooter>
       </Card>
     </section>

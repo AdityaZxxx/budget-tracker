@@ -65,8 +65,8 @@ const Goals = ({
             <div>
               <CardTitle className="text-xl">Goals</CardTitle>
               <CardDescription>
-                Savings targets for your household. Add a contribution by
-                tagging an expense transaction with a goal.
+                Savings targets for this space. Add a contribution by tagging an
+                expense transaction with a goal.
               </CardDescription>
             </div>
             {canEdit && (
