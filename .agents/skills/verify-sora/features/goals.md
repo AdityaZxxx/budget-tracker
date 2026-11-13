@@ -15,7 +15,7 @@ A goal is a savings target for the household. It holds no money of its own: prog
 
 - The `Goals` card sits on the dashboard, below `Balances`.
 - Create one from the `New goal` button on that card.
-- Edit one from the pencil button on the goal's own row; the dialog opens prefilled.
+- Edit one from the `Actions` menu on the goal's own row; the dialog opens prefilled.
 - Delete one from the bin button on the goal's own row.
 - Tag a contribution from the `Goal (optional)` field of the new-transaction dialog.
 - Set one from an assistant with the `create_goal` MCP tool.
@@ -41,7 +41,7 @@ Preconditions:
 
 - The goal dialog's fields are `Name` and `Target amount`; the transaction dialog's amount field is `Amount`. They are different labels for different things.
 - The edit dialog writes the whole record: a deadline left empty clears it, the same as choosing none on create.
-- The edit row's pencil button reads `Edit goal <name>`.
+- The row's actions button reads `Open actions for <name> goal` and opens an `Actions` menu with `Edit` and `Delete`.
 - The deadline field is optional and opens a calendar. Leaving it empty is fine.
 - The delete confirmation's button reads `Delete goal`, and the row's bin button reads `Delete goal <name>`.
 - A contribution is a transaction, so it counts towards the household's spending and towards any budget on its category. Tagging a contribution is not free.

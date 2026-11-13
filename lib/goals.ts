@@ -54,7 +54,7 @@ export type GoalWithProgress = Awaited<
 // another household's Goal cannot be reached through a guessed id.
 export async function updateHouseholdGoal(
   householdId: string,
-  input: UpdateGoalInput,
+  input: UpdateGoalSchemaType,
 ) {
   const parsed = UpdateGoalSchema.safeParse(input);
   if (!parsed.success) {
@@ -87,8 +87,6 @@ export async function updateHouseholdGoal(
 
   return { ...goal, target: goal.target.toNumber() };
 }
-
-export type UpdateGoalInput = UpdateGoalSchemaType;
 
 export type CreateGoalInput = {
   name: string;

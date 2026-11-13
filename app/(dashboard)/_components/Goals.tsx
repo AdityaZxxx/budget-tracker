@@ -2,7 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { MoreHorizontal, Pencil, Plus, TrashIcon } from "lucide-react";
+import { useState } from "react";
 
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Progress } from "@/components/ui/progress";
 import {
   Tooltip,
@@ -20,6 +30,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { POLL_INTERVAL } from "@/lib/constants";
+import { type GoalWithProgress } from "@/lib/goals";
 import { getFormatterForCurrency } from "@/lib/helpers";
 
 import { listGoals } from "../_actions/goals";
@@ -88,70 +99,22 @@ const Goals = ({
                   return (
                     <div
                       key={goal.id}
-                      className="space-y-2 rounded-lg bg-muted/40 p-3"
+                      className="group space-y-2 rounded-lg bg-muted/40 p-3"
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-sm font-medium">{goal.name}</span>
-                        <div className="flex items-center gap-2">
+                        <span className="flex min-w-0 flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-3">
+                          <span className="truncate text-sm font-medium">
+                            {goal.name}
+                          </span>
                           {goal.deadline && (
                             <span className="text-xs text-muted-foreground">
                               by {format(new Date(goal.deadline), "PPP")}
                             </span>
                           )}
-                          {canEdit && (
-                            <>
-                              <Tooltip>
-                                <EditGoalDialog
-                                  goal={goal}
-                                  currency={currency}
-                                  trigger={
-                                    <TooltipTrigger
-                                      render={
-                                        <Button
-                                          variant="ghost"
-                                          size="icon"
-                                          className="h-8 w-8"
-                                        />
-                                      }
-                                    >
-                                      <span className="sr-only">
-                                        Edit goal {goal.name}
-                                      </span>
-                                      <Pencil className="h-4 w-4" />
-                                    </TooltipTrigger>
-                                  }
-                                />
-                                <TooltipContent>
-                                  Edit goal {goal.name}
-                                </TooltipContent>
-                              </Tooltip>
-                              <Tooltip>
-                                <DeleteGoalDialog
-                                  goal={goal}
-                                  trigger={
-                                    <TooltipTrigger
-                                      render={
-                                        <Button
-                                          variant="ghost"
-                                          size="icon"
-                                          className="h-8 w-8"
-                                        />
-                                      }
-                                    >
-                                      <span className="sr-only">
-                                        Delete goal {goal.name}
-                                      </span>
-                                      <Trash2 className="h-4 w-4" />
-                                    </TooltipTrigger>
-                                  }
-                                />
-                                <TooltipContent>
-                                  Delete goal {goal.name}
-                                </TooltipContent>
-                              </Tooltip>
-                            </>
-                          )}
-                        </div>
+                        </span>
+                        {canEdit && (
+                          <GoalActions goal={goal} currency={currency} />
+                        )}
                       </div>
                       <Progress
                         value={progress}
@@ -177,6 +140,74 @@ const Goals = ({
         </CardContent>
       </Card>
     </div>
+  );
+};
+
+const GoalActions = ({
+  goal,
+  currency,
+}: {
+  goal: GoalWithProgress;
+  currency: string | null;
+}) => {
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+
+  return (
+    <>
+      <Tooltip>
+        <DropdownMenu>
+          <TooltipTrigger
+            render={
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    className="h-8 w-8 p-0 text-muted-foreground opacity-100 hover:bg-muted md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100"
+                    aria-label={`Open actions for ${goal.name} goal`}
+                  />
+                }
+              />
+            }
+          >
+            <span className="sr-only">Open actions</span>
+            <MoreHorizontal className="h-4 w-4" />
+          </TooltipTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="flex items-center gap-2"
+              onClick={() => setEditOpen(true)}
+            >
+              <Pencil className="h-4 w-4 text-muted-foreground" />
+              Edit
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="flex items-center gap-2"
+              onClick={() => setDeleteOpen(true)}
+            >
+              <TrashIcon className="h-4 w-4 text-muted-foreground" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <TooltipContent>Actions</TooltipContent>
+      </Tooltip>
+      <EditGoalDialog
+        goal={goal}
+        currency={currency}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+      />
+      <DeleteGoalDialog
+        goal={goal}
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+      />
+    </>
   );
 };
 

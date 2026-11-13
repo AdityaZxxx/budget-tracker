@@ -27,6 +27,7 @@ import {
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useHouseholds } from "@/hooks/use-households";
+import { DEFAULT_HOUSEHOLD_NAME } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 import {
@@ -151,7 +152,7 @@ export default function HouseholdSwitcher({
                 )}
               >
                 <span className="min-w-0 flex-1 truncate">
-                  {household.name ?? "My household"}
+                  {household.name ?? DEFAULT_HOUSEHOLD_NAME}
                 </span>
                 <span
                   className={cn(

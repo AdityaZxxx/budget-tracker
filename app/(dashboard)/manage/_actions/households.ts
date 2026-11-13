@@ -10,6 +10,7 @@ import {
   setActiveHouseholdCookie,
 } from "@/lib/household";
 import prisma from "@/lib/prisma";
+import { HouseholdNameSchema } from "@/schemas/household";
 
 export async function switchHousehold(householdId: string) {
   const session = await getSession();
@@ -35,6 +36,11 @@ export async function switchHousehold(householdId: string) {
 }
 
 export async function renameHousehold(name: string) {
+  const parsedName = HouseholdNameSchema.safeParse(name);
+  if (!parsedName.success) {
+    throw new Error(parsedName.error.issues[0]?.message ?? "Invalid name");
+  }
+
   const result = await requireHousehold();
   if (!result) {
     redirect("/sign-in");
@@ -47,7 +53,7 @@ export async function renameHousehold(name: string) {
       id: result.household.id,
     },
     data: {
-      name: name.trim() || null,
+      name: parsedName.data || null,
     },
   });
 

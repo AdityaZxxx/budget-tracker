@@ -3,6 +3,7 @@
 import type { ReactElement, ReactNode } from "react";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import {
@@ -21,11 +22,21 @@ import { type GoalWithProgress } from "@/lib/goals";
 import { deleteGoal } from "../_actions/goals";
 
 interface Props {
-  trigger: ReactNode;
+  trigger?: ReactNode;
   goal: GoalWithProgress;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-const DeleteGoalDialog = ({ trigger, goal }: Props) => {
+const DeleteGoalDialog = ({
+  trigger,
+  goal,
+  open: openProp,
+  onOpenChange,
+}: Props) => {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = openProp ?? internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
   const goalIdentifier = `delete-goal-${goal.id}`;
 
   const queryClient = useQueryClient();
@@ -38,6 +49,7 @@ const DeleteGoalDialog = ({ trigger, goal }: Props) => {
       await queryClient.invalidateQueries({
         queryKey: ["goals"],
       });
+      setOpen(false);
     },
     onError: () => {
       toast.error("Unable to delete goal. Try again.", {
@@ -47,8 +59,8 @@ const DeleteGoalDialog = ({ trigger, goal }: Props) => {
   });
 
   return (
-    <AlertDialog>
-      <AlertDialogTrigger render={trigger as ReactElement} />
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      {trigger ? <AlertDialogTrigger render={trigger as ReactElement} /> : null}
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>

@@ -26,6 +26,7 @@ import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useHouseholds } from "@/hooks/use-households";
+import { DEFAULT_HOUSEHOLD_NAME } from "@/lib/constants";
 
 import { renameHousehold } from "../_actions/households";
 
@@ -38,7 +39,7 @@ const HouseholdSection = ({ canEdit }: { canEdit: boolean }) => {
   const active = householdsQuery.data?.households.find(
     (household) => household.id === householdsQuery.data?.active.id,
   );
-  const displayName = active?.name ?? "My household";
+  const displayName = active?.name ?? DEFAULT_HOUSEHOLD_NAME;
 
   const { mutate: rename, isPending } = useMutation({
     mutationFn: () => renameHousehold(name),

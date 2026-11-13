@@ -30,9 +30,4 @@ export const UpdateGoalSchema = z.object({
   deadline: z.date().nullish(),
 });
 
-export type UpdateGoalSchemaType = {
-  id: string;
-  name?: string;
-  target?: number;
-  deadline?: Date | null;
-};
+export type UpdateGoalSchemaType = z.infer<typeof UpdateGoalSchema>;
