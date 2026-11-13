@@ -6,17 +6,13 @@ import type {
   PaginationState,
   SortingState,
 } from "@tanstack/react-table";
-import type { LegacyColumnDef as ColumnDef } from "@tanstack/react-table/legacy";
 
 import { useQuery } from "@tanstack/react-query";
-import { flexRender } from "@tanstack/react-table";
 import {
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useLegacyTable as useReactTable,
-} from "@tanstack/react-table/legacy";
+  createColumnHelper,
+  flexRender,
+  useTable,
+} from "@tanstack/react-table";
 import {
   ChevronLeft,
   ChevronRight,
@@ -31,6 +27,10 @@ import { useState } from "react";
 import { DataTableColumnHeader } from "@/components/datatable/ColumnHeader";
 import { DataTableViewOptions } from "@/components/datatable/Columntoggle";
 import { DataTableFacetedFilter } from "@/components/datatable/FacetedFilters";
+import {
+  appTableFeatures,
+  type AppTableFeatures,
+} from "@/components/datatable/table-features";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -82,134 +82,134 @@ type TransactionHistoryRow = GetTransactionsHistoryResponseType[0];
 const emptyData: TransactionHistoryRow[] = [];
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
-const buildColumns = (
-  formatAmount: (value: number) => string,
-): ColumnDef<TransactionHistoryRow>[] => [
-  {
-    id: "category",
-    accessorKey: "category",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Category" />
-    ),
-    filterFn: (row, id, value) => value.includes(row.getValue(id)),
-    cell: ({ row }) => (
-      <div className="flex items-center gap-3">
-        <span className="text-xl" aria-hidden="true">
-          {row.original.categoryIcon}
-        </span>
-        <span className="font-medium capitalize">{row.original.category}</span>
-      </div>
-    ),
-  },
-  {
-    accessorKey: "description",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Description" />
-    ),
-    cell: ({ row }) => (
-      <Tooltip>
-        <TooltipTrigger
-          render={
-            // A button, not a div: the tooltip reveals the description that
-            // the cell truncates, so the trigger has to be reachable by
-            // keyboard. The button defaults are neutralised to keep it
-            // looking like the plain text it replaces.
-            <button
-              type="button"
-              aria-label={row.original.description}
-              className="block max-w-[200px] truncate border-0 p-0 text-left capitalize md:max-w-none"
-            />
-          }
-        >
-          {row.original.description}
-        </TooltipTrigger>
-        <TooltipContent>{row.original.description}</TooltipContent>
-      </Tooltip>
-    ),
-  },
-  {
-    id: "addedBy",
-    accessorKey: "addedByName",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Added by" />
-    ),
-    cell: ({ row }) => <AddedByCell transaction={row.original} />,
-  },
-  {
-    accessorKey: "date",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Date" />
-    ),
-    cell: ({ row }) => {
-      const date = new Date(row.original.date);
-      const formattedDate = date.toLocaleDateString("default", {
-        timeZone: "UTC",
-        year: "numeric",
-        month: "short",
-        day: "2-digit",
-      });
-      return (
-        <div className="whitespace-nowrap text-muted-foreground">
-          {formattedDate}
+const columnHelper = createColumnHelper<
+  AppTableFeatures,
+  TransactionHistoryRow
+>();
+
+const buildColumns = (formatAmount: (value: number) => string) =>
+  columnHelper.columns([
+    columnHelper.accessor("category", {
+      id: "category",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Category" />
+      ),
+      filterFn: (row, id, value) => value.includes(row.getValue(id)),
+      cell: ({ row }) => (
+        <div className="flex items-center gap-3">
+          <span className="text-xl" aria-hidden="true">
+            {row.original.categoryIcon}
+          </span>
+          <span className="font-medium capitalize">
+            {row.original.category}
+          </span>
         </div>
-      );
-    },
-    sortFn: (rowA, rowB) => {
-      const dateA = new Date(rowA.original.date).getTime();
-      const dateB = new Date(rowB.original.date).getTime();
-      return dateA - dateB;
-    },
-  },
-  {
-    id: "type",
-    accessorKey: "type",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Type" />
-    ),
-    filterFn: (row, id, value) => value.includes(row.getValue(id)),
-    cell: ({ row }) => (
-      <Badge
-        className={cn(
-          "border-transparent px-2.5 text-xs font-medium capitalize",
-          row.original.type === "income"
-            ? "bg-income-badge text-income-foreground"
-            : "bg-expense-badge text-expense-foreground",
-        )}
-      >
-        {row.original.type}
-      </Badge>
-    ),
-  },
-  {
-    accessorKey: "amount",
-    header: ({ column }) => (
-      <DataTableColumnHeader
-        column={column}
-        title="Amount"
-        className="w-full justify-end"
-      />
-    ),
-    cell: ({ row }) => (
-      <p
-        className={cn(
-          "text-right text-sm font-medium tabular-nums",
-          row.original.type === "income"
-            ? "text-income-foreground"
-            : "text-expense-foreground",
-        )}
-      >
-        {row.original.type === "expense" ? "-" : "+"}
-        {formatAmount(row.original.amount)}
-      </p>
-    ),
-  },
-  {
-    id: "actions",
-    enableHiding: false,
-    header: () => <span className="sr-only">Actions</span>,
-    cell: ({ row }) => <RowActions transaction={row.original} />,
-  },
-];
+      ),
+    }),
+    columnHelper.accessor("description", {
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Description" />
+      ),
+      cell: ({ row }) => (
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              // A button, not a div: the tooltip reveals the description that
+              // the cell truncates, so the trigger has to be reachable by
+              // keyboard. The button defaults are neutralised to keep it
+              // looking like the plain text it replaces.
+              <button
+                type="button"
+                aria-label={row.original.description}
+                className="block max-w-[200px] truncate border-0 p-0 text-left capitalize md:max-w-none"
+              />
+            }
+          >
+            {row.original.description}
+          </TooltipTrigger>
+          <TooltipContent>{row.original.description}</TooltipContent>
+        </Tooltip>
+      ),
+    }),
+    columnHelper.accessor("addedByName", {
+      id: "addedBy",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Added by" />
+      ),
+      cell: ({ row }) => <AddedByCell transaction={row.original} />,
+    }),
+    columnHelper.accessor("date", {
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Date" />
+      ),
+      cell: ({ row }) => {
+        const date = new Date(row.original.date);
+        const formattedDate = date.toLocaleDateString("default", {
+          timeZone: "UTC",
+          year: "numeric",
+          month: "short",
+          day: "2-digit",
+        });
+        return (
+          <div className="whitespace-nowrap text-muted-foreground">
+            {formattedDate}
+          </div>
+        );
+      },
+      sortFn: (rowA, rowB) => {
+        const dateA = new Date(rowA.original.date).getTime();
+        const dateB = new Date(rowB.original.date).getTime();
+        return dateA - dateB;
+      },
+    }),
+    columnHelper.accessor("type", {
+      id: "type",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Type" />
+      ),
+      filterFn: (row, id, value) => value.includes(row.getValue(id)),
+      cell: ({ row }) => (
+        <Badge
+          className={cn(
+            "border-transparent px-2.5 text-xs font-medium capitalize",
+            row.original.type === "income"
+              ? "bg-income-badge text-income-foreground"
+              : "bg-expense-badge text-expense-foreground",
+          )}
+        >
+          {row.original.type}
+        </Badge>
+      ),
+    }),
+    columnHelper.accessor("amount", {
+      header: ({ column }) => (
+        <DataTableColumnHeader
+          column={column}
+          title="Amount"
+          className="w-full justify-end"
+        />
+      ),
+      cell: ({ row }) => (
+        <p
+          className={cn(
+            "text-right text-sm font-medium tabular-nums",
+            row.original.type === "income"
+              ? "text-income-foreground"
+              : "text-expense-foreground",
+          )}
+        >
+          {row.original.type === "expense" ? "-" : "+"}
+          {formatAmount(row.original.amount)}
+        </p>
+      ),
+    }),
+    columnHelper.display({
+      id: "actions",
+      enableHiding: false,
+      header: () => <span className="sr-only">Actions</span>,
+      cell: ({ row }) => <RowActions transaction={row.original} />,
+    }),
+  ]);
 
 const TransactionTable = ({ from, to }: Props) => {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -225,9 +225,8 @@ const TransactionTable = ({ from, to }: Props) => {
     refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,
   });
-  const formatAmount = getFormatterForCurrency(
-    householdQuery.data?.currency ?? "USD",
-  ).format;
+  const currency = householdQuery.data?.currency ?? "USD";
+  const formatAmount = getFormatterForCurrency(currency).format;
   const columns = buildColumns(formatAmount);
 
   const history = useQuery<GetTransactionsHistoryResponseType>({
@@ -246,17 +245,14 @@ const TransactionTable = ({ from, to }: Props) => {
     refetchOnWindowFocus: true,
   });
 
-  const table = useReactTable({
+  const table = useTable({
     data: history.data || emptyData,
     columns,
-    getCoreRowModel: getCoreRowModel(),
+    features: appTableFeatures,
     state: { sorting, columnFilters, pagination },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onPaginationChange: setPagination,
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
   });
 
   const totalRows = table.getFilteredRowModel().rows.length;
