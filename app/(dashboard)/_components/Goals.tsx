@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ import { getFormatterForCurrency } from "@/lib/helpers";
 import { listGoals } from "../_actions/goals";
 import CreateGoalDialog from "./CreateGoalDialog";
 import DeleteGoalDialog from "./DeleteGoalDialog";
+import EditGoalDialog from "./EditGoalDialog";
 
 const Goals = ({
   currency,
@@ -98,30 +99,57 @@ const Goals = ({
                             </span>
                           )}
                           {canEdit && (
-                            <Tooltip>
-                              <DeleteGoalDialog
-                                goal={goal}
-                                trigger={
-                                  <TooltipTrigger
-                                    render={
-                                      <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-8 w-8"
-                                      />
-                                    }
-                                  >
-                                    <span className="sr-only">
-                                      Delete goal {goal.name}
-                                    </span>
-                                    <Trash2 className="h-4 w-4" />
-                                  </TooltipTrigger>
-                                }
-                              />
-                              <TooltipContent>
-                                Delete goal {goal.name}
-                              </TooltipContent>
-                            </Tooltip>
+                            <>
+                              <Tooltip>
+                                <EditGoalDialog
+                                  goal={goal}
+                                  currency={currency}
+                                  trigger={
+                                    <TooltipTrigger
+                                      render={
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-8 w-8"
+                                        />
+                                      }
+                                    >
+                                      <span className="sr-only">
+                                        Edit goal {goal.name}
+                                      </span>
+                                      <Pencil className="h-4 w-4" />
+                                    </TooltipTrigger>
+                                  }
+                                />
+                                <TooltipContent>
+                                  Edit goal {goal.name}
+                                </TooltipContent>
+                              </Tooltip>
+                              <Tooltip>
+                                <DeleteGoalDialog
+                                  goal={goal}
+                                  trigger={
+                                    <TooltipTrigger
+                                      render={
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-8 w-8"
+                                        />
+                                      }
+                                    >
+                                      <span className="sr-only">
+                                        Delete goal {goal.name}
+                                      </span>
+                                      <Trash2 className="h-4 w-4" />
+                                    </TooltipTrigger>
+                                  }
+                                />
+                                <TooltipContent>
+                                  Delete goal {goal.name}
+                                </TooltipContent>
+                              </Tooltip>
+                            </>
                           )}
                         </div>
                       </div>

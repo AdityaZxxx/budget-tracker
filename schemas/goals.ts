@@ -21,3 +21,18 @@ export const DeleteGoalSchema = z.object({
 });
 
 export type DeleteGoalSchemaType = z.infer<typeof DeleteGoalSchema>;
+
+// A `null` deadline clears it; an absent one leaves it unchanged.
+export const UpdateGoalSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1, "Enter a name").max(50).optional(),
+  target: amountNumber(true).optional(),
+  deadline: z.date().nullish(),
+});
+
+export type UpdateGoalSchemaType = {
+  id: string;
+  name?: string;
+  target?: number;
+  deadline?: Date | null;
+};

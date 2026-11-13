@@ -1,7 +1,11 @@
 import { Prisma } from "@prisma/client";
 
 import prisma from "@/lib/prisma";
-import { CreateGoalSchema } from "@/schemas/goals";
+import {
+  CreateGoalSchema,
+  type UpdateGoalSchemaType,
+  UpdateGoalSchema,
+} from "@/schemas/goals";
 
 export async function getGoalsWithProgress(householdId: string) {
   const [goals, contributionSums] = await Promise.all([
@@ -45,6 +49,46 @@ export async function getGoalsWithProgress(householdId: string) {
 export type GoalWithProgress = Awaited<
   ReturnType<typeof getGoalsWithProgress>
 >[number];
+
+// Updates only the fields provided. `id` and `householdId` scope the write, so
+// another household's Goal cannot be reached through a guessed id.
+export async function updateHouseholdGoal(
+  householdId: string,
+  input: UpdateGoalInput,
+) {
+  const parsed = UpdateGoalSchema.safeParse(input);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid goal");
+  }
+
+  const { id, name, target, deadline } = parsed.data;
+
+  const data: Prisma.GoalUpdateInput = {};
+  if (name !== undefined) {
+    data.name = name;
+  }
+  if (target !== undefined) {
+    data.target = target;
+  }
+  if (deadline !== undefined) {
+    data.deadline = deadline;
+  }
+  if (Object.keys(data).length === 0) {
+    throw new Error("Nothing to update");
+  }
+
+  const goal = await prisma.goal.update({
+    where: {
+      id,
+      householdId,
+    },
+    data,
+  });
+
+  return { ...goal, target: goal.target.toNumber() };
+}
+
+export type UpdateGoalInput = UpdateGoalSchemaType;
 
 export type CreateGoalInput = {
   name: string;
