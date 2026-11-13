@@ -33,12 +33,12 @@ function HistoryLegend({
     {
       key: "income" as const,
       label: "Income",
-      swatch: "bg-emerald-600 dark:bg-emerald-500",
+      swatch: "bg-income",
     },
     {
       key: "expense" as const,
       label: "Expense",
-      swatch: "bg-red-600 dark:bg-red-500",
+      swatch: "bg-expense",
     },
   ];
   return (

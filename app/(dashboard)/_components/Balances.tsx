@@ -86,11 +86,11 @@ const Balances = ({ currency, canEdit = true }: Props) => {
                         All settled up
                       </span>
                     ) : balance.balance > 0 ? (
-                      <span className="text-sm font-semibold text-rose-600 tabular-nums dark:text-rose-400">
+                      <span className="text-sm font-semibold text-expense-foreground tabular-nums">
                         You owe {formatter.format(balance.balance)}
                       </span>
                     ) : (
-                      <span className="text-sm font-semibold text-emerald-700 tabular-nums dark:text-emerald-400">
+                      <span className="text-sm font-semibold text-income-foreground tabular-nums">
                         {balance.name} owes you{" "}
                         {formatter.format(-balance.balance)}
                       </span>

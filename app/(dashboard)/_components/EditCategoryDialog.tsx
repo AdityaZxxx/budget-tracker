@@ -124,8 +124,8 @@ const EditCategoryDialog = ({
               className={cn(
                 "m-1",
                 category.type === "income"
-                  ? "text-emerald-700 dark:text-emerald-400"
-                  : "text-red-600 dark:text-red-400",
+                  ? "text-income-foreground"
+                  : "text-expense-foreground",
               )}
             >
               {category.type}

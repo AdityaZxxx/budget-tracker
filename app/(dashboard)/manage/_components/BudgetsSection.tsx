@@ -233,7 +233,7 @@ function BudgetCard({
           value={Math.min(budget.percent, 100)}
           aria-label={`${budget.category} budget used`}
           indicatorClassName={cn(
-            overLimit && "bg-rose-500",
+            overLimit && "bg-expense",
             nearLimit && "bg-amber-500",
           )}
         />

@@ -64,9 +64,7 @@ const SharedSpendingCard = ({ currency }: Props) => {
             <div
               className={cn(
                 "flex items-center gap-1 text-sm",
-                isUp
-                  ? "text-rose-600 dark:text-rose-400"
-                  : "text-emerald-700 dark:text-emerald-400",
+                isUp ? "text-expense-foreground" : "text-income-foreground",
               )}
             >
               <TrendIcon className="h-4 w-4" />

@@ -59,8 +59,8 @@ const StatsCards = ({ from, to, currency }: Props) => {
             trend="up"
             isLoading={statsQuery.isLoading}
             icon={
-              <div className="flex items-center justify-center rounded-lg bg-emerald-500/10 p-3">
-                <TrendingUp className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+              <div className="flex items-center justify-center rounded-lg bg-income-soft p-3">
+                <TrendingUp className="h-6 w-6 text-income-foreground" />
               </div>
             }
           />
@@ -71,8 +71,8 @@ const StatsCards = ({ from, to, currency }: Props) => {
             trend="down"
             isLoading={statsQuery.isLoading}
             icon={
-              <div className="flex items-center justify-center rounded-lg bg-rose-500/10 p-3">
-                <TrendingDown className="h-6 w-6 text-rose-600 dark:text-rose-400" />
+              <div className="flex items-center justify-center rounded-lg bg-expense-soft p-3">
+                <TrendingDown className="h-6 w-6 text-expense-foreground" />
               </div>
             }
           />
@@ -114,13 +114,8 @@ function StatCard({
   isLoading = false,
 }: StatCardProps) {
   const trendColor =
-    trend === "up"
-      ? "text-emerald-700 dark:text-emerald-400"
-      : "text-rose-600 dark:text-rose-400";
-  const trendBg =
-    trend === "up"
-      ? "bg-emerald-500/10 dark:bg-emerald-400/10"
-      : "bg-rose-500/10 dark:bg-rose-400/10";
+    trend === "up" ? "text-income-foreground" : "text-expense-foreground";
+  const trendBg = trend === "up" ? "bg-income-soft" : "bg-expense-soft";
 
   // The card footer shows today's date. It is read once per component
   // instance so rendering stays pure.

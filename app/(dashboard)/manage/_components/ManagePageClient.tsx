@@ -171,19 +171,15 @@ function CategoryList({
   const typeConfig = {
     income: {
       label: "Income",
-      color: "text-emerald-700 dark:text-emerald-400",
-      bgColor: "bg-emerald-500/10 dark:bg-emerald-400/10",
-      icon: (
-        <TrendingUp className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-      ),
+      color: "text-income-foreground",
+      bgColor: "bg-income-soft",
+      icon: <TrendingUp className="h-6 w-6 text-income-foreground" />,
     },
     expense: {
       label: "Expense",
-      color: "text-rose-600 dark:text-rose-400",
-      bgColor: "bg-rose-500/10 dark:bg-rose-400/10",
-      icon: (
-        <TrendingDown className="h-6 w-6 text-rose-600 dark:text-rose-400" />
-      ),
+      color: "text-expense-foreground",
+      bgColor: "bg-expense-soft",
+      icon: <TrendingDown className="h-6 w-6 text-expense-foreground" />,
     },
   }[type];
 
@@ -284,11 +280,11 @@ function EmptyState({ type }: { type: TransactionType }) {
   const typeConfig = {
     income: {
       label: "income",
-      color: "text-emerald-700 dark:text-emerald-400",
+      color: "text-income-foreground",
     },
     expense: {
       label: "expense",
-      color: "text-rose-600 dark:text-rose-400",
+      color: "text-expense-foreground",
     },
   }[type];
 

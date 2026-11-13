@@ -55,7 +55,7 @@ const DashboardPage = async () => {
                 trigger={
                   <Button
                     variant="default"
-                    className="bg-emerald-700 text-white hover:bg-emerald-800 dark:bg-emerald-700 dark:hover:bg-emerald-800"
+                    className="bg-income-action text-white hover:bg-income-action-hover"
                   >
                     New income
                   </Button>
@@ -66,7 +66,7 @@ const DashboardPage = async () => {
                 trigger={
                   <Button
                     variant="default"
-                    className="bg-rose-600 text-white hover:bg-rose-700 dark:bg-rose-700 dark:hover:bg-rose-800"
+                    className="bg-expense-action text-white hover:bg-expense-action-hover"
                   >
                     New expense
                   </Button>

@@ -38,11 +38,11 @@ type TopLevelFormatterParams = TooltipRow | TooltipRow[];
 const chartConfig = {
   income: {
     label: "Income",
-    colors: { light: ["#047857"], dark: ["#10b981"] },
+    colors: { light: ["var(--income)"], dark: ["var(--income)"] },
   },
   expense: {
     label: "Expense",
-    colors: { light: ["#be123c"], dark: ["#f43f5e"] },
+    colors: { light: ["var(--expense)"], dark: ["var(--expense)"] },
   },
 } satisfies ChartConfig;
 
@@ -83,9 +83,7 @@ export default function HistoryChart({
 
     const net = row.income - row.expense;
     const netColor =
-      net >= 0
-        ? "text-emerald-600 dark:text-emerald-400"
-        : "text-red-600 dark:text-red-400";
+      net >= 0 ? "text-income-foreground" : "text-expense-foreground";
     const netSign = net >= 0 ? "+" : "";
     const header = new Date(
       row.year,
@@ -130,7 +128,7 @@ export default function HistoryChart({
     <EChartsBarChart
       data={rows}
       config={chartConfig}
-      barCategoryGap={0}
+      barCategoryGap={8}
       barGap={1}
       className="h-full w-full"
       xDataKey="key"
