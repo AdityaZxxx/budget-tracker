@@ -2,10 +2,11 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { MoreHorizontal, Pencil, Plus, Target, TrashIcon } from "lucide-react";
+import { MoreHorizontal, Pencil, Target, TrashIcon } from "lucide-react";
 import { useState } from "react";
 
 import SkeletonWrapper from "@/components/SkeletonWrapper";
+import AddIconButton from "@/components/ui/add-icon-button";
 import { Button } from "@/components/ui/button";
 import { CardContent } from "@/components/ui/card";
 import { CardShell, CardShellHeader } from "@/components/ui/card-shell";
@@ -54,86 +55,77 @@ const Goals = ({
   const goals = goalsQuery.data ?? [];
 
   return (
-    <div className="container mt-6">
-      <CardShell>
-        <CardShellHeader
-          title="Goals"
-          description="Savings targets for this space. Add a contribution by tagging an expense transaction with a goal."
-          action={
-            canEdit ? (
-              <CreateGoalDialog
-                currency={currency}
-                trigger={
-                  <Button variant="outline" className="gap-2">
-                    <Plus className="h-4 w-4" />
-                    New goal
-                  </Button>
-                }
+    <CardShell className="h-full">
+      <CardShellHeader
+        title="Goals"
+        description="Savings targets for this space. Add a contribution by tagging an expense transaction with a goal."
+        action={
+          canEdit ? (
+            <CreateGoalDialog
+              currency={currency}
+              trigger={<AddIconButton label="New goal" />}
+            />
+          ) : undefined
+        }
+      />
+      <CardContent>
+        <SkeletonWrapper isLoading={goalsQuery.isLoading}>
+          {goals.length === 0 ? (
+            <CardContent>
+              <EmptyState
+                icon={Target}
+                hint="No goals yet. Create one to get started."
               />
-            ) : undefined
-          }
-        />
-        <CardContent>
-          <SkeletonWrapper isLoading={goalsQuery.isLoading}>
-            {goals.length === 0 ? (
-              <CardContent>
-                <EmptyState
-                  icon={Target}
-                  hint="No goals yet. Create one to get started."
-                />
-              </CardContent>
-            ) : (
-              <div className="space-y-2">
-                {goals.map((goal) => {
-                  const progress = Math.min(
-                    (goal.contributed / goal.target) * 100,
-                    100,
-                  );
-                  const reached = goal.contributed >= goal.target;
-                  return (
-                    <div
-                      key={goal.id}
-                      className="space-y-2 rounded-lg bg-muted/40 p-3"
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="flex min-w-0 flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-3">
-                          <span className="truncate text-sm font-medium">
-                            {goal.name}
+            </CardContent>
+          ) : (
+            <div className="space-y-2">
+              {goals.map((goal) => {
+                const progress = Math.min(
+                  (goal.contributed / goal.target) * 100,
+                  100,
+                );
+                const reached = goal.contributed >= goal.target;
+                return (
+                  <div
+                    key={goal.id}
+                    className="space-y-2 rounded-lg bg-muted/40 p-3"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="flex min-w-0 flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-3">
+                        <span className="truncate text-sm font-medium">
+                          {goal.name}
+                        </span>
+                        {goal.deadline && (
+                          <span className="text-xs text-muted-foreground">
+                            by {format(new Date(goal.deadline), "PPP")}
                           </span>
-                          {goal.deadline && (
-                            <span className="text-xs text-muted-foreground">
-                              by {format(new Date(goal.deadline), "PPP")}
-                            </span>
-                          )}
-                        </span>
-                        {canEdit && (
-                          <GoalActions goal={goal} currency={currency} />
                         )}
-                      </div>
-                      <Progress
-                        value={progress}
-                        indicatorClassName={
-                          reached ? "bg-income" : "bg-primary"
-                        }
-                        aria-label={`${goal.name} goal progress`}
-                      />
-                      <p className="text-xs text-muted-foreground tabular-nums">
-                        <span className="font-medium text-foreground">
-                          {Math.floor(progress)}%
-                        </span>
-                        {" · "}
-                        {formatter.format(goal.contributed)} of{" "}
-                        {formatter.format(goal.target)}
-                      </p>
+                      </span>
+                      {canEdit && (
+                        <GoalActions goal={goal} currency={currency} />
+                      )}
                     </div>
-                  );
-                })}
-              </div>
-            )}
-          </SkeletonWrapper>
-        </CardContent>
-      </CardShell>
-    </div>
+                    <Progress
+                      value={progress}
+                      indicatorClassName={reached ? "bg-income" : "bg-primary"}
+                      aria-label={`${goal.name} goal progress`}
+                    />
+                    <p className="text-xs text-muted-foreground tabular-nums">
+                      <span className="font-medium text-foreground">
+                        {Math.floor(progress)}%
+                      </span>
+                      {" · "}
+                      {formatter.format(goal.contributed)} of{" "}
+                      {formatter.format(goal.target)}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </SkeletonWrapper>
+      </CardContent>
+    </CardShell>
   );
 };
 

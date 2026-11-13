@@ -83,14 +83,26 @@ const DashboardPage = async () => {
       {canEdit && <AddMemberCta memberCount={memberCount} />}
       <Overview currency={household.currency} />
       <Insights currency={household.currency} />
-      <SafeToSpend currency={household.currency} />
-      <UpcomingBills currency={household.currency} canEdit={canEdit} />
+      <div className="container mt-6 grid gap-4 lg:grid-cols-3">
+        <SafeToSpend currency={household.currency} />
+        <div className="lg:col-span-2">
+          <UpcomingBills currency={household.currency} canEdit={canEdit} />
+        </div>
+      </div>
       {memberCount > 1 && <SharedSpendingCard currency={household.currency} />}
-      {memberCount > 1 && (
-        <Balances currency={household.currency} canEdit={canEdit} />
-      )}
+      <div
+        className={
+          memberCount > 1
+            ? "container mt-6 grid gap-4 lg:grid-cols-2"
+            : "container mt-6 grid gap-4"
+        }
+      >
+        {memberCount > 1 && (
+          <Balances currency={household.currency} canEdit={canEdit} />
+        )}
+        <Goals currency={household.currency} canEdit={canEdit} />
+      </div>
       {memberCount > 2 && <SimplifyDebts currency={household.currency} />}
-      <Goals currency={household.currency} canEdit={canEdit} />
       <History currency={household.currency} />
     </div>
   );

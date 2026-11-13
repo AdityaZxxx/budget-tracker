@@ -9,7 +9,7 @@ import dynamic from "next/dynamic";
 import CountUp from "react-countup";
 
 import SkeletonWrapper from "@/components/SkeletonWrapper";
-import { Button } from "@/components/ui/button";
+import AddIconButton from "@/components/ui/add-icon-button";
 import { CardContent } from "@/components/ui/card";
 import { CardShell, CardShellHeader } from "@/components/ui/card-shell";
 import EmptyState from "@/components/ui/empty-state";
@@ -78,11 +78,7 @@ const Insights = ({ currency }: Props) => {
             action={
               <CreateTransactionDialog
                 type="expense"
-                trigger={
-                  <Button variant="outline" size="sm">
-                    Add a transaction
-                  </Button>
-                }
+                trigger={<AddIconButton label="Add a transaction" />}
               />
             }
           />

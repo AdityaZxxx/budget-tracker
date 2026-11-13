@@ -3,16 +3,11 @@
 import type { Household } from "@prisma/client";
 
 import { useQuery } from "@tanstack/react-query";
-import {
-  MoreHorizontal,
-  Pencil,
-  PlusSquare,
-  Target,
-  TrashIcon,
-} from "lucide-react";
+import { MoreHorizontal, Pencil, Target, TrashIcon } from "lucide-react";
 import { useState } from "react";
 
 import SkeletonWrapper from "@/components/SkeletonWrapper";
+import AddIconButton from "@/components/ui/add-icon-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -85,26 +80,10 @@ const BudgetsSection = ({ canEdit }: { canEdit: boolean }) => {
               </CardDescription>
             </div>
             {canEdit && (
-              <Tooltip>
-                <BudgetDialog
-                  household={household.data}
-                  trigger={
-                    <TooltipTrigger
-                      render={
-                        <Button
-                          size="sm"
-                          className="gap-2"
-                          aria-label="Create budget"
-                        />
-                      }
-                    >
-                      <PlusSquare className="h-4 w-4" />
-                      <span className="sr-only md:not-sr-only">Create</span>
-                    </TooltipTrigger>
-                  }
-                />
-                <TooltipContent>Create budget</TooltipContent>
-              </Tooltip>
+              <BudgetDialog
+                household={household.data}
+                trigger={<AddIconButton label="Create budget" />}
+              />
             )}
           </div>
         </CardHeader>

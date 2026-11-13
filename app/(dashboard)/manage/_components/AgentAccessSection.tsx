@@ -5,17 +5,11 @@ import type { Household } from "@prisma/client";
 import type { ReactElement } from "react";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Check,
-  Copy,
-  KeyRound,
-  Loader2,
-  PlusSquare,
-  TrashIcon,
-} from "lucide-react";
+import { Check, Copy, KeyRound, Loader2, TrashIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import AddIconButton from "@/components/ui/add-icon-button";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -172,12 +166,7 @@ const ApiTokenList = ({ canEdit }: { canEdit: boolean }) => {
         </p>
         <CreateApiTokenDialog
           canEdit={canEdit}
-          trigger={
-            <Button size="sm" className="gap-2">
-              <PlusSquare className="h-4 w-4" />
-              Create token
-            </Button>
-          }
+          trigger={<AddIconButton label="Create token" />}
         />
       </div>
 

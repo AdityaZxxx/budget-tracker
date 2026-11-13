@@ -11,13 +11,13 @@ import {
   Pause,
   Pencil,
   Play,
-  Plus,
   Trash2,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import SkeletonWrapper from "@/components/SkeletonWrapper";
+import AddIconButton from "@/components/ui/add-icon-button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -135,8 +135,8 @@ const UpcomingBills = ({ currency, canEdit }: Props) => {
   const hiddenCount = items.length - due.length;
 
   return (
-    <div className="container mt-6">
-      <CardShell>
+    <>
+      <CardShell className="h-full">
         <CardShellHeader
           title="Upcoming bills"
           description="Recurring income and expenses, due and past due"
@@ -144,12 +144,7 @@ const UpcomingBills = ({ currency, canEdit }: Props) => {
             canEdit ? (
               <RecurringItemDialog
                 currency={currency}
-                trigger={
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <Plus className="h-4 w-4" />
-                    Add bill
-                  </Button>
-                }
+                trigger={<AddIconButton label="Add bill" />}
               />
             ) : undefined
           }
@@ -339,7 +334,7 @@ const UpcomingBills = ({ currency, canEdit }: Props) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </>
   );
 };
 

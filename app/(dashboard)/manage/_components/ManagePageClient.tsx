@@ -9,7 +9,6 @@ import {
   Link2,
   MoreHorizontal,
   Pencil,
-  PlusSquare,
   TrashIcon,
   TrendingDown,
   TrendingUp,
@@ -18,6 +17,7 @@ import { useState } from "react";
 
 import { CurrencyComboBox } from "@/components/CurrencyComboBox";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
+import AddIconButton from "@/components/ui/add-icon-button";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -204,27 +204,11 @@ function CategoryList({
               </div>
             </div>
             {canEdit && (
-              <Tooltip>
-                <CreateCategoryDialog
-                  type={type}
-                  successCallback={() => refetch()}
-                  trigger={
-                    <TooltipTrigger
-                      render={
-                        <Button
-                          size="sm"
-                          className="gap-2"
-                          aria-label={`Create ${type} category`}
-                        />
-                      }
-                    >
-                      <PlusSquare className="h-4 w-4" />
-                      <span className="sr-only md:not-sr-only">Create</span>
-                    </TooltipTrigger>
-                  }
-                />
-                <TooltipContent>Create {type} category</TooltipContent>
-              </Tooltip>
+              <CreateCategoryDialog
+                type={type}
+                successCallback={() => refetch()}
+                trigger={<AddIconButton label={`Create ${type} category`} />}
+              />
             )}
           </div>
         </CardHeader>

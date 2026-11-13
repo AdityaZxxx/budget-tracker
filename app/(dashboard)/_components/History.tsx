@@ -116,6 +116,12 @@ const History = ({ currency }: { currency: string | null }) => {
           title="History"
           action={
             <div className="flex flex-wrap items-center justify-end gap-2">
+              <HistoryPeriodSelector
+                period={period}
+                setPeriod={setPeriod}
+                timeframe={timeframe}
+                setTimeframe={setTimeframe}
+              />
               <HistoryLegend
                 hidden={hiddenSeries}
                 onToggle={(key) =>
@@ -129,12 +135,6 @@ const History = ({ currency }: { currency: string | null }) => {
                     return next;
                   })
                 }
-              />
-              <HistoryPeriodSelector
-                period={period}
-                setPeriod={setPeriod}
-                timeframe={timeframe}
-                setTimeframe={setTimeframe}
               />
             </div>
           }
