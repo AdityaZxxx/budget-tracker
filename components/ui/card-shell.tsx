@@ -31,7 +31,7 @@ const CardShellHeader = ({
     )}
   >
     <div className="min-w-0 space-y-0.5">
-      <CardTitle className="text-xl">{title}</CardTitle>
+      <CardTitle className="text-lg">{title}</CardTitle>
       {description ? <CardDescription>{description}</CardDescription> : null}
     </div>
     {action ? (

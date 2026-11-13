@@ -64,7 +64,7 @@ const HouseholdSection = ({ canEdit }: { canEdit: boolean }) => {
     <section>
       <Card className="transition-all hover:shadow-md">
         <CardHeader>
-          <CardTitle className="text-xl">Your space</CardTitle>
+          <CardTitle className="text-lg">Your space</CardTitle>
           <CardDescription>
             Rename the space where you keep your money
           </CardDescription>

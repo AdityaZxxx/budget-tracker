@@ -311,7 +311,7 @@ const CreateTransactionDialog = ({
       <DialogTrigger render={trigger as ReactElement} />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="text-lg sm:text-xl">
+          <DialogTitle className="text-lg sm:text-lg">
             Create a new{" "}
             <span
               className={cn(

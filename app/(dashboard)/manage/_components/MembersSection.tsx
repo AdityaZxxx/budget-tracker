@@ -98,7 +98,7 @@ const MembersSection = () => {
     <section>
       <Card className="transition-all hover:shadow-md">
         <CardHeader>
-          <CardTitle className="text-xl">Members</CardTitle>
+          <CardTitle className="text-lg">Members</CardTitle>
           <CardDescription>
             Full members can add, edit, and remove transactions; view-only
             members follow along

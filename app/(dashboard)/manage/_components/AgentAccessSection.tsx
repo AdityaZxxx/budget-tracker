@@ -105,7 +105,7 @@ const AgentAccessSection = ({ canEdit }: { canEdit: boolean }) => {
     <section>
       <Card className="transition-all hover:shadow-md">
         <CardHeader>
-          <CardTitle className="text-xl">Agent access</CardTitle>
+          <CardTitle className="text-lg">Agent access</CardTitle>
           <CardDescription>
             Let an AI assistant or a script use Sora with a personal API token
           </CardDescription>

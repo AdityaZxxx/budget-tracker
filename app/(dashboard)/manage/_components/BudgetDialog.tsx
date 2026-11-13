@@ -150,7 +150,7 @@ const BudgetDialog = ({
       {trigger ? <DialogTrigger render={trigger as ReactElement} /> : null}
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="text-lg sm:text-xl">
+          <DialogTitle className="text-lg sm:text-lg">
             {isEditing && budget
               ? `Edit ${budget.category} budget`
               : "Create a budget"}

@@ -79,7 +79,7 @@ const BudgetsSection = ({ canEdit }: { canEdit: boolean }) => {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-xl">Budgets</CardTitle>
+              <CardTitle className="text-lg">Budgets</CardTitle>
               <CardDescription>
                 Monthly spending limits per category
               </CardDescription>

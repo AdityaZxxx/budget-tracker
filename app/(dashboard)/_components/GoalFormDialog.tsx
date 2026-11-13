@@ -173,7 +173,7 @@ const GoalFormDialog = ({
       {trigger ? <DialogTrigger render={trigger as ReactElement} /> : null}
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="text-lg sm:text-xl">{copy.title}</DialogTitle>
+          <DialogTitle className="text-lg sm:text-lg">{copy.title}</DialogTitle>
         </DialogHeader>
         <form
           className="space-y-4"

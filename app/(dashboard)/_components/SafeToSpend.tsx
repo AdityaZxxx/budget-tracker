@@ -75,7 +75,7 @@ const SafeToSpend = ({ currency }: Props) => {
                   </div>
                   <div>
                     {shouldReduceMotion ? (
-                      <span className="text-4xl font-bold tabular-nums">
+                      <span className="text-3xl font-bold tabular-nums">
                         {formatter.format(remaining)}
                       </span>
                     ) : (
@@ -87,7 +87,7 @@ const SafeToSpend = ({ currency }: Props) => {
                           formatter.format(value)
                         }
                         preserveValue
-                        className="text-4xl font-bold tabular-nums"
+                        className="text-3xl font-bold tabular-nums"
                       />
                     )}
                   </div>

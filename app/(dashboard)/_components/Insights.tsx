@@ -131,13 +131,13 @@ const Insights = ({ currency }: Props) => {
             {currentRate === undefined ? (
               <span
                 aria-hidden="true"
-                className="text-5xl font-bold text-muted-foreground"
+                className="text-3xl font-bold text-muted-foreground"
               >
                 –
               </span>
             ) : shouldReduceMotion ? (
               <span
-                className={cn("text-5xl font-bold tabular-nums", rateColor)}
+                className={cn("text-3xl font-bold tabular-nums", rateColor)}
               >
                 {Math.round(currentRate * 100)}%
               </span>
@@ -148,7 +148,7 @@ const Insights = ({ currency }: Props) => {
                 duration={1.2}
                 suffix="%"
                 preserveValue
-                className={cn("text-5xl font-bold tabular-nums", rateColor)}
+                className={cn("text-3xl font-bold tabular-nums", rateColor)}
               />
             )}
           </div>

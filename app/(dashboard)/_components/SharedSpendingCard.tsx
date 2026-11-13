@@ -57,7 +57,7 @@ const SharedSpendingCard = ({ currency }: Props) => {
                   end={thisMonth}
                   decimals={2}
                   formattingFn={(amount: number) => formatter.format(amount)}
-                  className="text-2xl font-bold text-foreground tabular-nums"
+                  className="text-xl font-bold text-foreground tabular-nums"
                 />
               </div>
             </div>

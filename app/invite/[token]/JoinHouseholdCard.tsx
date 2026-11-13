@@ -39,7 +39,7 @@ const JoinHouseholdCard = ({ token, householdName, inviterName }: Props) => {
   return (
     <Card className="mt-12 w-[min(400px,calc(100vw-2rem))]">
       <CardHeader>
-        <CardTitle className="text-2xl">
+        <CardTitle className="text-xl">
           Join {householdName ?? "this household"}
         </CardTitle>
         <CardDescription>

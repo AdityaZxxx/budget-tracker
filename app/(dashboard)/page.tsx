@@ -48,7 +48,7 @@ const DashboardPage = async () => {
     <div className="h-full bg-background px-6">
       <div className="border-b bg-card">
         <div className="container flex flex-wrap items-center justify-between gap-6 py-8">
-          <h1 className="text-3xl font-bold">
+          <h1 className="text-2xl font-bold">
             Hello, {session.user.name.split(" ")[0]}! 👋
           </h1>
 

@@ -24,7 +24,7 @@ const AddMemberCta = ({ memberCount }: Props) => {
     <div className="container mt-6">
       <CardShell>
         <CardHeader>
-          <CardTitle className="text-xl">
+          <CardTitle className="text-lg">
             Add a Member any time to share this ledger
           </CardTitle>
           <CardDescription>
