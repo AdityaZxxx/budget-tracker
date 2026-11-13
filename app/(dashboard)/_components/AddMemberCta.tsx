@@ -17,8 +17,7 @@ import InviteLinkDialog from "../manage/_components/InviteLinkDialog";
 const DISMISSAL_KEY = "sora:add-member-cta-dismissed";
 
 const subscribe = () => () => {};
-const getSnapshot = () =>
-  window.localStorage.getItem(DISMISSAL_KEY) === "1";
+const getSnapshot = () => window.localStorage.getItem(DISMISSAL_KEY) === "1";
 const getServerSnapshot = () => false;
 
 interface Props {
@@ -63,9 +62,9 @@ const AddMemberCta = ({ memberCount }: Props) => {
             Add a Member any time to share this ledger
           </CardTitle>
           <CardDescription>
-            Share a revocable link or QR code and everyone you add sees the
-            same transactions, budgets, and goals. Tracking on your own works
-            fine too.
+            Share a revocable link or QR code and everyone you add sees the same
+            transactions, budgets, and goals. Tracking on your own works fine
+            too.
           </CardDescription>
         </CardHeader>
         <CardContent>
