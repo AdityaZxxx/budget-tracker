@@ -25,7 +25,7 @@ interface Props {
   hidden: ReadonlySet<SeriesKey>;
 }
 
-type TooltipRow = {
+type TooltipParam = {
   axisValue?: string | number;
   name?: string;
   seriesId?: string;
@@ -33,7 +33,7 @@ type TooltipRow = {
   value?: number | string | null;
 };
 
-type TopLevelFormatterParams = TooltipRow | TooltipRow[];
+type TopLevelFormatterParams = TooltipParam | TooltipParam[];
 
 const chartConfig = {
   income: {
@@ -55,6 +55,11 @@ const monthShort = (monthIndex: number) =>
     month: "short",
   });
 
+// ECharts appends the tooltip DOM to document.body, outside [data-chart],
+// so the dots must reference globally resolvable tokens, not chart-scoped ones.
+const seriesSwatch = (key: SeriesKey) =>
+  key === "income" ? "var(--income)" : "var(--expense)";
+
 export default function HistoryChart({
   data,
   timeframe,
@@ -68,17 +73,11 @@ export default function HistoryChart({
   }));
 
   const tooltipFormatter = (params: TopLevelFormatterParams) => {
-    const items: TooltipRow[] = Array.isArray(params) ? params : [params];
+    const items: TooltipParam[] = Array.isArray(params) ? params : [params];
     const first = items.find((item) => item != null);
     const axisLabel = first?.axisValue ?? first?.name ?? "";
     const bucketIndex = Number.parseInt(String(axisLabel), 10);
-    const row = rows.find(
-      (entry) =>
-        Number.parseInt(
-          String(timeframe === "year" ? entry.month : (entry.day ?? -1)),
-          10,
-        ) === bucketIndex,
-    );
+    const row = rows.find((entry) => entry.key === String(bucketIndex));
     if (!row) return "";
 
     const net = row.income - row.expense;
@@ -100,7 +99,7 @@ export default function HistoryChart({
         if (hidden.has(key)) return [];
         const value = key === "income" ? row.income : row.expense;
         const label = key === "income" ? "Income" : "Expense";
-        const dot = `<span aria-hidden="true" class="h-2.5 w-2.5 shrink-0 rounded-[2px]" style="background:${SERIES_DOT_COLORS[key]}"></span>`;
+        const dot = `<span aria-hidden="true" class="h-2.5 w-2.5 shrink-0 rounded-[2px]" style="background:${seriesSwatch(key)}"></span>`;
         return [
           `
           <div class="flex w-full items-center gap-2">
@@ -174,8 +173,3 @@ export default function HistoryChart({
     </EChartsBarChart>
   );
 }
-
-const SERIES_DOT_COLORS: Record<SeriesKey, string> = {
-  income: "var(--color-income-0)",
-  expense: "var(--color-expense-0)",
-};

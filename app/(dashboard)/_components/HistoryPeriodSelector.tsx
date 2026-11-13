@@ -1,15 +1,11 @@
 "use client";
 
-import type { GetHistoryPeriodsResponseType } from "../../api/history-periods/route";
 import type { Period, Timeframe } from "@/lib/types";
 
-import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { POLL_INTERVAL } from "@/lib/constants";
 
 interface Props {
   period: Period;
@@ -24,14 +20,6 @@ const HistoryPeriodSelector = ({
   timeframe,
   setTimeframe,
 }: Props) => {
-  const historyPeriods = useQuery<GetHistoryPeriodsResponseType>({
-    queryKey: ["overview", "history", "periods"],
-    queryFn: () => fetch(`/api/history-periods`).then((res) => res.json()),
-    staleTime: POLL_INTERVAL,
-    refetchInterval: POLL_INTERVAL,
-    refetchOnWindowFocus: true,
-  });
-
   const label =
     timeframe === "year"
       ? String(period.year)
@@ -54,22 +42,20 @@ const HistoryPeriodSelector = ({
 
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
-      <SkeletonWrapper isLoading={historyPeriods.isLoading} fullWidth={false}>
-        <Tabs
-          value={timeframe}
-          onValueChange={(value) => setTimeframe(value as Timeframe)}
-          className="flex w-full sm:w-auto"
-        >
-          <TabsList className="w-full sm:w-auto">
-            <TabsTrigger value="year" className="flex-1 sm:flex-initial">
-              Year
-            </TabsTrigger>
-            <TabsTrigger value="month" className="flex-1 sm:flex-initial">
-              Month
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </SkeletonWrapper>
+      <Tabs
+        value={timeframe}
+        onValueChange={(value) => setTimeframe(value as Timeframe)}
+        className="flex w-full sm:w-auto"
+      >
+        <TabsList className="w-full sm:w-auto">
+          <TabsTrigger value="year" className="flex-1 sm:flex-initial">
+            Year
+          </TabsTrigger>
+          <TabsTrigger value="month" className="flex-1 sm:flex-initial">
+            Month
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
       <div className="flex w-full items-center justify-between gap-2 rounded-xl border bg-card p-1 sm:w-auto sm:justify-start">
         <Button
           variant="ghost"

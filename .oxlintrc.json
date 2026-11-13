@@ -46,9 +46,8 @@
     "import/no-duplicates": "error",
     "unicorn/no-array-for-each": "error",
 
-    // 29 of the 30 hits are `import * as React`, which is how the React
-    // types are named here, and the last is the recharts namespace in the
-    // chart component. A rule that fires on correct code gets turned off.
+    // `import * as React` is how the React types are named here, and every
+    // hit is correct code. A rule that fires on correct code gets turned off.
     "import/no-namespace": "off",
 
     "sora/no-em-dash-copy": "error",
