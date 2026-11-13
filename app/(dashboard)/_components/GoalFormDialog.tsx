@@ -60,12 +60,12 @@ const fromGoal = (goal: GoalWithProgress): GoalFormValues => ({
 
 const COPY = {
   create: {
-    title: "Create a new goal",
-    submit: "Create",
-    toastId: "create-goal",
-    success: "Goal created",
-    loading: "Creating goal…",
-    error: "Unable to create goal. Try again.",
+    title: "Add a goal",
+    submit: "Add",
+    toastId: "add-goal",
+    success: "Goal added",
+    loading: "Adding goal…",
+    error: "Unable to add goal. Try again.",
   },
   edit: {
     title: "Edit goal",

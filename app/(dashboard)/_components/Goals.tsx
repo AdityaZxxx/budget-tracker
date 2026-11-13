@@ -74,7 +74,7 @@ const Goals = ({
             <CardContent>
               <EmptyState
                 icon={Target}
-                hint="No goals yet. Create one to get started."
+                hint="No goals yet. Add one to get started."
               />
             </CardContent>
           ) : (

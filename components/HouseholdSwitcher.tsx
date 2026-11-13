@@ -185,7 +185,7 @@ export default function HouseholdSwitcher({
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>New household</DialogTitle>
+            <DialogTitle>Add household</DialogTitle>
           </DialogHeader>
           <Field>
             <FieldLabel htmlFor="household-name">Name</FieldLabel>
@@ -218,7 +218,7 @@ export default function HouseholdSwitcher({
               onClick={() => create()}
               className="w-full sm:w-auto"
             >
-              {isCreating ? <Loader2 className="animate-spin" /> : "Create"}
+              {isCreating ? <Loader2 className="animate-spin" /> : "Add"}
             </Button>
           </DialogFooter>
         </DialogContent>

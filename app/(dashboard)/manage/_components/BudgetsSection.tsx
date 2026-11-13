@@ -108,7 +108,7 @@ const BudgetsSection = ({ canEdit }: { canEdit: boolean }) => {
             ) : budgets.length === 0 ? (
               <EmptyStateUI
                 icon={Target}
-                hint="No budgets yet. Create one to track spending per category."
+                hint="No budgets yet. Add one to track spending per category."
               />
             ) : (
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">

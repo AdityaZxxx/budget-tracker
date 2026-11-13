@@ -394,9 +394,10 @@ const TransactionTable = ({ from, to }: Props) => {
                       </div>
                     ) : (
                       <div className="flex flex-col items-center gap-1">
-                        <p className="font-medium">No transactions found</p>
+                        <p className="font-medium">Nothing in this range</p>
                         <p className="text-sm text-muted-foreground">
-                          Try a different date range or clear the filters.
+                          Try a different date range, or clear the filters to
+                          see everything.
                         </p>
                       </div>
                     )}

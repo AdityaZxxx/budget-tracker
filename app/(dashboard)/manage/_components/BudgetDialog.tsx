@@ -98,7 +98,7 @@ const BudgetDialog = ({
             mode: values.mode,
           }),
     onSuccess: () => {
-      toast.success(isEditing ? "Budget updated" : "Budget created", {
+      toast.success(isEditing ? "Budget updated" : "Budget added", {
         id: "budget-dialog",
       });
       queryClient.invalidateQueries({
@@ -134,7 +134,7 @@ const BudgetDialog = ({
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
-    toast.loading(isEditing ? "Updating budget…" : "Creating budget…", {
+    toast.loading(isEditing ? "Updating budget…" : "Adding budget…", {
       id: "budget-dialog",
     });
 

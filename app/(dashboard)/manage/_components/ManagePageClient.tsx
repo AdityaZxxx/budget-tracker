@@ -268,7 +268,7 @@ function EmptyState({ type }: { type: TransactionType }) {
   return (
     <EmptyStateUI
       icon={type === "income" ? TrendingUp : TrendingDown}
-      hint={`No ${type} categories yet. Create one to get started.`}
+      hint={`No ${type} categories yet. Add one to get started.`}
     />
   );
 }
