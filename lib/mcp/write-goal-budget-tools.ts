@@ -159,12 +159,11 @@ export function registerGoalBudgetWriteTools(
           .optional()
           .describe("New amount to save, in the Household's currency."),
         deadline: z
-          .string()
-          .regex(DEADLINE_PATTERN)
+          .union([z.literal(""), z.string().regex(DEADLINE_PATTERN)])
           .nullable()
           .optional()
           .describe(
-            "New deadline as YYYY-MM-DD, or null to clear it. Omit to leave it unchanged.",
+            "New deadline as YYYY-MM-DD, or null (or an empty string) to clear it. Omit to leave it unchanged.",
           ),
       },
     },
@@ -185,7 +184,8 @@ export function registerGoalBudgetWriteTools(
           update.target = target;
         }
         if (deadline !== undefined) {
-          update.deadline = deadline === null ? null : parseDate(deadline);
+          update.deadline =
+            deadline === null || deadline === "" ? null : parseDate(deadline);
         }
 
         const goal = await updateHouseholdGoal(context.householdId, update);

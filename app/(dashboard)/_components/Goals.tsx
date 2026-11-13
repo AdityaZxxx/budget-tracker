@@ -99,7 +99,7 @@ const Goals = ({
                   return (
                     <div
                       key={goal.id}
-                      className="group space-y-2 rounded-lg bg-muted/40 p-3"
+                      className="space-y-2 rounded-lg bg-muted/40 p-3"
                     >
                       <div className="flex items-center justify-between gap-2">
                         <span className="flex min-w-0 flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-3">
@@ -163,7 +163,7 @@ const GoalActions = ({
                 render={
                   <Button
                     variant="ghost"
-                    className="h-8 w-8 p-0 text-muted-foreground opacity-100 hover:bg-muted md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100"
+                    className="h-8 w-8 p-0 text-muted-foreground hover:bg-muted"
                     aria-label={`Open actions for ${goal.name} goal`}
                   />
                 }

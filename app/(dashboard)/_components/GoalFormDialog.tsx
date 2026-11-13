@@ -40,7 +40,7 @@ import { CreateGoalSchema } from "@/schemas/goals";
 
 import { createGoal, updateGoal } from "../_actions/goals";
 
-export type GoalFormValues = {
+type GoalFormValues = {
   name: string;
   target: number;
   deadline: Date | undefined;

@@ -351,7 +351,7 @@ function CategoryCard({
 
   return (
     <>
-      <div className="group relative flex items-center justify-between rounded-lg border p-4 transition-all hover:shadow-md">
+      <div className="relative flex items-center justify-between rounded-lg border p-4 transition-all hover:shadow-md">
         <div className="flex min-w-0 items-center gap-4">
           <span className="text-2xl" aria-hidden="true">
             {category.icon}
@@ -368,7 +368,7 @@ function CategoryCard({
                     render={
                       <Button
                         variant="ghost"
-                        className="h-8 w-8 p-0 text-muted-foreground opacity-100 hover:bg-muted md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100"
+                        className="h-8 w-8 p-0 text-muted-foreground hover:bg-muted"
                         aria-label={`Open actions for ${category.name} category`}
                       />
                     }

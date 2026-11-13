@@ -4,5 +4,3 @@ export const HouseholdNameSchema = z
   .string()
   .trim()
   .max(50, "Keep the name under 50 characters");
-
-export type HouseholdNameSchemaType = z.infer<typeof HouseholdNameSchema>;
