@@ -24,18 +24,19 @@ const CardShellHeader = ({
   action?: ReactNode;
   className?: string;
 }) => (
-  <div
-    className={cn(
-      "flex flex-col gap-3 px-6 pt-6 sm:flex-row sm:items-start sm:justify-between",
-      className,
-    )}
-  >
-    <div className="min-w-0 space-y-0.5">
-      <CardTitle className="text-lg">{title}</CardTitle>
-      {description ? <CardDescription>{description}</CardDescription> : null}
+  <div className={cn("px-6 pt-6", className)}>
+    <div className="flex min-w-0 items-center justify-between gap-3">
+      <div className="min-w-0">
+        <CardTitle className="text-lg">{title}</CardTitle>
+      </div>
+      {action ? (
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+          {action}
+        </div>
+      ) : null}
     </div>
-    {action ? (
-      <div className="flex min-w-0 flex-wrap items-center gap-2">{action}</div>
+    {description ? (
+      <CardDescription className="mt-0.5">{description}</CardDescription>
     ) : null}
   </div>
 );
