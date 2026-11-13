@@ -7,6 +7,7 @@ import { getMonthSpentByCategory } from "@/lib/budgets";
 import { getFormatterForCurrency } from "@/lib/helpers";
 import { notifyHouseholdExcept, notifyMembers } from "@/lib/notifications";
 import prisma from "@/lib/prisma";
+import { evaluateUnusualSpending } from "@/lib/unusual-spending";
 import { CreateTransactionSchema } from "@/schemas/transaction";
 
 export async function getTransactionsHistory(
@@ -434,6 +435,18 @@ export async function createTransaction(
       );
     });
   }
+
+  after(() =>
+    evaluateUnusualSpending({
+      amount,
+      category: categoryRow.name,
+      description: description ?? "",
+      type,
+      shared,
+      householdId,
+      userId,
+    }),
+  );
 
   return created;
 }
