@@ -55,7 +55,7 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
     mutationFn: CreateCategory,
     onSuccess: async (category: Category) => {
       form.reset();
-      toast.success(`Category "${category.name}" created`, {
+      toast.success(`Category "${category.name}" added`, {
         id: "create-category",
       });
 
@@ -87,7 +87,7 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
       document.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
     },
     onSubmit: ({ value }) => {
-      toast.loading("Creating category…", {
+      toast.loading("Adding category…", {
         id: "create-category",
       });
       mutate(value);
@@ -100,7 +100,7 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
       className="flex border-separate items-center justify-start rounded-none border-b px-3 py-3 text-muted-foreground"
     >
       <PlusSquare className="mr-2 h-4 w-4" />
-      Create new
+      Add new
     </Button>
   )) as ReactElement;
 
@@ -110,7 +110,7 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            Create{" "}
+            Add{" "}
             <span
               className={cn(
                 "m-1",
@@ -187,7 +187,7 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
                     >
                       {field.state.value ? (
                         <div className="flex flex-col items-center gap-2">
-                          <span className="text-5xl" aria-hidden="true">
+                          <span className="text-3xl" aria-hidden="true">
                             {field.state.value}
                           </span>
                           <p className="text-xs text-muted-foreground">
@@ -237,7 +237,7 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
               Cancel
             </DialogClose>
             <Button type="submit" disabled={isPending}>
-              {!isPending && "Create"}
+              {!isPending && "Add"}
               {isPending && <Loader2 className="animate-spin" />}
             </Button>
           </DialogFooter>

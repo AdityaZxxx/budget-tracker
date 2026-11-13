@@ -9,8 +9,10 @@ import dynamic from "next/dynamic";
 import CountUp from "react-countup";
 
 import SkeletonWrapper from "@/components/SkeletonWrapper";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import AddIconButton from "@/components/ui/add-icon-button";
+import { CardContent } from "@/components/ui/card";
+import { CardShell, CardShellHeader } from "@/components/ui/card-shell";
+import EmptyState from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { POLL_INTERVAL } from "@/lib/constants";
 import { getFormatterForCurrency } from "@/lib/helpers";
@@ -70,25 +72,23 @@ const Insights = ({ currency }: Props) => {
   if (!isLoading && !hasAnyData) {
     return (
       <div className="container mt-6">
-        <Card className="flex h-40 w-full flex-col items-center justify-center gap-2 p-6 text-center">
-          <div className="rounded-full bg-muted p-3">
-            <HandCoins
-              aria-hidden="true"
-              className="h-5 w-5 text-muted-foreground"
-            />
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Add your first transaction to see your savings rate.
-          </p>
-          <CreateTransactionDialog
-            type="expense"
-            trigger={
-              <Button variant="outline" size="sm">
-                Add a transaction
-              </Button>
+        <CardShell>
+          <CardShellHeader
+            title="Savings rate"
+            action={
+              <CreateTransactionDialog
+                type="expense"
+                trigger={<AddIconButton label="Add a transaction" />}
+              />
             }
           />
-        </Card>
+          <CardContent>
+            <EmptyState
+              icon={HandCoins}
+              hint="Add your first transaction to see your savings rate."
+            />
+          </CardContent>
+        </CardShell>
       </div>
     );
   }
@@ -111,72 +111,77 @@ const Insights = ({ currency }: Props) => {
 
   return (
     <div className="container mt-6 grid gap-4 lg:grid-cols-3">
-      <Card className="flex flex-col justify-center gap-1 p-6 transition-all hover:shadow-md">
-        <p className="text-sm font-medium text-muted-foreground">
-          Savings rate · {current ? monthLong(current.year, current.month) : ""}
-        </p>
-        <div
-          aria-label={
-            currentRate === undefined
-              ? "Savings rate undefined: no income this month"
-              : `Savings rate ${Math.round(currentRate * 100)} percent`
-          }
-        >
-          {currentRate === undefined ? (
-            <span
-              aria-hidden="true"
-              className="text-5xl font-bold text-muted-foreground"
-            >
-              –
-            </span>
-          ) : shouldReduceMotion ? (
-            <span className={cn("text-5xl font-bold tabular-nums", rateColor)}>
-              {Math.round(currentRate * 100)}%
-            </span>
-          ) : (
-            <CountUp
-              end={currentRate * 100}
-              decimals={0}
-              duration={1.2}
-              suffix="%"
-              preserveValue
-              className={cn("text-5xl font-bold tabular-nums", rateColor)}
-            />
-          )}
-        </div>
-        <p className="text-sm text-muted-foreground">
-          {deltaPt === undefined ? (
-            <span className="tabular-nums">– pt</span>
-          ) : (
-            <span
-              className={cn(
-                "tabular-nums",
-                deltaPt >= 0
-                  ? "text-emerald-600 dark:text-emerald-400"
-                  : "text-rose-600 dark:text-rose-400",
-              )}
-            >
-              {deltaPt >= 0 ? "+" : "-"}
-              {Math.abs(deltaPt)} pt
-            </span>
-          )}{" "}
-          vs {previousMonthLabel(previous)}
-        </p>
-      </Card>
+      <CardShell className="flex flex-col justify-center">
+        <CardShellHeader
+          title="Savings rate"
+          description={current ? monthLong(current.year, current.month) : ""}
+        />
+        <CardContent className="gap-1">
+          <div
+            aria-label={
+              currentRate === undefined
+                ? "Savings rate undefined: no income this month"
+                : `Savings rate ${Math.round(currentRate * 100)} percent`
+            }
+          >
+            {currentRate === undefined ? (
+              <span
+                aria-hidden="true"
+                className="text-3xl font-bold text-muted-foreground"
+              >
+                –
+              </span>
+            ) : shouldReduceMotion ? (
+              <span
+                className={cn("text-3xl font-bold tabular-nums", rateColor)}
+              >
+                {Math.round(currentRate * 100)}%
+              </span>
+            ) : (
+              <CountUp
+                end={currentRate * 100}
+                decimals={0}
+                duration={1.2}
+                suffix="%"
+                preserveValue
+                className={cn("text-3xl font-bold tabular-nums", rateColor)}
+              />
+            )}
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {deltaPt === undefined ? (
+              <span className="tabular-nums">– pt</span>
+            ) : (
+              <span
+                className={cn(
+                  "tabular-nums",
+                  deltaPt >= 0
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : "text-rose-600 dark:text-rose-400",
+                )}
+              >
+                {deltaPt >= 0 ? "+" : "-"}
+                {Math.abs(deltaPt)} pt
+              </span>
+            )}{" "}
+            vs {previousMonthLabel(previous)}
+          </p>
+        </CardContent>
+      </CardShell>
 
-      <Card className="p-6 transition-all hover:shadow-md lg:col-span-2">
-        <CardHeader className="p-0 pb-4">
-          <CardTitle className="text-xl">Income vs expense</CardTitle>
-          <p className="text-sm text-muted-foreground">Last six months</p>
-        </CardHeader>
-        <CardContent className="p-0">
+      <CardShell className="lg:col-span-2">
+        <CardShellHeader
+          title="Income vs expense"
+          description="Last six months"
+        />
+        <CardContent>
           <SkeletonWrapper isLoading={isLoading}>
             <div className="h-44 w-full">
               <TrendChart months={months} formatter={formatter} />
             </div>
           </SkeletonWrapper>
         </CardContent>
-      </Card>
+      </CardShell>
     </div>
   );
 };

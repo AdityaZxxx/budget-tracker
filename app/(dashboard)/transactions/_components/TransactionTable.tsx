@@ -97,7 +97,7 @@ const buildColumns = (formatAmount: (value: number) => string) =>
       filterFn: (row, id, value) => value.includes(row.getValue(id)),
       cell: ({ row }) => (
         <div className="flex items-center gap-3">
-          <span className="text-xl" aria-hidden="true">
+          <span className="text-2xl" aria-hidden="true">
             {row.original.categoryIcon}
           </span>
           <span className="font-medium capitalize">
@@ -394,9 +394,10 @@ const TransactionTable = ({ from, to }: Props) => {
                       </div>
                     ) : (
                       <div className="flex flex-col items-center gap-1">
-                        <p className="font-medium">No transactions found</p>
+                        <p className="font-medium">Nothing in this range</p>
                         <p className="text-sm text-muted-foreground">
-                          Try a different date range or clear the filters.
+                          Try a different date range, or clear the filters to
+                          see everything.
                         </p>
                       </div>
                     )}

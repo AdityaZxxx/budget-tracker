@@ -101,7 +101,7 @@ const InvalidInviteLink = () => {
       <Logo />
       <Card className="mt-12 w-[min(400px,calc(100vw-2rem))]">
         <CardHeader>
-          <CardTitle className="text-2xl">Invite link unavailable</CardTitle>
+          <CardTitle className="text-xl">Invite link unavailable</CardTitle>
           <CardDescription>
             This invite link is invalid or has been revoked. Ask a member of the
             household for a new one.

@@ -4,12 +4,12 @@ import { UserPlus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
-  Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { CardShell } from "@/components/ui/card-shell";
 
 import InviteLinkDialog from "../manage/_components/InviteLinkDialog";
 
@@ -21,10 +21,10 @@ const AddMemberCta = ({ memberCount }: Props) => {
   if (memberCount > 1) return null;
 
   return (
-    <div className="container pt-6">
-      <Card className="transition-all hover:shadow-md">
+    <div className="container mt-6">
+      <CardShell>
         <CardHeader>
-          <CardTitle className="text-xl">
+          <CardTitle className="text-lg">
             Add a Member any time to share this ledger
           </CardTitle>
           <CardDescription>
@@ -43,7 +43,7 @@ const AddMemberCta = ({ memberCount }: Props) => {
             }
           />
         </CardContent>
-      </Card>
+      </CardShell>
     </div>
   );
 };

@@ -99,7 +99,7 @@ const RecordSettlementDialog = ({ trigger, members, currency }: Props) => {
       <DialogTrigger render={trigger as ReactElement} />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="text-lg sm:text-xl">
+          <DialogTitle className="text-lg sm:text-lg">
             Record a settlement
           </DialogTitle>
         </DialogHeader>

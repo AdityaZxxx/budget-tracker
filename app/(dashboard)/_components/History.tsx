@@ -4,11 +4,14 @@ import type { HistoryChartRow, SeriesKey } from "./HistoryChart";
 import type { Period, Timeframe } from "@/lib/types";
 
 import { useQuery } from "@tanstack/react-query";
+import { ChartNoAxesColumn } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useState } from "react";
 
 import SkeletonWrapper from "@/components/SkeletonWrapper";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
+import { CardShell, CardShellHeader } from "@/components/ui/card-shell";
+import EmptyState from "@/components/ui/empty-state";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { POLL_INTERVAL } from "@/lib/constants";
@@ -107,18 +110,18 @@ const History = ({ currency }: { currency: string | null }) => {
     historyDataQuery.data.length > 0;
 
   return (
-    <div className="container">
-      <h2 className="mt-12 text-3xl font-bold">History</h2>
-      <Card className="col-span-12 mt-2 w-full">
-        <CardHeader>
-          <CardTitle className="grid grid-cols-1 justify-between gap-2 md:grid-flow-col md:items-center">
-            <HistoryPeriodSelector
-              period={period}
-              setPeriod={setPeriod}
-              timeframe={timeframe}
-              setTimeframe={setTimeframe}
-            />
-            <div className="justify-self-start md:justify-self-end">
+    <div className="container mt-6">
+      <CardShell className="col-span-12">
+        <CardShellHeader
+          title="History"
+          action={
+            <div className="flex flex-wrap items-center justify-start gap-2">
+              <HistoryPeriodSelector
+                period={period}
+                setPeriod={setPeriod}
+                timeframe={timeframe}
+                setTimeframe={setTimeframe}
+              />
               <HistoryLegend
                 hidden={hiddenSeries}
                 onToggle={(key) =>
@@ -134,8 +137,8 @@ const History = ({ currency }: { currency: string | null }) => {
                 }
               />
             </div>
-          </CardTitle>
-        </CardHeader>
+          }
+        />
         <CardContent>
           <SkeletonWrapper isLoading={historyDataQuery.isLoading}>
             {dataAvailable ? (
@@ -154,16 +157,15 @@ const History = ({ currency }: { currency: string | null }) => {
                 </div>
               </ScrollArea>
             ) : (
-              <Card className="flex h-[300px] flex-col items-center justify-center gap-1 bg-background text-center">
-                No data for this period
-                <p className="text-sm text-muted-foreground">
-                  Try selecting a different period or adding new transactions.
-                </p>
-              </Card>
+              <EmptyState
+                icon={ChartNoAxesColumn}
+                hint="No data for this period. Try a different period or add new transactions."
+                className="min-h-[300px]"
+              />
             )}
           </SkeletonWrapper>
         </CardContent>
-      </Card>
+      </CardShell>
     </div>
   );
 };

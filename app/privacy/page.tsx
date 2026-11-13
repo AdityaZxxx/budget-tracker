@@ -13,7 +13,7 @@ const PrivacyPage = () => {
       <header className="border-b bg-card py-8">
         <div className="container">
           <div className="space-y-1">
-            <h1 className="text-3xl font-bold tracking-tight">Privacy</h1>
+            <h1 className="text-2xl font-bold tracking-tight">Privacy</h1>
             <p className="text-muted-foreground">
               Plain language, last updated November 2026
             </p>
@@ -24,7 +24,7 @@ const PrivacyPage = () => {
       <div className="container py-8">
         <div className="max-w-2xl space-y-8">
           <section className="space-y-2">
-            <h2 className="text-xl font-semibold tracking-tight">
+            <h2 className="text-lg font-semibold tracking-tight">
               What we collect
             </h2>
             <p className="text-muted-foreground">
@@ -37,7 +37,7 @@ const PrivacyPage = () => {
           </section>
 
           <section className="space-y-2">
-            <h2 className="text-xl font-semibold tracking-tight">
+            <h2 className="text-lg font-semibold tracking-tight">
               Where your data lives
             </h2>
             <p className="text-muted-foreground">
@@ -49,7 +49,7 @@ const PrivacyPage = () => {
           </section>
 
           <section className="space-y-2">
-            <h2 className="text-xl font-semibold tracking-tight">
+            <h2 className="text-lg font-semibold tracking-tight">
               Export your data
             </h2>
             <p className="text-muted-foreground">
@@ -69,7 +69,7 @@ const PrivacyPage = () => {
           </section>
 
           <section className="space-y-2">
-            <h2 className="text-xl font-semibold tracking-tight">
+            <h2 className="text-lg font-semibold tracking-tight">
               Delete your account
             </h2>
             <p className="text-muted-foreground">
@@ -85,7 +85,7 @@ const PrivacyPage = () => {
           </section>
 
           <section className="space-y-2">
-            <h2 className="text-xl font-semibold tracking-tight">Contact</h2>
+            <h2 className="text-lg font-semibold tracking-tight">Contact</h2>
             <p className="text-muted-foreground">
               Questions or requests about your data? Email{" "}
               <a

@@ -186,7 +186,7 @@ const CreateTransactionDialog = ({
   const { mutate, isPending } = useMutation({
     mutationFn: CreateTransaction,
     onSuccess: () => {
-      toast.success("Transaction created", {
+      toast.success("Transaction added", {
         id: "create-transaction",
       });
       form.reset();
@@ -238,7 +238,7 @@ const CreateTransactionDialog = ({
       document.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
     },
     onSubmit: ({ value }) => {
-      toast.loading("Creating transaction…", {
+      toast.loading("Adding transaction…", {
         id: "create-transaction",
       });
 
@@ -311,8 +311,8 @@ const CreateTransactionDialog = ({
       <DialogTrigger render={trigger as ReactElement} />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="text-lg sm:text-xl">
-            Create a new{" "}
+          <DialogTitle className="text-lg sm:text-lg">
+            Add a{" "}
             <span
               className={cn(
                 "m-1",
@@ -674,7 +674,7 @@ const CreateTransactionDialog = ({
               disabled={isPending || splitInvalid}
               className="w-full sm:w-auto"
             >
-              {!isPending ? "Create" : <Loader2 className="animate-spin" />}
+              {!isPending ? "Add" : <Loader2 className="animate-spin" />}
             </Button>
           </DialogFooter>
         </form>

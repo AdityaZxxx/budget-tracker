@@ -20,7 +20,7 @@ const AccountSection = () => {
       <section>
         <Card className="transition-all hover:shadow-md">
           <CardHeader>
-            <CardTitle className="text-xl">Your data</CardTitle>
+            <CardTitle className="text-lg">Your data</CardTitle>
             <CardDescription>
               Download everything you have stored in Sora, or read how we handle
               it
@@ -57,7 +57,7 @@ const AccountSection = () => {
       <section>
         <Card className="border-destructive/20 transition-all hover:shadow-md">
           <CardHeader>
-            <CardTitle className="text-xl text-destructive">
+            <CardTitle className="text-lg text-destructive">
               Delete account
             </CardTitle>
             <CardDescription>

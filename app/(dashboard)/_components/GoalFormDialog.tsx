@@ -60,12 +60,12 @@ const fromGoal = (goal: GoalWithProgress): GoalFormValues => ({
 
 const COPY = {
   create: {
-    title: "Create a new goal",
-    submit: "Create",
-    toastId: "create-goal",
-    success: "Goal created",
-    loading: "Creating goal…",
-    error: "Unable to create goal. Try again.",
+    title: "Add a goal",
+    submit: "Add",
+    toastId: "add-goal",
+    success: "Goal added",
+    loading: "Adding goal…",
+    error: "Unable to add goal. Try again.",
   },
   edit: {
     title: "Edit goal",
@@ -173,7 +173,7 @@ const GoalFormDialog = ({
       {trigger ? <DialogTrigger render={trigger as ReactElement} /> : null}
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="text-lg sm:text-xl">{copy.title}</DialogTitle>
+          <DialogTitle className="text-lg sm:text-lg">{copy.title}</DialogTitle>
         </DialogHeader>
         <form
           className="space-y-4"

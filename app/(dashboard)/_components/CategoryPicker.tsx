@@ -102,7 +102,7 @@ const CategoryPicker = ({
           <CommandEmpty>
             <p>Category not found</p>
             <p className="text-xs text-muted-foreground">
-              Tip: Create a new category
+              Create a new category
             </p>
           </CommandEmpty>
           <CommandGroup>

@@ -197,7 +197,7 @@ const EditCategoryDialog = ({
                     >
                       {field.state.value ? (
                         <div className="flex flex-col items-center gap-2">
-                          <span className="text-5xl" aria-hidden="true">
+                          <span className="text-3xl" aria-hidden="true">
                             {field.state.value}
                           </span>
                           <p className="text-xs text-muted-foreground">

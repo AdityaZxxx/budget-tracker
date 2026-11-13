@@ -9,7 +9,6 @@ import {
   Link2,
   MoreHorizontal,
   Pencil,
-  PlusSquare,
   TrashIcon,
   TrendingDown,
   TrendingUp,
@@ -18,6 +17,7 @@ import { useState } from "react";
 
 import { CurrencyComboBox } from "@/components/CurrencyComboBox";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
+import AddIconButton from "@/components/ui/add-icon-button";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -35,6 +35,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import EmptyStateUI from "@/components/ui/empty-state";
 import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
@@ -63,7 +64,7 @@ const ManagePageClient = () => {
       <header className="border-b bg-card py-8">
         <div className="container">
           <div className="space-y-1">
-            <h1 className="text-3xl font-bold tracking-tight">Manage</h1>
+            <h1 className="text-2xl font-bold tracking-tight">Manage</h1>
             <p className="text-muted-foreground">
               Manage your categories, budgets, and account
             </p>
@@ -79,7 +80,7 @@ const ManagePageClient = () => {
             <section>
               <Card className="transition-all hover:shadow-md">
                 <CardHeader>
-                  <CardTitle className="text-xl">Invite link</CardTitle>
+                  <CardTitle className="text-lg">Invite link</CardTitle>
                   <CardDescription>
                     Share a revocable link or QR code to add another member to
                     your household
@@ -106,7 +107,7 @@ const ManagePageClient = () => {
           <section>
             <Card className="transition-all hover:shadow-md">
               <CardHeader>
-                <CardTitle className="text-xl">Currency settings</CardTitle>
+                <CardTitle className="text-lg">Currency settings</CardTitle>
                 <CardDescription>
                   Set the currency for your transactions
                 </CardDescription>
@@ -120,7 +121,7 @@ const ManagePageClient = () => {
           </section>
 
           <section className="space-y-6">
-            <h2 className="text-2xl font-semibold tracking-tight">
+            <h2 className="text-xl font-semibold tracking-tight">
               Transaction categories
             </h2>
             <div className="grid gap-6 md:grid-cols-2">
@@ -204,27 +205,11 @@ function CategoryList({
               </div>
             </div>
             {canEdit && (
-              <Tooltip>
-                <CreateCategoryDialog
-                  type={type}
-                  successCallback={() => refetch()}
-                  trigger={
-                    <TooltipTrigger
-                      render={
-                        <Button
-                          size="sm"
-                          className="gap-2"
-                          aria-label={`Create ${type} category`}
-                        />
-                      }
-                    >
-                      <PlusSquare className="h-4 w-4" />
-                      <span className="sr-only md:not-sr-only">Create</span>
-                    </TooltipTrigger>
-                  }
-                />
-                <TooltipContent>Create {type} category</TooltipContent>
-              </Tooltip>
+              <CreateCategoryDialog
+                type={type}
+                successCallback={() => refetch()}
+                trigger={<AddIconButton label={`Create ${type} category`} />}
+              />
             )}
           </div>
         </CardHeader>
@@ -280,35 +265,11 @@ function CategoryList({
 }
 
 function EmptyState({ type }: { type: TransactionType }) {
-  const typeConfig = {
-    income: {
-      label: "income",
-      color: "text-income-foreground",
-    },
-    expense: {
-      label: "expense",
-      color: "text-expense-foreground",
-    },
-  }[type];
-
   return (
-    <div className="flex h-48 flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center">
-      <div className="mb-2 rounded-full bg-muted p-3">
-        {type === "income" ? (
-          <TrendingUp className="h-6 w-6 text-muted-foreground" />
-        ) : (
-          <TrendingDown className="h-6 w-6 text-muted-foreground" />
-        )}
-      </div>
-      <p className="text-sm text-muted-foreground">
-        No{" "}
-        <span className={cn("font-medium", typeConfig.color)}>
-          {typeConfig.label}
-        </span>{" "}
-        categories yet
-      </p>
-      <p className="text-sm text-muted-foreground">Create one to get started</p>
-    </div>
+    <EmptyStateUI
+      icon={type === "income" ? TrendingUp : TrendingDown}
+      hint={`No ${type} categories yet. Add one to get started.`}
+    />
   );
 }
 
@@ -353,7 +314,7 @@ function CategoryCard({
     <>
       <div className="relative flex items-center justify-between rounded-lg border p-4 transition-all hover:shadow-md">
         <div className="flex min-w-0 items-center gap-4">
-          <span className="text-2xl" aria-hidden="true">
+          <span className="text-xl" aria-hidden="true">
             {category.icon}
           </span>
           <span className="truncate font-medium">{category.name}</span>

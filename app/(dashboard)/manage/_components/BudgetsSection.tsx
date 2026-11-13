@@ -3,16 +3,11 @@
 import type { Household } from "@prisma/client";
 
 import { useQuery } from "@tanstack/react-query";
-import {
-  MoreHorizontal,
-  Pencil,
-  PlusSquare,
-  Target,
-  TrashIcon,
-} from "lucide-react";
+import { MoreHorizontal, Pencil, Target, TrashIcon } from "lucide-react";
 import { useState } from "react";
 
 import SkeletonWrapper from "@/components/SkeletonWrapper";
+import AddIconButton from "@/components/ui/add-icon-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,6 +26,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import EmptyStateUI from "@/components/ui/empty-state";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -79,32 +75,16 @@ const BudgetsSection = ({ canEdit }: { canEdit: boolean }) => {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-xl">Budgets</CardTitle>
+              <CardTitle className="text-lg">Budgets</CardTitle>
               <CardDescription>
                 Monthly spending limits per category
               </CardDescription>
             </div>
             {canEdit && (
-              <Tooltip>
-                <BudgetDialog
-                  household={household.data}
-                  trigger={
-                    <TooltipTrigger
-                      render={
-                        <Button
-                          size="sm"
-                          className="gap-2"
-                          aria-label="Create budget"
-                        />
-                      }
-                    >
-                      <PlusSquare className="h-4 w-4" />
-                      <span className="sr-only md:not-sr-only">Create</span>
-                    </TooltipTrigger>
-                  }
-                />
-                <TooltipContent>Create budget</TooltipContent>
-              </Tooltip>
+              <BudgetDialog
+                household={household.data}
+                trigger={<AddIconButton label="Create budget" />}
+              />
             )}
           </div>
         </CardHeader>
@@ -126,15 +106,10 @@ const BudgetsSection = ({ canEdit }: { canEdit: boolean }) => {
                 </Button>
               </div>
             ) : budgets.length === 0 ? (
-              <div className="flex h-32 flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center">
-                <div className="mb-2 rounded-full bg-muted p-3">
-                  <Target className="h-6 w-6 text-muted-foreground" />
-                </div>
-                <p className="text-sm text-muted-foreground">No budgets yet</p>
-                <p className="text-sm text-muted-foreground">
-                  Create one to track spending per category
-                </p>
-              </div>
+              <EmptyStateUI
+                icon={Target}
+                hint="No budgets yet. Add one to track spending per category."
+              />
             ) : (
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
                 {budgets.map((budget) => (
