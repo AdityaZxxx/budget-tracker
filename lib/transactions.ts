@@ -110,6 +110,7 @@ export type CreateTransactionInput = {
   shares?: { userId: string; amount: number }[];
   // null = added through the UI, "agent" = added through an assistant
   addedVia?: string | null;
+  recurringItemId?: string;
 };
 
 // The Household's Categories are the only labels a Transaction can carry, and
@@ -157,48 +158,61 @@ export async function createTransaction(
   const { amount, date, description, type, shared } = parsedBody.data;
   const goalId = parsedBody.data.goalId || undefined;
   const addedVia = input.addedVia ?? null;
+  const recurringItemId = input.recurringItemId || undefined;
   const shareInput =
     type === "expense" && shared ? (parsedBody.data.shares ?? []) : [];
 
-  const [household, actor, goal, memberships] = await Promise.all([
-    prisma.household.findUnique({
-      where: {
-        id: householdId,
-      },
-      select: {
-        currency: true,
-      },
-    }),
-    prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
-      select: {
-        name: true,
-      },
-    }),
-    goalId
-      ? prisma.goal.findFirst({
-          where: {
-            id: goalId,
-            householdId,
-          },
-        })
-      : null,
-    shareInput.length > 0
-      ? prisma.householdMembership.findMany({
-          where: {
-            householdId,
-          },
-          select: {
-            userId: true,
-          },
-        })
-      : [],
-  ]);
+  const [household, actor, goal, memberships, recurringItem] =
+    await Promise.all([
+      prisma.household.findUnique({
+        where: {
+          id: householdId,
+        },
+        select: {
+          currency: true,
+        },
+      }),
+      prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
+        select: {
+          name: true,
+        },
+      }),
+      goalId
+        ? prisma.goal.findFirst({
+            where: {
+              id: goalId,
+              householdId,
+            },
+          })
+        : null,
+      shareInput.length > 0
+        ? prisma.householdMembership.findMany({
+            where: {
+              householdId,
+            },
+            select: {
+              userId: true,
+            },
+          })
+        : [],
+      recurringItemId
+        ? prisma.recurringItem.findFirst({
+            where: {
+              id: recurringItemId,
+              householdId,
+            },
+          })
+        : null,
+    ]);
 
   if (goalId && !goal) {
     throw new Error("Goal not found");
+  }
+  if (recurringItemId && !recurringItem) {
+    throw new Error("Recurring item not found");
   }
 
   const formatAmount = getFormatterForCurrency(
@@ -290,6 +304,17 @@ export async function createTransaction(
           userId: share.userId,
           amount: share.amount,
         })),
+      });
+    }
+
+    if (recurringItem) {
+      await tx.recurringItem.update({
+        where: {
+          id: recurringItem.id,
+        },
+        data: {
+          lastPostedAt: new Date(),
+        },
       });
     }
 
