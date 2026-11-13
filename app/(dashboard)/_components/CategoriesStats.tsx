@@ -91,7 +91,7 @@ function CategoriesCard({ data, type, formatter, total }: CategoriesCardProps) {
   return (
     <Card className="flex h-80 w-full flex-col">
       <CardHeader>
-        <CardTitle className="text-lg font-semibold text-muted-foreground">
+        <CardTitle className="text-xl">
           {type === "income" ? "Incomes by category" : "Expenses by category"}
         </CardTitle>
       </CardHeader>
@@ -126,9 +126,7 @@ function CategoriesCard({ data, type, formatter, total }: CategoriesCardProps) {
                       value={percentage}
                       aria-label={`${item.category} share`}
                       indicatorClassName={
-                        type === "income"
-                          ? "bg-emerald-600 dark:bg-emerald-400"
-                          : "bg-red-600 dark:bg-red-400"
+                        type === "income" ? "bg-income" : "bg-expense"
                       }
                     />
                   </div>

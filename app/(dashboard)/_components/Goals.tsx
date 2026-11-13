@@ -83,10 +83,11 @@ const Goals = ({
                     (goal.contributed / goal.target) * 100,
                     100,
                   );
+                  const reached = goal.contributed >= goal.target;
                   return (
                     <div
                       key={goal.id}
-                      className="space-y-2 rounded-lg border p-3"
+                      className="space-y-2 rounded-lg bg-muted/40 p-3"
                     >
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-sm font-medium">{goal.name}</span>
@@ -126,12 +127,18 @@ const Goals = ({
                       </div>
                       <Progress
                         value={progress}
+                        indicatorClassName={
+                          reached ? "bg-income" : "bg-primary"
+                        }
                         aria-label={`${goal.name} goal progress`}
                       />
                       <p className="text-xs text-muted-foreground tabular-nums">
+                        <span className="font-medium text-foreground">
+                          {Math.floor(progress)}%
+                        </span>
+                        {" · "}
                         {formatter.format(goal.contributed)} of{" "}
                         {formatter.format(goal.target)}
-                        {goal.contributed >= goal.target && " (reached)"}
                       </p>
                     </div>
                   );

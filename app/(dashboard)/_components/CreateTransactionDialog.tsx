@@ -292,8 +292,8 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
               className={cn(
                 "m-1",
                 type === "income"
-                  ? "text-teal-700 dark:text-teal-400"
-                  : "text-rose-600 dark:text-rose-400",
+                  ? "text-income-foreground"
+                  : "text-expense-foreground",
               )}
             >
               {type}

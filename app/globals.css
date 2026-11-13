@@ -37,6 +37,18 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-income: var(--income);
+  --color-income-foreground: var(--income-foreground);
+  --color-income-action: var(--income-action);
+  --color-income-action-hover: var(--income-action-hover);
+  --color-income-soft: var(--income-soft);
+  --color-income-badge: var(--income-badge);
+  --color-expense: var(--expense);
+  --color-expense-foreground: var(--expense-foreground);
+  --color-expense-action: var(--expense-action);
+  --color-expense-action-hover: var(--expense-action-hover);
+  --color-expense-soft: var(--expense-soft);
+  --color-expense-badge: var(--expense-badge);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -96,6 +108,18 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --income: oklch(0.596 0.145 163.225);
+  --income-foreground: oklch(0.508 0.118 165.612);
+  --income-action: oklch(0.508 0.118 165.612);
+  --income-action-hover: oklch(0.432 0.095 166.913);
+  --expense: oklch(0.586 0.253 17.585);
+  --expense-foreground: oklch(0.586 0.253 17.585);
+  --expense-action: oklch(0.586 0.253 17.585);
+  --expense-action-hover: oklch(0.455 0.188 13.697);
+  --income-soft: oklch(0.696 0.17 162.48 / 10%);
+  --expense-soft: oklch(0.645 0.246 16.439 / 10%);
+  --income-badge: oklch(0.95 0.052 163.051);
+  --expense-badge: oklch(0.941 0.03 12.58);
 }
 
 .dark {
@@ -130,6 +154,18 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  --income: oklch(0.765 0.177 163.223);
+  --income-foreground: oklch(0.765 0.177 163.223);
+  --income-action: oklch(0.508 0.118 165.612);
+  --income-action-hover: oklch(0.432 0.095 166.913);
+  --expense: oklch(0.712 0.194 13.428);
+  --expense-foreground: oklch(0.712 0.194 13.428);
+  --expense-action: oklch(0.455 0.188 13.697);
+  --expense-action-hover: oklch(0.364 0.139 11.608);
+  --income-soft: oklch(0.696 0.17 162.48 / 10%);
+  --expense-soft: oklch(0.645 0.246 16.439 / 10%);
+  --income-badge: oklch(0.378 0.077 168.94 / 50%);
+  --expense-badge: oklch(0.41 0.159 10.272 / 50%);
 }
 
 @layer base {

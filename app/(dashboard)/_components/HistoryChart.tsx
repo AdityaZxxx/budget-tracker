@@ -1,20 +1,12 @@
 "use client";
 
-import type { ChartTooltipPayload } from "@/components/ui/chart";
 import type { Timeframe } from "@/lib/types";
 
-import CountUp from "react-countup";
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
-
-import { cn } from "@/lib/utils";
+  EChartsBarChart,
+  type ChartConfig,
+} from "@/components/evilcharts/charts/echarts-bar-chart";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 export type HistoryChartRow = {
   year: number;
@@ -24,156 +16,160 @@ export type HistoryChartRow = {
   day?: number;
 };
 
+export type SeriesKey = "income" | "expense";
+
 interface Props {
   data: HistoryChartRow[];
   timeframe: Timeframe;
   formatter: { format: (value: number) => string };
+  hidden: ReadonlySet<SeriesKey>;
 }
 
-interface HistoryTooltipProps {
-  active?: boolean;
-  payload?: ChartTooltipPayload<HistoryChartRow>;
-  formatter: { format: (value: number) => string };
+type TooltipParam = {
+  axisValue?: string | number;
+  name?: string;
+  seriesId?: string;
+  seriesName?: string;
+  value?: number | string | null;
+};
+
+type TopLevelFormatterParams = TooltipParam | TooltipParam[];
+
+const chartConfig = {
+  income: {
+    label: "Income",
+    colors: { light: ["var(--income)"], dark: ["var(--income)"] },
+  },
+  expense: {
+    label: "Expense",
+    colors: { light: ["var(--expense)"], dark: ["var(--expense)"] },
+  },
+} satisfies ChartConfig;
+
+function bucketKey(row: HistoryChartRow, timeframe: Timeframe) {
+  return String(timeframe === "year" ? row.month : (row.day ?? 0));
 }
 
-// Recharts and react-countup are close to half a megabyte together, and the
-// chart sits below the fold, so it downloads only once the dashboard reaches
-// it.
-export default function HistoryChart({ data, timeframe, formatter }: Props) {
-  return (
-    <ResponsiveContainer width={"100%"} height={300}>
-      <BarChart data={data} barCategoryGap={5}>
-        <defs>
-          <linearGradient id="incomeBar" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#059669" stopOpacity="1" />
-            <stop offset="1" stopColor="#059669" stopOpacity="0.4" />
-          </linearGradient>
-          <linearGradient id="expenseBar" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#dc2626" stopOpacity="1" />
-            <stop offset="1" stopColor="#dc2626" stopOpacity="0.4" />
-          </linearGradient>
-        </defs>
-        <CartesianGrid
-          strokeDasharray="5 5"
-          strokeOpacity={"0.2"}
-          vertical={false}
-        />
-        <XAxis
-          stroke="#888888"
-          fontSize={12}
-          tickLine={false}
-          axisLine={false}
-          padding={{ left: 5, right: 5 }}
-          dataKey={(row: HistoryChartRow) => {
-            const { year, month, day } = row;
-            const date = new Date(year, month, day || 1);
-            if (timeframe === "year") {
-              return date.toLocaleDateString("default", {
-                month: "long",
-              });
-            }
-            return date.toLocaleDateString("default", {
-              day: "2-digit",
-            });
-          }}
-        />
-        <YAxis
-          stroke="#888888"
-          fontSize={12}
-          tickLine={false}
-          axisLine={false}
-          tickFormatter={(value) => formatter.format(value)}
-        />
-        <Tooltip
-          cursor={{ opacity: 0.1 }}
-          content={<CustomTooltip formatter={formatter} />}
-        />
-        <Bar
-          dataKey={"income"}
-          fill="url(#incomeBar)"
-          radius={4}
-          isAnimationActive={false}
-          className="cursor-pointer"
-        />
-        <Bar
-          dataKey={"expense"}
-          fill="url(#expenseBar)"
-          radius={4}
-          isAnimationActive={false}
-          className="cursor-pointer"
-        />
-      </BarChart>
-    </ResponsiveContainer>
-  );
-}
+const monthShort = (monthIndex: number) =>
+  new Date(2024, monthIndex, 1).toLocaleDateString(undefined, {
+    month: "short",
+  });
 
-function CustomTooltip({ active, payload, formatter }: HistoryTooltipProps) {
-  if (!active || !payload || payload.length === 0) return null;
-  const data = payload[0].payload;
-  if (!data) return null;
-  const { expense, income } = data;
-  return (
-    <div className="w-[300px] max-w-[calc(100vw-2rem)] rounded-md border bg-background p-4">
-      <TooltipRow
-        formatter={formatter}
-        label="Expense"
-        value={expense}
-        bgColor="bg-red-600 dark:bg-red-500"
-        textColor="text-red-600 dark:text-red-400"
-      />
+// ECharts appends the tooltip DOM to document.body, outside [data-chart],
+// so the dots must reference globally resolvable tokens, not chart-scoped ones.
+const seriesSwatch = (key: SeriesKey) =>
+  key === "income" ? "var(--income)" : "var(--expense)";
 
-      <TooltipRow
-        formatter={formatter}
-        label="Income"
-        value={income}
-        bgColor="bg-emerald-600 dark:bg-emerald-500"
-        textColor="text-emerald-700 dark:text-emerald-400"
-      />
-
-      <TooltipRow
-        formatter={formatter}
-        label="Balance"
-        value={income - expense}
-        bgColor="bg-gray-500"
-        textColor="text-foreground"
-      />
-    </div>
-  );
-}
-
-function TooltipRow({
-  label,
-  value,
-  bgColor,
-  textColor,
+export default function HistoryChart({
+  data,
+  timeframe,
   formatter,
-}: {
-  label: string;
-  value: number;
-  bgColor: string;
-  textColor: string;
-  formatter: { format: (value: number) => string };
-}) {
-  const formattingFn = (amount: number) => {
-    return formatter.format(amount);
-  };
-  return (
-    <div className="flex items-center gap-2">
-      <div className={cn("h-4 w-4 rounded-full", bgColor)} />
-      <div className="flex w-full justify-between">
-        <p className="text-sm font-bold">{label}</p>
-        <div className={cn("text-sm font-bold tabular-nums", textColor)}>
-          <CountUp
-            duration={0.5}
-            preserveValue
-            redraw={false}
-            end={value}
-            decimals={0}
-            className="text-sm tabular-nums"
-            formattingFn={formattingFn}
-          />
+  hidden,
+}: Props) {
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const rows = data.map((row) => ({
+    ...row,
+    key: bucketKey(row, timeframe),
+  }));
+
+  const tooltipFormatter = (params: TopLevelFormatterParams) => {
+    const items: TooltipParam[] = Array.isArray(params) ? params : [params];
+    const first = items.find((item) => item != null);
+    const axisLabel = first?.axisValue ?? first?.name ?? "";
+    const bucketIndex = Number.parseInt(String(axisLabel), 10);
+    const row = rows.find((entry) => entry.key === String(bucketIndex));
+    if (!row) return "";
+
+    const net = row.income - row.expense;
+    const netColor =
+      net >= 0 ? "text-income-foreground" : "text-expense-foreground";
+    const netSign = net >= 0 ? "+" : "";
+    const header = new Date(
+      row.year,
+      row.month,
+      row.day ?? 1,
+    ).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
+    const body = (["income", "expense"] as const)
+      .flatMap((key) => {
+        if (hidden.has(key)) return [];
+        const value = key === "income" ? row.income : row.expense;
+        const label = key === "income" ? "Income" : "Expense";
+        const dot = `<span aria-hidden="true" class="h-2.5 w-2.5 shrink-0 rounded-[2px]" style="background:${seriesSwatch(key)}"></span>`;
+        return [
+          `
+          <div class="flex w-full items-center gap-2">
+            ${dot}
+            <span class="flex flex-1 justify-between gap-4">
+              <span class="text-muted-foreground">${label}</span>
+              <span class="font-mono tabular-nums">${formatter.format(value)}</span>
+            </span>
+          </div>`.trim(),
+        ];
+      })
+      .join("");
+
+    return `
+      <div class="grid min-w-36 items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl backdrop-blur-sm">
+        <div class="flex w-full items-center justify-between gap-4">
+          <span class="font-medium">${header}</span>
+          <span class="font-mono tabular-nums ${netColor}">${netSign}${formatter.format(net)}</span>
         </div>
-      </div>
-    </div>
+        <div class="grid gap-1.5">${body}</div>
+      </div>`.trim();
+  };
+
+  return (
+    <EChartsBarChart
+      data={rows}
+      config={chartConfig}
+      barCategoryGap={8}
+      barGap={1}
+      className="h-full w-full"
+      xDataKey="key"
+      chartOptions={{
+        tooltip: {
+          trigger: "axis",
+          confine: true,
+          backgroundColor: "transparent",
+          padding: 0,
+          borderWidth: 0,
+          extraCssText: "box-shadow:none;",
+          axisPointer: { type: "none" },
+          formatter: tooltipFormatter,
+        },
+      }}
+    >
+      <EChartsBarChart.Grid />
+      <EChartsBarChart.XAxis
+        dataKey="key"
+        tickFormatter={(value: string) =>
+          timeframe === "year" ? monthShort(Number.parseInt(value, 10)) : value
+        }
+      />
+      {isDesktop && (
+        <EChartsBarChart.YAxis
+          tickFormatter={(value: string) => formatter.format(Number(value))}
+        />
+      )}
+      {hidden.has("income") ? null : (
+        <EChartsBarChart.Bar
+          dataKey="income"
+          variant="default"
+          enableHoverHighlight
+        />
+      )}
+      {hidden.has("expense") ? null : (
+        <EChartsBarChart.Bar
+          dataKey="expense"
+          variant="default"
+          enableHoverHighlight
+        />
+      )}
+    </EChartsBarChart>
   );
 }

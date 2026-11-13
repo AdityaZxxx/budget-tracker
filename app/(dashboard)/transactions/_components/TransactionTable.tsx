@@ -172,8 +172,8 @@ const buildColumns = (
         className={cn(
           "border-transparent px-2.5 text-xs font-medium capitalize",
           row.original.type === "income"
-            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400"
-            : "bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-400",
+            ? "bg-income-badge text-income-foreground"
+            : "bg-expense-badge text-expense-foreground",
         )}
       >
         {row.original.type}
@@ -194,8 +194,8 @@ const buildColumns = (
         className={cn(
           "text-right text-sm font-medium tabular-nums",
           row.original.type === "income"
-            ? "text-emerald-700 dark:text-emerald-400"
-            : "text-rose-600 dark:text-rose-400",
+            ? "text-income-foreground"
+            : "text-expense-foreground",
         )}
       >
         {row.original.type === "expense" ? "-" : "+"}
