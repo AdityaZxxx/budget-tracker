@@ -86,7 +86,7 @@ const Goals = ({
           <SkeletonWrapper isLoading={goalsQuery.isLoading}>
             {goals.length === 0 ? (
               <p className="py-4 text-center text-sm text-muted-foreground">
-                No goals yet. Create one to start saving together.
+                No goals yet. Create one to get started.
               </p>
             ) : (
               <div className="space-y-2">
