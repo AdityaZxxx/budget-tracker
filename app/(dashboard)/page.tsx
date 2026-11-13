@@ -13,6 +13,7 @@ import Goals from "./_components/Goals";
 import History from "./_components/History";
 import Insights from "./_components/Insights";
 import Overview from "./_components/Overview";
+import SafeToSpend from "./_components/SafeToSpend";
 import SharedSpendingCard from "./_components/SharedSpendingCard";
 import SimplifyDebts from "./_components/SimplifyDebts";
 import UpcomingBills from "./_components/UpcomingBills";
@@ -82,6 +83,7 @@ const DashboardPage = async () => {
       {canEdit && <AddMemberCta memberCount={memberCount} />}
       <Overview currency={household.currency} />
       <Insights currency={household.currency} />
+      <SafeToSpend currency={household.currency} />
       <UpcomingBills currency={household.currency} canEdit={canEdit} />
       {memberCount > 1 && <SharedSpendingCard currency={household.currency} />}
       {memberCount > 1 && (
