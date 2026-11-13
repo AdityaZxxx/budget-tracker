@@ -1,11 +1,16 @@
 import type { McpContext } from "./context";
+import type { UpdateGoalSchemaType } from "@/schemas/goals";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 import { z } from "zod";
 
 import { deleteHouseholdBudget, setHouseholdBudget } from "@/lib/budgets";
 import { READ_WRITE_SCOPE, VIEW_ONLY_ROLE } from "@/lib/constants";
-import { createHouseholdGoal, deleteHouseholdGoal } from "@/lib/goals";
+import {
+  createHouseholdGoal,
+  deleteHouseholdGoal,
+  updateHouseholdGoal,
+} from "@/lib/goals";
 import { amountNumber } from "@/schemas/money";
 
 import { parseDate, toolError, toolResult } from "./tools";
@@ -118,6 +123,72 @@ export function registerGoalBudgetWriteTools(
           target,
           deadline: deadline ? parseDate(deadline) : undefined,
         });
+
+        return toolResult({
+          id: goal.id,
+          currency: context.currency,
+          name: goal.name,
+          target: goal.target,
+          deadline: goal.deadline?.toISOString() ?? null,
+          memberId: context.userId,
+        });
+      } catch (error) {
+        return toolError(errorMessage(error));
+      }
+    },
+  );
+
+  server.registerTool(
+    "update_goal",
+    {
+      title: "Update goal",
+      description:
+        "Update a Goal in the Household: its name, target, or deadline. Only the fields provided change. Transactions tagged with the Goal are not affected. Use list_goals to find the Goal's id.",
+      inputSchema: {
+        id: z
+          .string()
+          .min(1)
+          .describe("Id of the Goal to update. Use list_goals to see them."),
+        name: z
+          .string()
+          .min(1)
+          .max(50)
+          .optional()
+          .describe("New name for the Goal, up to 50 characters."),
+        target: amountNumber(false)
+          .optional()
+          .describe("New amount to save, in the Household's currency."),
+        deadline: z
+          .union([z.literal(""), z.string().regex(DEADLINE_PATTERN)])
+          .nullable()
+          .optional()
+          .describe(
+            "New deadline as YYYY-MM-DD, or null (or an empty string) to clear it. Omit to leave it unchanged.",
+          ),
+      },
+    },
+    async ({ id, name, target, deadline }) => {
+      if (context.scope !== READ_WRITE_SCOPE)
+        return toolError("This token is read-only.");
+      if (context.role === VIEW_ONLY_ROLE)
+        return toolError(
+          "View-only members cannot make changes in this household.",
+        );
+
+      try {
+        const update: UpdateGoalSchemaType = { id };
+        if (name !== undefined) {
+          update.name = name;
+        }
+        if (target !== undefined) {
+          update.target = target;
+        }
+        if (deadline !== undefined) {
+          update.deadline =
+            deadline === null || deadline === "" ? null : parseDate(deadline);
+        }
+
+        const goal = await updateHouseholdGoal(context.householdId, update);
 
         return toolResult({
           id: goal.id,

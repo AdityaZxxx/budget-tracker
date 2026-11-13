@@ -175,7 +175,7 @@ function BudgetCard({
 
   return (
     <>
-      <div className="group relative flex flex-col gap-2 rounded-lg border p-4 transition-all hover:shadow-md">
+      <div className="relative flex flex-col gap-2 rounded-lg border p-4 transition-all hover:shadow-md">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="font-medium">{budget.category}</span>
@@ -194,7 +194,7 @@ function BudgetCard({
                       render={
                         <Button
                           variant="ghost"
-                          className="h-8 w-8 p-0 text-muted-foreground opacity-100 hover:bg-muted md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100"
+                          className="h-8 w-8 p-0 text-muted-foreground hover:bg-muted"
                           aria-label={`Open actions for ${budget.category} budget`}
                         />
                       }
