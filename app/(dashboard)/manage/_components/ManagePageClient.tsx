@@ -35,6 +35,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import EmptyStateUI from "@/components/ui/empty-state";
 import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
@@ -264,35 +265,11 @@ function CategoryList({
 }
 
 function EmptyState({ type }: { type: TransactionType }) {
-  const typeConfig = {
-    income: {
-      label: "income",
-      color: "text-income-foreground",
-    },
-    expense: {
-      label: "expense",
-      color: "text-expense-foreground",
-    },
-  }[type];
-
   return (
-    <div className="flex h-48 flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center">
-      <div className="mb-2 rounded-full bg-muted p-3">
-        {type === "income" ? (
-          <TrendingUp className="h-6 w-6 text-muted-foreground" />
-        ) : (
-          <TrendingDown className="h-6 w-6 text-muted-foreground" />
-        )}
-      </div>
-      <p className="text-sm text-muted-foreground">
-        No{" "}
-        <span className={cn("font-medium", typeConfig.color)}>
-          {typeConfig.label}
-        </span>{" "}
-        categories yet
-      </p>
-      <p className="text-sm text-muted-foreground">Create one to get started</p>
-    </div>
+    <EmptyStateUI
+      icon={type === "income" ? TrendingUp : TrendingDown}
+      hint={`No ${type} categories yet. Create one to get started.`}
+    />
   );
 }
 

@@ -26,6 +26,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import EmptyStateUI from "@/components/ui/empty-state";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -105,15 +106,10 @@ const BudgetsSection = ({ canEdit }: { canEdit: boolean }) => {
                 </Button>
               </div>
             ) : budgets.length === 0 ? (
-              <div className="flex h-32 flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center">
-                <div className="mb-2 rounded-full bg-muted p-3">
-                  <Target className="h-6 w-6 text-muted-foreground" />
-                </div>
-                <p className="text-sm text-muted-foreground">No budgets yet</p>
-                <p className="text-sm text-muted-foreground">
-                  Create one to track spending per category
-                </p>
-              </div>
+              <EmptyStateUI
+                icon={Target}
+                hint="No budgets yet. Create one to track spending per category."
+              />
             ) : (
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
                 {budgets.map((budget) => (
