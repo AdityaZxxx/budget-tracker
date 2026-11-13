@@ -142,6 +142,7 @@ const History = ({ currency }: { currency: string | null }) => {
               <ScrollArea
                 className="h-[312px] w-full md:h-[300px]"
                 viewportClassName="w-full overscroll-x-contain pb-3 md:pb-0"
+                orientation="horizontal"
               >
                 <div className="h-full min-w-180 pb-3 md:min-w-0 md:pb-0">
                   <HistoryChart
