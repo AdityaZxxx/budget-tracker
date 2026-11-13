@@ -65,8 +65,8 @@ const Goals = ({
             <div>
               <CardTitle className="text-xl">Goals</CardTitle>
               <CardDescription>
-                Savings targets for your household. Add a contribution by
-                tagging an expense transaction with a goal.
+                Savings targets for this space. Add a contribution by tagging an
+                expense transaction with a goal.
               </CardDescription>
             </div>
             {canEdit && (
@@ -86,7 +86,7 @@ const Goals = ({
           <SkeletonWrapper isLoading={goalsQuery.isLoading}>
             {goals.length === 0 ? (
               <p className="py-4 text-center text-sm text-muted-foreground">
-                No goals yet. Create one to start saving together.
+                No goals yet. Create one to get started.
               </p>
             ) : (
               <div className="space-y-2">

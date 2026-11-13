@@ -65,7 +65,7 @@ const ManagePageClient = () => {
           <div className="space-y-1">
             <h1 className="text-3xl font-bold tracking-tight">Manage</h1>
             <p className="text-muted-foreground">
-              Manage your household, categories, budgets, and account
+              Manage your categories, budgets, and account
             </p>
           </div>
         </div>
@@ -108,7 +108,7 @@ const ManagePageClient = () => {
               <CardHeader>
                 <CardTitle className="text-xl">Currency settings</CardTitle>
                 <CardDescription>
-                  Set the currency for all household transactions
+                  Set the currency for your transactions
                 </CardDescription>
               </CardHeader>
               <CardContent>

@@ -344,8 +344,8 @@ const CreateApiTokenDialog = ({
             <DialogHeader>
               <DialogTitle>Create an API token</DialogTitle>
               <DialogDescription>
-                The token lets an assistant act as you in this household. Revoke
-                it any time to cut it off.
+                The token lets an assistant act as you in this space. Revoke it
+                any time to cut it off.
               </DialogDescription>
             </DialogHeader>
             <form className="space-y-4" onSubmit={handleSubmit}>

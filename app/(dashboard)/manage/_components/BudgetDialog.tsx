@@ -1,9 +1,9 @@
 "use client";
 
-import type { Category, Household } from "@prisma/client";
+import type { Household } from "@prisma/client";
 import type { ReactElement, ReactNode } from "react";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { NumericFormat } from "react-number-format";
@@ -34,10 +34,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { type BudgetWithProgress } from "@/lib/budgets";
-import { POLL_INTERVAL } from "@/lib/constants";
 import { Currencies } from "@/lib/currencies";
 
 import { createBudget, updateBudget } from "../../_actions/budgets";
+import CategoryPicker from "../../_components/CategoryPicker";
 
 interface Props {
   trigger?: ReactNode;
@@ -69,20 +69,6 @@ const BudgetDialog = ({
   const queryClient = useQueryClient();
 
   const isEditing = Boolean(budget);
-
-  const categoriesQuery = useQuery<Category[]>({
-    queryKey: ["categories", "expense"],
-    queryFn: () =>
-      fetch(`/api/categories?type=expense`).then(async (res) => {
-        if (!res.ok) {
-          throw new Error("Failed to fetch categories");
-        }
-        return res.json();
-      }),
-    staleTime: POLL_INTERVAL,
-    refetchInterval: POLL_INTERVAL,
-    refetchOnWindowFocus: true,
-  });
 
   const currency = Currencies.find((c) => c.value === household?.currency);
 
@@ -173,37 +159,19 @@ const BudgetDialog = ({
         <form className="space-y-4" onSubmit={handleSubmit}>
           <Field data-invalid={Boolean(errors.category)}>
             <FieldLabel htmlFor="budget-category">Category</FieldLabel>
-            <Select
+            <CategoryPicker
+              key={open ? "open" : "closed"}
+              id="budget-category"
+              type="expense"
               value={category || undefined}
-              onValueChange={(value) => {
-                if (value === null) return;
-                setCategory(value);
-              }}
-              items={Object.fromEntries(
-                (categoriesQuery.data ?? []).map((expenseCategory) => [
-                  expenseCategory.name,
-                  <>
-                    {expenseCategory.icon} {expenseCategory.name}
-                  </>,
-                ]),
-              )}
-            >
-              <SelectTrigger id="budget-category" className="w-full">
-                <SelectValue placeholder="Select an expense category" />
-              </SelectTrigger>
-              <SelectContent>
-                {(categoriesQuery.data ?? []).map((expenseCategory) => (
-                  <SelectItem
-                    key={expenseCategory.name}
-                    value={expenseCategory.name}
-                  >
-                    {expenseCategory.icon} {expenseCategory.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              onChange={setCategory}
+              aria-invalid={Boolean(errors.category) || undefined}
+              aria-describedby={
+                errors.category ? "budget-category-error" : undefined
+              }
+            />
             <FieldDescription className="text-xs sm:text-sm">
-              The monthly limit applies to shared expenses in this category
+              The monthly limit applies to expenses in this category
             </FieldDescription>
             {errors.category && (
               <FieldError id="budget-category-error">
@@ -228,7 +196,7 @@ const BudgetDialog = ({
               allowNegative={false}
             />
             <FieldDescription className="text-xs sm:text-sm">
-              How much the household can spend in this category per month
+              Monthly limit for this category
             </FieldDescription>
             {errors.amount && (
               <FieldError id="budget-amount-error">{errors.amount}</FieldError>

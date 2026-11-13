@@ -83,10 +83,10 @@ export async function GET(request: NextRequest) {
       subject: `Your Sora digest: ${memberNotifications.length} new ${
         memberNotifications.length === 1 ? "notification" : "notifications"
       }`,
-      text: `Hi ${membership.user.name}, here are your household notifications from the last 24 hours:\n\n${memberNotifications
+      text: `Hi ${membership.user.name}, here are your notifications from the last 24 hours:\n\n${memberNotifications
         .map((notification) => `- ${notification.message}`)
         .join("\n")}\n`,
-      html: `<p>Hi ${escapeHtml(membership.user.name)}, here are your household notifications from the last 24 hours:</p><ul>${items.join(
+      html: `<p>Hi ${escapeHtml(membership.user.name)}, here are your notifications from the last 24 hours:</p><ul>${items.join(
         "",
       )}</ul><p>Open Sora to see them in the app.</p>`,
     });

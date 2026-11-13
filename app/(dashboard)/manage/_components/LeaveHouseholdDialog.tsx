@@ -22,21 +22,30 @@ import { leaveHousehold } from "../_actions/membership";
 
 interface Props {
   trigger: ReactNode;
+  memberCount: number;
 }
 
-const LeaveHouseholdDialog = ({ trigger }: Props) => {
+const LeaveHouseholdDialog = ({ trigger, memberCount }: Props) => {
   const router = useRouter();
+  const isOnlyMember = memberCount === 1;
 
   const leaveMutation = useMutation({
     mutationFn: leaveHousehold,
     onSuccess: () => {
-      toast.success("You left the household", { id: "leave-household" });
+      toast.success(isOnlyMember ? "Space deleted" : "You left the household", {
+        id: "leave-household",
+      });
       router.refresh();
     },
     onError: () => {
-      toast.error("Unable to leave the household. Try again.", {
-        id: "leave-household",
-      });
+      toast.error(
+        isOnlyMember
+          ? "Unable to delete the space. Try again."
+          : "Unable to leave the household. Try again.",
+        {
+          id: "leave-household",
+        },
+      );
     },
   });
 
@@ -45,12 +54,13 @@ const LeaveHouseholdDialog = ({ trigger }: Props) => {
       <AlertDialogTrigger render={trigger as ReactElement} />
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Leave household?</AlertDialogTitle>
+          <AlertDialogTitle>
+            {isOnlyMember ? "Delete this space?" : "Leave household?"}
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            You will no longer see this household&apos;s transactions,
-            categories, or invite links. Your past transactions stay in the
-            ledger, attributed to you. You can join again later with a new
-            invite link.
+            {isOnlyMember
+              ? "This permanently deletes your space and everything in it: transactions, categories, budgets, goals, and invite links. This cannot be undone."
+              : "You will no longer see this household&apos;s transactions, categories, or invite links. Your past transactions stay in the ledger, attributed to you. You can join again later with a new invite link."}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -58,11 +68,13 @@ const LeaveHouseholdDialog = ({ trigger }: Props) => {
           <AlertDialogAction
             variant="destructive"
             onClick={() => {
-              toast.loading("Leaving household…", { id: "leave-household" });
+              toast.loading(isOnlyMember ? "Deleting…" : "Leaving household…", {
+                id: "leave-household",
+              });
               leaveMutation.mutate();
             }}
           >
-            Leave household
+            {isOnlyMember ? "Delete this space" : "Leave household"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
