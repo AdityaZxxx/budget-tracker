@@ -1,16 +1,12 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 
 import SkeletonWrapper from "@/components/SkeletonWrapper";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
+import { CardShell, CardShellHeader } from "@/components/ui/card-shell";
+import EmptyState from "@/components/ui/empty-state";
 import { POLL_INTERVAL } from "@/lib/constants";
 import { getFormatterForCurrency } from "@/lib/helpers";
 
@@ -34,21 +30,21 @@ const SimplifyDebts = ({ currency }: Props) => {
   const transfers = debtsQuery.data ?? [];
 
   return (
-    <div className="container mt-12">
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="text-xl">Simplify debts</CardTitle>
-          <CardDescription>
-            The fewest transfers that settle every balance. No money moves
-            inside the app. Record what you paid as a Settlement.
-          </CardDescription>
-        </CardHeader>
+    <div className="container mt-6">
+      <CardShell>
+        <CardShellHeader
+          title="Simplify debts"
+          description="The fewest transfers that settle every balance. No money moves inside the app. Record what you paid as a Settlement."
+        />
         <CardContent>
           <SkeletonWrapper isLoading={debtsQuery.isLoading}>
             {transfers.length === 0 ? (
-              <p className="py-4 text-center text-sm text-muted-foreground">
-                All settled up. No transfers needed.
-              </p>
+              <CardContent>
+                <EmptyState
+                  icon={CheckCircle2}
+                  hint="All settled up. No transfers needed right now."
+                />
+              </CardContent>
             ) : (
               <div className="space-y-2">
                 {transfers.map((transfer) => (
@@ -70,7 +66,7 @@ const SimplifyDebts = ({ currency }: Props) => {
             )}
           </SkeletonWrapper>
         </CardContent>
-      </Card>
+      </CardShell>
     </div>
   );
 };

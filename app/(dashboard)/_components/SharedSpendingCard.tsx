@@ -39,7 +39,7 @@ const SharedSpendingCard = ({ currency }: Props) => {
   const TrendIcon = isUp ? ArrowUpRight : ArrowDownRight;
 
   return (
-    <div className="container mt-12">
+    <div className="container mt-6">
       <Card className="w-full p-6 transition-all hover:shadow-md">
         <SkeletonWrapper isLoading={spendingQuery.isLoading}>
           <div className="flex flex-wrap items-center justify-between gap-4">

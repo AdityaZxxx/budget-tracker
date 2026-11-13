@@ -7,7 +7,9 @@ import CountUp from "react-countup";
 
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
+import { CardShell, CardShellHeader } from "@/components/ui/card-shell";
+import EmptyState from "@/components/ui/empty-state";
 import { POLL_INTERVAL } from "@/lib/constants";
 import { getFormatterForCurrency } from "@/lib/helpers";
 
@@ -37,20 +39,12 @@ const SafeToSpend = ({ currency }: Props) => {
 
   return (
     <div className="container mt-6">
-      <Card className="flex w-full flex-col justify-center gap-1 p-6 transition-all hover:shadow-md">
-        <SkeletonWrapper isLoading={isLoading}>
-          {budgets.length === 0 ? (
-            <div className="flex h-28 flex-col items-start justify-center gap-2">
-              <div className="rounded-full bg-muted p-3">
-                <Wallet
-                  aria-hidden="true"
-                  className="h-5 w-5 text-muted-foreground"
-                />
-              </div>
-              <p className="text-sm text-muted-foreground">
-                No budgets yet. Create one to see what is safe to spend this
-                month.
-              </p>
+      <CardShell>
+        <CardShellHeader
+          title="Safe to spend"
+          description="Left across your budgets this month"
+          action={
+            budgets.length === 0 ? (
               <BudgetDialog
                 trigger={
                   <Button variant="outline" size="sm">
@@ -58,43 +52,51 @@ const SafeToSpend = ({ currency }: Props) => {
                   </Button>
                 }
               />
-            </div>
+            ) : undefined
+          }
+        />
+        <SkeletonWrapper isLoading={isLoading}>
+          {budgets.length === 0 ? (
+            <CardContent>
+              <EmptyState
+                icon={Wallet}
+                hint="Set your first budget and this figure tells you what is safe to spend."
+              />
+            </CardContent>
           ) : (
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="rounded-full bg-emerald-500/10 p-3">
-                  <Wallet
-                    aria-hidden="true"
-                    className="h-6 w-6 text-emerald-600 dark:text-emerald-400"
-                  />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Safe to spend
-                  </p>
-                  {shouldReduceMotion ? (
-                    <span className="text-4xl font-bold tabular-nums">
-                      {formatter.format(remaining)}
-                    </span>
-                  ) : (
-                    <CountUp
-                      end={remaining}
-                      decimals={2}
-                      duration={1.2}
-                      formattingFn={(value: number) => formatter.format(value)}
-                      preserveValue
-                      className="text-4xl font-bold tabular-nums"
+            <CardContent>
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="rounded-full bg-emerald-500/10 p-3">
+                    <Wallet
+                      aria-hidden="true"
+                      className="h-6 w-6 text-emerald-600 dark:text-emerald-400"
                     />
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    Left across your budgets this month
-                  </p>
+                  </div>
+                  <div>
+                    {shouldReduceMotion ? (
+                      <span className="text-4xl font-bold tabular-nums">
+                        {formatter.format(remaining)}
+                      </span>
+                    ) : (
+                      <CountUp
+                        end={remaining}
+                        decimals={2}
+                        duration={1.2}
+                        formattingFn={(value: number) =>
+                          formatter.format(value)
+                        }
+                        preserveValue
+                        className="text-4xl font-bold tabular-nums"
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
+            </CardContent>
           )}
         </SkeletonWrapper>
-      </Card>
+      </CardShell>
     </div>
   );
 };

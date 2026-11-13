@@ -2,18 +2,13 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { MoreHorizontal, Pencil, Plus, TrashIcon } from "lucide-react";
+import { MoreHorizontal, Pencil, Plus, Target, TrashIcon } from "lucide-react";
 import { useState } from "react";
 
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
+import { CardShell, CardShellHeader } from "@/components/ui/card-shell";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import EmptyState from "@/components/ui/empty-state";
 import { Progress } from "@/components/ui/progress";
 import {
   Tooltip,
@@ -58,18 +54,13 @@ const Goals = ({
   const goals = goalsQuery.data ?? [];
 
   return (
-    <div className="container mt-12">
-      <Card className="w-full">
-        <CardHeader>
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <CardTitle className="text-xl">Goals</CardTitle>
-              <CardDescription>
-                Savings targets for this space. Add a contribution by tagging an
-                expense transaction with a goal.
-              </CardDescription>
-            </div>
-            {canEdit && (
+    <div className="container mt-6">
+      <CardShell>
+        <CardShellHeader
+          title="Goals"
+          description="Savings targets for this space. Add a contribution by tagging an expense transaction with a goal."
+          action={
+            canEdit ? (
               <CreateGoalDialog
                 currency={currency}
                 trigger={
@@ -79,15 +70,18 @@ const Goals = ({
                   </Button>
                 }
               />
-            )}
-          </div>
-        </CardHeader>
+            ) : undefined
+          }
+        />
         <CardContent>
           <SkeletonWrapper isLoading={goalsQuery.isLoading}>
             {goals.length === 0 ? (
-              <p className="py-4 text-center text-sm text-muted-foreground">
-                No goals yet. Create one to get started.
-              </p>
+              <CardContent>
+                <EmptyState
+                  icon={Target}
+                  hint="No goals yet. Create one to get started."
+                />
+              </CardContent>
             ) : (
               <div className="space-y-2">
                 {goals.map((goal) => {
@@ -138,7 +132,7 @@ const Goals = ({
             )}
           </SkeletonWrapper>
         </CardContent>
-      </Card>
+      </CardShell>
     </div>
   );
 };

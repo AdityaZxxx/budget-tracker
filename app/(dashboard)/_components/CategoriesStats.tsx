@@ -3,9 +3,11 @@
 import type { TransactionType } from "@/lib/types";
 
 import { useQuery } from "@tanstack/react-query";
+import { TrendingDown, TrendingUp } from "lucide-react";
 
 import SkeletonWrapper from "@/components/SkeletonWrapper";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardShell, CardShellHeader } from "@/components/ui/card-shell";
+import EmptyState from "@/components/ui/empty-state";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { POLL_INTERVAL } from "@/lib/constants";
@@ -89,22 +91,18 @@ export default CategoriesStats;
 
 function CategoriesCard({ data, type, formatter, total }: CategoriesCardProps) {
   return (
-    <Card className="flex h-80 w-full flex-col">
-      <CardHeader>
-        <CardTitle className="text-xl">
-          {type === "income" ? "Incomes by category" : "Expenses by category"}
-        </CardTitle>
-      </CardHeader>
+    <CardShell className="flex h-80 w-full flex-col">
+      <CardShellHeader
+        title={
+          type === "income" ? "Incomes by category" : "Expenses by category"
+        }
+      />
       <div className="flex-1 overflow-hidden">
         {data.length === 0 && (
-          <div className="flex h-full w-full flex-col items-center justify-center">
-            <p className="text-center text-sm text-muted-foreground">
-              No data for the selected period
-            </p>
-            <p className="text-center text-xs text-muted-foreground">
-              Try selecting a different period or adding new {type}s.
-            </p>
-          </div>
+          <EmptyState
+            icon={type === "income" ? TrendingUp : TrendingDown}
+            hint={`No data for the selected period. Try a different period or add new ${type}s.`}
+          />
         )}
         {data.length > 0 && (
           <ScrollArea className="h-full px-4">
@@ -136,6 +134,6 @@ function CategoriesCard({ data, type, formatter, total }: CategoriesCardProps) {
           </ScrollArea>
         )}
       </div>
-    </Card>
+    </CardShell>
   );
 }

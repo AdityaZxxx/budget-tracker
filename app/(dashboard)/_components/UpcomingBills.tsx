@@ -29,14 +29,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { CardContent, CardFooter } from "@/components/ui/card";
+import { CardShell, CardShellHeader } from "@/components/ui/card-shell";
+import EmptyState from "@/components/ui/empty-state";
 import { POLL_INTERVAL } from "@/lib/constants";
 import { getFormatterForCurrency } from "@/lib/helpers";
 
@@ -140,17 +135,13 @@ const UpcomingBills = ({ currency, canEdit }: Props) => {
   const hiddenCount = items.length - due.length;
 
   return (
-    <div className="container pt-6">
-      <Card className="w-full">
-        <CardHeader>
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <CardTitle className="text-xl">Upcoming bills</CardTitle>
-              <CardDescription>
-                Recurring income and expenses, due and past due
-              </CardDescription>
-            </div>
-            {canEdit && (
+    <div className="container mt-6">
+      <CardShell>
+        <CardShellHeader
+          title="Upcoming bills"
+          description="Recurring income and expenses, due and past due"
+          action={
+            canEdit ? (
               <RecurringItemDialog
                 currency={currency}
                 trigger={
@@ -160,29 +151,29 @@ const UpcomingBills = ({ currency, canEdit }: Props) => {
                   </Button>
                 }
               />
-            )}
-          </div>
-        </CardHeader>
+            ) : undefined
+          }
+        />
         <CardContent>
           <SkeletonWrapper isLoading={isLoading}>
             {items.length === 0 ? (
-              <div className="flex h-40 flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center">
-                <div className="mb-2 rounded-full bg-muted p-3">
-                  <CalendarClock className="h-5 w-5 text-muted-foreground" />
-                </div>
-                <p className="text-sm font-medium">Nothing here yet</p>
-                <p className="text-sm text-muted-foreground">
-                  {canEdit
-                    ? "Add your first recurring bill or paycheck to get started."
-                    : "No recurring bills have been added yet."}
-                </p>
-              </div>
+              <CardContent>
+                <EmptyState
+                  icon={CalendarClock}
+                  hint={
+                    canEdit
+                      ? "Add your first recurring bill or paycheck to get started."
+                      : "No recurring bills have been added yet."
+                  }
+                />
+              </CardContent>
             ) : visible.length === 0 ? (
-              <div className="flex h-24 flex-col items-center justify-center text-center">
-                <p className="text-sm text-muted-foreground">
-                  Nothing due right now.
-                </p>
-              </div>
+              <CardContent>
+                <EmptyState
+                  icon={CalendarClock}
+                  hint="Nothing due right now."
+                />
+              </CardContent>
             ) : (
               <div className="divide-y">
                 {visible.map((item) => (
@@ -312,7 +303,7 @@ const UpcomingBills = ({ currency, canEdit }: Props) => {
             </Button>
           </CardFooter>
         )}
-      </Card>
+      </CardShell>
 
       <AlertDialog
         open={deleteTarget !== null}

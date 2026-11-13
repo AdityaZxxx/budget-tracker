@@ -1,17 +1,13 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Handshake } from "lucide-react";
+import { Handshake, Users } from "lucide-react";
 
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
+import { CardShell, CardShellHeader } from "@/components/ui/card-shell";
+import EmptyState from "@/components/ui/empty-state";
 import { POLL_INTERVAL } from "@/lib/constants";
 import { getFormatterForCurrency } from "@/lib/helpers";
 
@@ -37,18 +33,13 @@ const Balances = ({ currency, canEdit = true }: Props) => {
   const balances = balancesQuery.data ?? [];
 
   return (
-    <div className="container mt-12">
-      <Card className="w-full">
-        <CardHeader>
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <CardTitle className="text-xl">Balances</CardTitle>
-              <CardDescription>
-                Net amounts from shared expenses and settlements. No money moves
-                inside the app.
-              </CardDescription>
-            </div>
-            {canEdit && (
+    <div className="container mt-6">
+      <CardShell>
+        <CardShellHeader
+          title="Balances"
+          description="Net amounts from shared expenses and settlements. No money moves inside the app."
+          action={
+            canEdit ? (
               <RecordSettlementDialog
                 currency={currency}
                 members={balances.map(({ userId, name }) => ({ userId, name }))}
@@ -63,16 +54,18 @@ const Balances = ({ currency, canEdit = true }: Props) => {
                   </Button>
                 }
               />
-            )}
-          </div>
-        </CardHeader>
+            ) : undefined
+          }
+        />
         <CardContent>
           <SkeletonWrapper isLoading={balancesQuery.isLoading}>
             {balances.length === 0 ? (
-              <p className="py-4 text-center text-sm text-muted-foreground">
-                No other members yet. Invite someone to start splitting
-                expenses.
-              </p>
+              <CardContent>
+                <EmptyState
+                  icon={Users}
+                  hint="No other members yet. Invite someone to start splitting shared expenses."
+                />
+              </CardContent>
             ) : (
               <div className="space-y-2">
                 {balances.map((balance) => (
@@ -101,7 +94,7 @@ const Balances = ({ currency, canEdit = true }: Props) => {
             )}
           </SkeletonWrapper>
         </CardContent>
-      </Card>
+      </CardShell>
     </div>
   );
 };
