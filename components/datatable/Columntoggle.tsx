@@ -1,7 +1,7 @@
 "use client";
 
-import type { RowData } from "@tanstack/react-table";
-import type { LegacyTable as Table } from "@tanstack/react-table/legacy";
+import type { AppTableFeatures } from "./table-features";
+import type { RowData, Table } from "@tanstack/react-table";
 
 import { Settings2 } from "lucide-react";
 
@@ -19,7 +19,7 @@ import {
 export function DataTableViewOptions<TData extends RowData>({
   table,
 }: {
-  table: Table<TData>;
+  table: Table<AppTableFeatures, TData>;
 }) {
   return (
     <DropdownMenu>

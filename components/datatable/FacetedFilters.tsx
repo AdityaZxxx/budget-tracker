@@ -1,5 +1,5 @@
-import type { RowData } from "@tanstack/react-table";
-import type { LegacyColumn as Column } from "@tanstack/react-table/legacy";
+import type { AppTableFeatures } from "./table-features";
+import type { Column, RowData } from "@tanstack/react-table";
 
 import { Check, PlusCircle } from "lucide-react";
 import * as React from "react";
@@ -24,7 +24,7 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
 interface DataTableFacetedFilterProps<TData extends RowData, TValue> {
-  column?: Column<TData, TValue>;
+  column?: Column<AppTableFeatures, TData, TValue>;
   title?: string;
   options: {
     label: string;

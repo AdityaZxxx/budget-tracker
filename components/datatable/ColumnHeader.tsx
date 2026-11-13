@@ -1,5 +1,5 @@
-import type { RowData } from "@tanstack/react-table";
-import type { LegacyColumn as Column } from "@tanstack/react-table/legacy";
+import type { AppTableFeatures } from "./table-features";
+import type { Column, RowData } from "@tanstack/react-table";
 
 import { ArrowDown, ArrowUp, ChevronsUpDown, EyeOff } from "lucide-react";
 
@@ -17,7 +17,7 @@ interface DataTableColumnHeaderProps<
   TData extends RowData,
   TValue,
 > extends React.HTMLAttributes<HTMLDivElement> {
-  column: Column<TData, TValue>;
+  column: Column<AppTableFeatures, TData, TValue>;
   title: string;
 }
 
