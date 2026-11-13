@@ -51,6 +51,7 @@ import EditCategoryDialog from "../../_components/EditCategoryDialog";
 import AccountSection from "./AccountSection";
 import AgentAccessSection from "./AgentAccessSection";
 import BudgetsSection from "./BudgetsSection";
+import HouseholdSection from "./HouseholdSection";
 import InviteLinkDialog from "./InviteLinkDialog";
 import MembersSection from "./MembersSection";
 
@@ -72,6 +73,8 @@ const ManagePageClient = () => {
 
       <div className="container py-8">
         <div className="space-y-8">
+          <HouseholdSection canEdit={canEdit} />
+
           {canEdit && (
             <section>
               <Card className="transition-all hover:shadow-md">

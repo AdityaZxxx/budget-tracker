@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, House, Loader2, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -26,23 +26,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { POLL_INTERVAL } from "@/lib/constants";
+import { useHouseholds } from "@/hooks/use-households";
 import { cn } from "@/lib/utils";
 
 import {
   createHousehold,
   switchHousehold,
 } from "../app/(dashboard)/manage/_actions/households";
-
-type HouseholdsResponse = {
-  active: { id: string };
-  households: {
-    id: string;
-    name: string | null;
-    currency: string | null;
-    memberCount: number;
-  }[];
-};
 
 interface HouseholdSwitcherProps {
   variant?: "default" | "row";
@@ -56,19 +46,7 @@ export default function HouseholdSwitcher({
   const [createOpen, setCreateOpen] = useState(false);
   const [name, setName] = useState("");
 
-  const householdsQuery = useQuery<HouseholdsResponse>({
-    queryKey: ["households"],
-    queryFn: async () => {
-      const response = await fetch("/api/households");
-      if (!response.ok) {
-        throw new Error("Failed to load households");
-      }
-      return response.json();
-    },
-    staleTime: POLL_INTERVAL,
-    refetchInterval: POLL_INTERVAL,
-    refetchOnWindowFocus: true,
-  });
+  const householdsQuery = useHouseholds();
 
   const households = householdsQuery.data?.households ?? [];
   const activeId = householdsQuery.data?.active.id;

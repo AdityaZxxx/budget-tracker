@@ -4,7 +4,11 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { getSession } from "@/lib/auth";
-import { setActiveHouseholdCookie } from "@/lib/household";
+import {
+  assertFullMember,
+  requireHousehold,
+  setActiveHouseholdCookie,
+} from "@/lib/household";
 import prisma from "@/lib/prisma";
 
 export async function switchHousehold(householdId: string) {
@@ -28,6 +32,27 @@ export async function switchHousehold(householdId: string) {
 
   await setActiveHouseholdCookie(householdId);
   revalidatePath("/", "layout");
+}
+
+export async function renameHousehold(name: string) {
+  const result = await requireHousehold();
+  if (!result) {
+    redirect("/sign-in");
+  }
+  assertFullMember(result);
+
+  // Empty clears the name, like createHousehold; the UI renders the default.
+  const household = await prisma.household.update({
+    where: {
+      id: result.household.id,
+    },
+    data: {
+      name: name.trim() || null,
+    },
+  });
+
+  revalidatePath("/", "layout");
+  return household;
 }
 
 export async function createHousehold(name: string) {
