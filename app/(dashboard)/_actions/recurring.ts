@@ -11,10 +11,8 @@ import {
   updateRecurringItem,
 } from "@/lib/recurring";
 import {
-  CreateRecurringItemSchema,
   DeleteRecurringItemSchema,
   SetRecurringItemPausedSchema,
-  UpdateRecurringItemSchema,
   type CreateRecurringItemType,
   type UpdateRecurringItemType,
 } from "@/schemas/recurring";
@@ -29,33 +27,23 @@ export async function listRecurringItemsAction() {
 }
 
 export async function CreateRecurringItem(form: CreateRecurringItemType) {
-  const parsedBody = CreateRecurringItemSchema.safeParse(form);
-  if (!parsedBody.success) {
-    throw new Error(parsedBody.error.message);
-  }
-
   const result = await requireHousehold();
   if (!result) {
     redirect("/sign-in");
   }
   assertFullMember(result);
 
-  await createRecurringItem(result.household.id, parsedBody.data);
+  await createRecurringItem(result.household.id, form);
 }
 
 export async function UpdateRecurringItem(form: UpdateRecurringItemType) {
-  const parsedBody = UpdateRecurringItemSchema.safeParse(form);
-  if (!parsedBody.success) {
-    throw new Error(parsedBody.error.message);
-  }
-
   const result = await requireHousehold();
   if (!result) {
     redirect("/sign-in");
   }
   assertFullMember(result);
 
-  await updateRecurringItem(result.household.id, parsedBody.data);
+  await updateRecurringItem(result.household.id, form);
 }
 
 export async function SetRecurringItemPaused(form: {
