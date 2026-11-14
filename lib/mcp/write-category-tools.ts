@@ -6,7 +6,7 @@ import {
   deleteHouseholdCategory,
   updateHouseholdCategory,
 } from "@/lib/categories";
-import { READ_WRITE_SCOPE, VIEW_ONLY_ROLE } from "@/lib/constants";
+import { READ_WRITE_SCOPE } from "@/lib/constants";
 import {
   categoryIconSchema,
   categoryNameSchema,
@@ -42,17 +42,12 @@ export function registerCategoryWriteTools(
     async ({ name, icon, type }) => {
       if (context.scope !== READ_WRITE_SCOPE)
         return toolError("This token is read-only.");
-      if (context.role === VIEW_ONLY_ROLE)
-        return toolError(
-          "View-only members cannot make changes in this household.",
-        );
-
       try {
-        const category = await createHouseholdCategory(context.householdId, {
-          name,
-          icon,
-          type,
-        });
+        const category = await createHouseholdCategory(
+          context.householdId,
+          { name, icon, type },
+          context.role,
+        );
 
         return toolResult({
           name: category.name,
@@ -90,18 +85,12 @@ export function registerCategoryWriteTools(
     async ({ originalName, name, icon, type }) => {
       if (context.scope !== READ_WRITE_SCOPE)
         return toolError("This token is read-only.");
-      if (context.role === VIEW_ONLY_ROLE)
-        return toolError(
-          "View-only members cannot make changes in this household.",
-        );
-
       try {
-        const category = await updateHouseholdCategory(context.householdId, {
-          originalName,
-          name,
-          icon,
-          type,
-        });
+        const category = await updateHouseholdCategory(
+          context.householdId,
+          { originalName, name, icon, type },
+          context.role,
+        );
 
         return toolResult({
           name: category.name,
@@ -133,16 +122,12 @@ export function registerCategoryWriteTools(
     async ({ name, type }) => {
       if (context.scope !== READ_WRITE_SCOPE)
         return toolError("This token is read-only.");
-      if (context.role === VIEW_ONLY_ROLE)
-        return toolError(
-          "View-only members cannot make changes in this household.",
-        );
-
       try {
-        const category = await deleteHouseholdCategory(context.householdId, {
-          name,
-          type,
-        });
+        const category = await deleteHouseholdCategory(
+          context.householdId,
+          { name, type },
+          context.role,
+        );
 
         return toolResult({
           name: category.name,

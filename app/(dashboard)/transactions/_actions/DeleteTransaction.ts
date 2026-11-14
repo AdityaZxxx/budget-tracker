@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 
-import { assertFullMember, requireHousehold } from "@/lib/household";
+import { requireHousehold } from "@/lib/household";
 import { deleteTransaction } from "@/lib/transactions";
 
 export async function DeleteTransaction(id: string) {
@@ -10,7 +10,5 @@ export async function DeleteTransaction(id: string) {
   if (!result) {
     redirect("/sign-in");
   }
-  assertFullMember(result);
-
-  await deleteTransaction(result.household.id, id);
+  await deleteTransaction(result.household.id, id, result.membership.role);
 }

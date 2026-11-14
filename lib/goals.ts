@@ -2,6 +2,7 @@ import { Prisma } from "@prisma/client";
 
 import { DomainError } from "@/lib/errors";
 import prisma from "@/lib/prisma";
+import { assertCanWrite } from "@/lib/roles";
 import {
   CreateGoalSchema,
   type UpdateGoalSchemaType,
@@ -56,7 +57,9 @@ export type GoalWithProgress = Awaited<
 export async function updateHouseholdGoal(
   householdId: string,
   input: UpdateGoalSchemaType,
+  role: string,
 ) {
+  assertCanWrite(role);
   const parsed = UpdateGoalSchema.safeParse(input);
   if (!parsed.success) {
     throw new DomainError(parsed.error.issues[0]?.message ?? "Invalid goal");
@@ -99,7 +102,9 @@ export type CreateGoalInput = {
 export async function createHouseholdGoal(
   householdId: string,
   input: CreateGoalInput,
+  role: string,
 ) {
+  assertCanWrite(role);
   const parsed = CreateGoalSchema.safeParse(input);
   if (!parsed.success) {
     throw new DomainError(parsed.error.issues[0]?.message ?? "Invalid goal");
@@ -121,7 +126,12 @@ export async function createHouseholdGoal(
 
 // Contribution transactions survive the goal; onDelete: SetNull clears their
 // goalId so the money stays in the ledger.
-export async function deleteHouseholdGoal(householdId: string, id: string) {
+export async function deleteHouseholdGoal(
+  householdId: string,
+  id: string,
+  role: string,
+) {
+  assertCanWrite(role);
   const goal = await prisma.goal.delete({
     where: {
       id,

@@ -8,6 +8,7 @@ import { DomainError } from "@/lib/errors";
 import { getFormatterForCurrency } from "@/lib/helpers";
 import { notifyHouseholdExcept, notifyMembers } from "@/lib/notifications";
 import prisma from "@/lib/prisma";
+import { assertCanWrite } from "@/lib/roles";
 import { evaluateUnusualSpending } from "@/lib/unusual-spending";
 import { CreateTransactionSchema } from "@/schemas/transaction";
 
@@ -142,7 +143,9 @@ export async function createTransaction(
   householdId: string,
   userId: string,
   input: CreateTransactionInput,
+  role: string,
 ) {
+  assertCanWrite(role);
   const categoryRow = await resolveCategory(
     householdId,
     input.type,
@@ -454,7 +457,12 @@ export async function createTransaction(
   return created;
 }
 
-export async function deleteTransaction(householdId: string, id: string) {
+export async function deleteTransaction(
+  householdId: string,
+  id: string,
+  role: string,
+) {
+  assertCanWrite(role);
   const transaction = await prisma.transaction.findUnique({
     where: {
       householdId,

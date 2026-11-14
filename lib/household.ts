@@ -7,8 +7,8 @@ import {
   FULL_MEMBER_ROLE,
   VIEW_ONLY_ROLE,
 } from "@/lib/constants";
-import { DomainError } from "@/lib/errors";
 import prisma from "@/lib/prisma";
+import { assertCanWrite } from "@/lib/roles";
 
 export { FULL_MEMBER_ROLE, VIEW_ONLY_ROLE };
 
@@ -90,9 +90,5 @@ export async function clearActiveHouseholdCookie() {
 export function assertFullMember(
   result: NonNullable<Awaited<ReturnType<typeof requireHousehold>>>,
 ) {
-  if (result.membership.role === VIEW_ONLY_ROLE) {
-    throw new DomainError(
-      "View-only members cannot make changes in this household",
-    );
-  }
+  assertCanWrite(result.membership.role);
 }

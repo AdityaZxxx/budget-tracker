@@ -13,7 +13,7 @@ import {
   deleteHouseholdCategory,
   updateHouseholdCategory,
 } from "@/lib/categories";
-import { assertFullMember, requireHousehold } from "@/lib/household";
+import { requireHousehold } from "@/lib/household";
 import {
   CreateCategorySchema,
   DeleteCategorySchema,
@@ -30,9 +30,11 @@ export async function CreateCategory(form: CreateCategorySchemaType) {
   if (!result) {
     redirect("/sign-in");
   }
-  assertFullMember(result);
-
-  return await createHouseholdCategory(result.household.id, parsedBody.data);
+  return await createHouseholdCategory(
+    result.household.id,
+    parsedBody.data,
+    result.membership.role,
+  );
 }
 
 export async function UpdateCategory(form: UpdateCategorySchemaType) {
@@ -45,9 +47,11 @@ export async function UpdateCategory(form: UpdateCategorySchemaType) {
   if (!result) {
     redirect("/sign-in");
   }
-  assertFullMember(result);
-
-  return await updateHouseholdCategory(result.household.id, parsedBody.data);
+  return await updateHouseholdCategory(
+    result.household.id,
+    parsedBody.data,
+    result.membership.role,
+  );
 }
 
 export async function DeleteCategory(form: DeleteCategorySchemaType) {
@@ -60,7 +64,9 @@ export async function DeleteCategory(form: DeleteCategorySchemaType) {
   if (!result) {
     redirect("/sign-in");
   }
-  assertFullMember(result);
-
-  return await deleteHouseholdCategory(result.household.id, parsedBody.data);
+  return await deleteHouseholdCategory(
+    result.household.id,
+    parsedBody.data,
+    result.membership.role,
+  );
 }

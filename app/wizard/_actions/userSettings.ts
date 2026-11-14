@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { requireHousehold } from "@/lib/household";
+import { assertFullMember, requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 import { UpdateUserCurrencySchema } from "@/schemas/userSetting";
 
@@ -18,6 +18,7 @@ export async function UpdateUserCurrency(currency: string) {
   if (!result) {
     redirect("/sign-in");
   }
+  assertFullMember(result);
   const household = await prisma.household.update({
     where: {
       id: result.household.id,
