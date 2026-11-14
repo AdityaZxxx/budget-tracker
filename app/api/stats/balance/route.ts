@@ -1,14 +1,12 @@
-import { redirect } from "next/navigation";
-
 import { resolveDateRange } from "@/lib/dates";
-import { DomainError } from "@/lib/errors";
+import { DomainError, unauthorized } from "@/lib/errors";
 import { requireHousehold } from "@/lib/household";
 import { getBalanceStats } from "@/lib/transactions";
 
 export async function GET(request: Request): Promise<Response> {
   const result = await requireHousehold();
   if (!result) {
-    redirect("/sign-in");
+    return unauthorized();
   }
 
   const { searchParams } = new URL(request.url);

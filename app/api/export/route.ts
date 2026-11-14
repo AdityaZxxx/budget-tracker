@@ -1,5 +1,4 @@
-import { redirect } from "next/navigation";
-
+import { unauthorized } from "@/lib/errors";
 import { requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 import { assertFullMemberRole } from "@/lib/roles";
@@ -7,7 +6,7 @@ import { assertFullMemberRole } from "@/lib/roles";
 export async function GET() {
   const result = await requireHousehold();
   if (!result) {
-    redirect("/sign-in");
+    return unauthorized();
   }
   try {
     assertFullMemberRole(result.membership.role);

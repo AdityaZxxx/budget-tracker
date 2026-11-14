@@ -1,12 +1,11 @@
-import { redirect } from "next/navigation";
-
 import { getMemberBalances } from "@/lib/balances";
+import { unauthorized } from "@/lib/errors";
 import { requireHousehold } from "@/lib/household";
 
 export async function GET() {
   const result = await requireHousehold();
   if (!result) {
-    redirect("/sign-in");
+    return unauthorized();
   }
 
   const balances = await getMemberBalances(

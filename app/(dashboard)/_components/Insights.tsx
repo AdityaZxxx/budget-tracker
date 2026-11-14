@@ -57,7 +57,13 @@ const Insights = ({ currency }: Props) => {
 
   const { data: queryMonths, isLoading } = useQuery<GetInsightsResponseType>({
     queryKey: ["insights"],
-    queryFn: () => fetch("/api/insights").then((response) => response.json()),
+    queryFn: async () => {
+      const response = await fetch("/api/insights");
+      if (!response.ok) {
+        throw new Error("Failed to fetch insights");
+      }
+      return response.json();
+    },
     staleTime: POLL_INTERVAL,
     refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,

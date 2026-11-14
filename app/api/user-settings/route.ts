@@ -1,6 +1,6 @@
-import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 
+import { unauthorized } from "@/lib/errors";
 import { requireHousehold } from "@/lib/household";
 
 // This route is read by four components that poll it, so it must not
@@ -11,7 +11,7 @@ export async function GET() {
   const result = await requireHousehold();
 
   if (!result) {
-    redirect("/sign-in");
+    return unauthorized();
   }
 
   return NextResponse.json(result.household);

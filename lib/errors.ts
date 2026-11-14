@@ -7,3 +7,9 @@ export class DomainError extends Error {
     this.name = "DomainError";
   }
 }
+
+// Session-guarded routes answer a missing session with this instead of
+// redirecting to the sign-in page, which is HTML a fetcher cannot parse.
+export function unauthorized() {
+  return Response.json({ message: "Unauthorized" }, { status: 401 });
+}

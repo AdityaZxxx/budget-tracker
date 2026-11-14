@@ -33,6 +33,11 @@ export function proxy(request: NextRequest) {
   // validate the session themselves before redirecting a signed-in Member.
 
   if (!sessionCookie && isProtected) {
+    // API routes answer with JSON so fetchers can tell "not signed in" from
+    // "server broken"; only browser navigations redirect to sign-in.
+    if (isApiRoute) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
     return NextResponse.redirect(new URL("/sign-in", request.url));
   }
 

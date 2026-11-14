@@ -1,9 +1,9 @@
 import type { Period, Timeframe } from "@/lib/types";
 
 import { getDaysInMonth } from "date-fns";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import { unauthorized } from "@/lib/errors";
 import { requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 
@@ -24,7 +24,7 @@ const getHistoryDataSchema = z.object({
 export async function GET(request: Request) {
   const result = await requireHousehold();
   if (!result) {
-    redirect("/sign-in");
+    return unauthorized();
   }
 
   const { searchParams } = new URL(request.url);

@@ -1,15 +1,13 @@
-import { redirect } from "next/navigation";
-
 import { SETTLEMENT_CATEGORY_NAME } from "@/lib/constants";
 import { resolveDateRange } from "@/lib/dates";
-import { DomainError } from "@/lib/errors";
+import { DomainError, unauthorized } from "@/lib/errors";
 import { requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 
 export async function GET(request: Request): Promise<Response> {
   const result = await requireHousehold();
   if (!result) {
-    redirect("/sign-in");
+    return unauthorized();
   }
 
   const { searchParams } = new URL(request.url);
