@@ -191,6 +191,7 @@ export default function HouseholdSwitcher({
             <FieldLabel htmlFor="household-name">Name</FieldLabel>
             <Input
               id="household-name"
+              maxLength={50}
               value={name}
               onChange={(event) => setName(event.target.value)}
               placeholder="e.g. Family, Flat 12"
