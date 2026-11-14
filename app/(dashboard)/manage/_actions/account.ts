@@ -3,10 +3,11 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { type ActionResult } from "@/lib/action-result";
 import { auth, getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
-export async function deleteAccount() {
+export async function deleteAccount(): Promise<ActionResult> {
   const session = await getSession();
   if (!session) {
     redirect("/sign-in");

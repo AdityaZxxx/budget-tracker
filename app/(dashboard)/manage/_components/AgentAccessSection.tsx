@@ -86,7 +86,11 @@ const AgentAccessSection = ({ canEdit }: { canEdit: boolean }) => {
   const enabled = household?.agentAccessEnabled ?? false;
 
   const accessMutation = useMutation({
-    mutationFn: setAgentAccess,
+    mutationFn: async (input: Parameters<typeof setAgentAccess>[0]) => {
+      const res = await setAgentAccess(input);
+      if (!res.ok) throw new Error(res.message);
+      return res.data;
+    },
     onSuccess: async (_data, variables) => {
       toast.success(
         variables.enabled ? "Agent access enabled" : "Agent access turned off",
@@ -147,18 +151,31 @@ const ApiTokenList = ({ canEdit }: { canEdit: boolean }) => {
 
   const { data: tokens = [], isLoading } = useQuery<ApiTokenSummary[]>({
     queryKey: ["apiTokens"],
-    queryFn: listApiTokens,
+    queryFn: async () => {
+      const res = await listApiTokens();
+      if (!res.ok) throw new Error(res.message);
+      return res.data ?? [];
+    },
     staleTime: POLL_INTERVAL,
   });
 
   const revokeMutation = useMutation({
-    mutationFn: revokeApiToken,
+    mutationFn: async (input: Parameters<typeof revokeApiToken>[0]) => {
+      const res = await revokeApiToken(input);
+      if (!res.ok) throw new Error(res.message);
+      return res.data;
+    },
     onSuccess: async () => {
       toast.success("Token revoked", { id: "api-tokens" });
       await queryClient.invalidateQueries({ queryKey: ["apiTokens"] });
     },
-    onError: () => {
-      toast.error("Unable to revoke token. Try again.", { id: "api-tokens" });
+    onError: (error) => {
+      toast.error(
+        error instanceof Error && error.message
+          ? error.message
+          : "Unable to revoke token. Try again.",
+        { id: "api-tokens" },
+      );
     },
   });
 
@@ -251,8 +268,13 @@ const CreateApiTokenDialog = ({
   const queryClient = useQueryClient();
 
   const createMutation = useMutation({
-    mutationFn: createApiToken,
+    mutationFn: async (input: Parameters<typeof createApiToken>[0]) => {
+      const res = await createApiToken(input);
+      if (!res.ok) throw new Error(res.message);
+      return res.data;
+    },
     onSuccess: async (data) => {
+      if (!data) return;
       setCreated(data.token);
       setName("");
       setScope(READ_ONLY_SCOPE);
@@ -264,7 +286,7 @@ const CreateApiTokenDialog = ({
       setError(
         mutationError instanceof Error && mutationError.message
           ? mutationError.message
-          : "Unable to create token. Try again.",
+          : "Unable to create the token. Check the details and try again.",
       );
     },
   });
