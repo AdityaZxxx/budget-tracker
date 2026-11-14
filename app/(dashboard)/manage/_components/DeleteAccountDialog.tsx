@@ -28,16 +28,25 @@ const DeleteAccountDialog = ({ trigger }: Props) => {
   const router = useRouter();
 
   const deleteMutation = useMutation({
-    mutationFn: deleteAccount,
+    mutationFn: async () => {
+      const res = await deleteAccount();
+      if (!res.ok) throw new Error(res.message);
+      return res.data;
+    },
     onSuccess: () => {
       toast.success("Your account was deleted", { id: "delete-account" });
       router.replace("/sign-in");
       router.refresh();
     },
-    onError: () => {
-      toast.error("Unable to delete your account. Try again.", {
-        id: "delete-account",
-      });
+    onError: (error) => {
+      toast.error(
+        error instanceof Error && error.message
+          ? error.message
+          : "Unable to delete your account. Try again.",
+        {
+          id: "delete-account",
+        },
+      );
     },
   });
 

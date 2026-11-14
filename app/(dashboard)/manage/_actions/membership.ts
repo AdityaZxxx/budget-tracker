@@ -5,10 +5,13 @@ import type {
   SetEmailDigestSchemaType,
   SetMemberRoleSchemaType,
 } from "@/schemas/membership";
+import type { HouseholdMembership } from "@prisma/client";
 
 import { redirect } from "next/navigation";
 
+import { type ActionResult, fail, ok } from "@/lib/action-result";
 import { VIEW_ONLY_ROLE } from "@/lib/constants";
+import { DomainError } from "@/lib/errors";
 import {
   clearActiveHouseholdCookie,
   requireHousehold,
@@ -25,6 +28,8 @@ import {
   SetEmailDigestSchema,
   SetMemberRoleSchema,
 } from "@/schemas/membership";
+
+import { firstIssueMessage } from "./parse-error";
 
 export async function listMembers() {
   const result = await requireHousehold();
@@ -54,7 +59,7 @@ export async function listMembers() {
   });
 }
 
-export async function leaveHousehold() {
+export async function leaveHousehold(): Promise<ActionResult> {
   const result = await requireHousehold();
   if (!result) {
     redirect("/sign-in");
@@ -128,10 +133,17 @@ export async function leaveHousehold() {
   redirect("/");
 }
 
-export async function removeMember(form: RemoveMemberSchemaType) {
+export async function removeMember(
+  form: RemoveMemberSchemaType,
+): Promise<ActionResult> {
   const parsedBody = RemoveMemberSchema.safeParse(form);
   if (!parsedBody.success) {
-    throw new Error("Bad request");
+    return fail(
+      firstIssueMessage(
+        parsedBody.error,
+        "Unable to remove this member. Try again.",
+      ),
+    );
   }
 
   const result = await requireHousehold();
@@ -141,12 +153,20 @@ export async function removeMember(form: RemoveMemberSchemaType) {
 
   const { session, household } = result;
 
-  const removedName = await removeMemberSeam(
-    household.id,
-    session.user.id,
-    result.membership.role,
-    parsedBody.data,
-  );
+  let removedName: string;
+  try {
+    removedName = await removeMemberSeam(
+      household.id,
+      session.user.id,
+      result.membership.role,
+      parsedBody.data,
+    );
+  } catch (cause) {
+    if (cause instanceof DomainError) {
+      return fail(cause.message);
+    }
+    throw cause;
+  }
 
   // The removed member now belongs to a different household, so their bell
   // would never show this; only the remaining members are notified.
@@ -156,12 +176,21 @@ export async function removeMember(form: RemoveMemberSchemaType) {
     "member_left",
     `${removedName} was removed from the household.`,
   );
+
+  return ok();
 }
 
-export async function setMemberRole(form: SetMemberRoleSchemaType) {
+export async function setMemberRole(
+  form: SetMemberRoleSchemaType,
+): Promise<ActionResult> {
   const parsedBody = SetMemberRoleSchema.safeParse(form);
   if (!parsedBody.success) {
-    throw new Error("Bad request");
+    return fail(
+      firstIssueMessage(
+        parsedBody.error,
+        "Unable to change this member's access. Try again.",
+      ),
+    );
   }
 
   const result = await requireHousehold();
@@ -172,12 +201,20 @@ export async function setMemberRole(form: SetMemberRoleSchemaType) {
   const { session, household } = result;
   const { userId } = parsedBody.data;
 
-  const { role: nextRole } = await setMemberRoleSeam(
-    household.id,
-    session.user.id,
-    result.membership.role,
-    parsedBody.data,
-  );
+  let nextRole: (typeof parsedBody.data)["role"];
+  try {
+    ({ role: nextRole } = await setMemberRoleSeam(
+      household.id,
+      session.user.id,
+      result.membership.role,
+      parsedBody.data,
+    ));
+  } catch (cause) {
+    if (cause instanceof DomainError) {
+      return fail(cause.message);
+    }
+    throw cause;
+  }
 
   await notify(
     household.id,
@@ -187,12 +224,21 @@ export async function setMemberRole(form: SetMemberRoleSchemaType) {
       ? `${session.user.name} set your access to view-only in this household.`
       : `${session.user.name} gave you full edit access in this household.`,
   );
+
+  return ok();
 }
 
-export async function setEmailDigest(form: SetEmailDigestSchemaType) {
+export async function setEmailDigest(
+  form: SetEmailDigestSchemaType,
+): Promise<ActionResult<HouseholdMembership>> {
   const parsedBody = SetEmailDigestSchema.safeParse(form);
   if (!parsedBody.success) {
-    throw new Error("Bad request");
+    return fail(
+      firstIssueMessage(
+        parsedBody.error,
+        "Unable to update the email digest. Try again.",
+      ),
+    );
   }
 
   const result = await requireHousehold();
@@ -203,15 +249,17 @@ export async function setEmailDigest(form: SetEmailDigestSchemaType) {
   const { session, household } = result;
 
   // Members can only toggle their own digest preference.
-  return await prisma.householdMembership.update({
-    where: {
-      householdId_userId: {
-        householdId: household.id,
-        userId: session.user.id,
+  return ok(
+    await prisma.householdMembership.update({
+      where: {
+        householdId_userId: {
+          householdId: household.id,
+          userId: session.user.id,
+        },
       },
-    },
-    data: {
-      emailDigest: parsedBody.data.emailDigest,
-    },
-  });
+      data: {
+        emailDigest: parsedBody.data.emailDigest,
+      },
+    }),
+  );
 }

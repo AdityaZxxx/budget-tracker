@@ -94,7 +94,7 @@ const BudgetsSection = ({ canEdit }: { canEdit: boolean }) => {
             {isError ? (
               <div className="flex h-32 flex-col items-center justify-center rounded-lg border border-destructive/20 bg-destructive/5 p-6 text-center">
                 <p className="mb-2 text-sm font-medium text-destructive">
-                  Failed to load budgets
+                  Unable to load budgets. Try again.
                 </p>
                 <Button
                   variant="ghost"

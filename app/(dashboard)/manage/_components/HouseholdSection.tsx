@@ -42,7 +42,11 @@ const HouseholdSection = ({ canEdit }: { canEdit: boolean }) => {
   const displayName = active?.name ?? DEFAULT_HOUSEHOLD_NAME;
 
   const { mutate: rename, isPending } = useMutation({
-    mutationFn: () => renameHousehold(name),
+    mutationFn: async () => {
+      const res = await renameHousehold(name);
+      if (!res.ok) throw new Error(res.message);
+      return res.data;
+    },
     onSuccess: () => {
       toast.success("Space renamed", {
         id: "rename-household",
@@ -53,10 +57,15 @@ const HouseholdSection = ({ canEdit }: { canEdit: boolean }) => {
       });
       setOpen(false);
     },
-    onError: () => {
-      toast.error("Unable to rename. Try again.", {
-        id: "rename-household",
-      });
+    onError: (error) => {
+      toast.error(
+        error instanceof Error && error.message
+          ? error.message
+          : "Unable to rename this space. Check the name and try again.",
+        {
+          id: "rename-household",
+        },
+      );
     },
   });
 
