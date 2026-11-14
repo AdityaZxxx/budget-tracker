@@ -54,7 +54,11 @@ const RecordSettlementDialog = ({ trigger, members, currency }: Props) => {
   const decimalSeparator = numberParts.find((p) => p.type === "decimal")?.value;
 
   const { mutate, isPending } = useMutation({
-    mutationFn: RecordSettlement,
+    mutationFn: async (input: Parameters<typeof RecordSettlement>[0]) => {
+      const res = await RecordSettlement(input);
+      if (!res.ok) throw new Error(res.message);
+      return res.data;
+    },
     onSuccess: () => {
       toast.success("Settlement recorded", {
         id: "record-settlement",
@@ -72,10 +76,15 @@ const RecordSettlementDialog = ({ trigger, members, currency }: Props) => {
       setAmount(0);
       setOpen(false);
     },
-    onError: () => {
-      toast.error("Unable to record settlement. Try again.", {
-        id: "record-settlement",
-      });
+    onError: (error) => {
+      toast.error(
+        error instanceof Error && error.message
+          ? error.message
+          : "Unable to record the settlement. Refresh the page and try again.",
+        {
+          id: "record-settlement",
+        },
+      );
     },
   });
 

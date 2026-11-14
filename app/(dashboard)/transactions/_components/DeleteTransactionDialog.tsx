@@ -25,7 +25,11 @@ interface Props {
 const DeleteTransactionDialog = ({ open, setOpen, transactionId }: Props) => {
   const queryClient = useQueryClient();
   const deleteMutation = useMutation({
-    mutationFn: DeleteTransaction,
+    mutationFn: async (id: string) => {
+      const res = await DeleteTransaction(id);
+      if (!res.ok) throw new Error(res.message);
+      return res.data;
+    },
     onSuccess: async () => {
       toast.success("Transaction deleted", {
         id: transactionId,
@@ -34,10 +38,15 @@ const DeleteTransactionDialog = ({ open, setOpen, transactionId }: Props) => {
         queryKey: ["transactions"],
       });
     },
-    onError: () => {
-      toast.error("Unable to delete transaction. Try again.", {
-        id: transactionId,
-      });
+    onError: (error) => {
+      toast.error(
+        error instanceof Error && error.message
+          ? error.message
+          : "Unable to delete the transaction. Refresh the page and try again.",
+        {
+          id: transactionId,
+        },
+      );
     },
   });
 

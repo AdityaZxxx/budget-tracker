@@ -65,7 +65,8 @@ const COPY = {
     toastId: "add-goal",
     success: "Goal added",
     loading: "Adding goal…",
-    error: "Unable to add goal. Try again.",
+    error:
+      "Unable to add the goal. Check the name and target amount, then try again.",
   },
   edit: {
     title: "Edit goal",
@@ -73,7 +74,8 @@ const COPY = {
     toastId: "update-goal",
     success: "Goal updated",
     loading: "Saving goal…",
-    error: "Unable to update goal. Try again.",
+    error:
+      "Unable to update the goal. Check the name and target amount, then try again.",
   },
 };
 
@@ -109,15 +111,18 @@ const GoalFormDialog = ({
   const decimalSeparator = numberParts.find((p) => p.type === "decimal")?.value;
 
   const { mutate, isPending } = useMutation({
-    mutationFn: (values: GoalFormValues) =>
-      goal
-        ? updateGoal({
+    mutationFn: async (values: GoalFormValues) => {
+      const res = goal
+        ? await updateGoal({
             id: goal.id,
             name: values.name,
             target: values.target,
             deadline: values.deadline ?? null,
           })
-        : createGoal(values),
+        : await createGoal(values);
+      if (!res.ok) throw new Error(res.message);
+      return res.data;
+    },
     onSuccess: async () => {
       toast.success(copy.success, {
         id: copy.toastId,
@@ -133,10 +138,13 @@ const GoalFormDialog = ({
 
       setOpen(false);
     },
-    onError: () => {
-      toast.error(copy.error, {
-        id: copy.toastId,
-      });
+    onError: (error) => {
+      toast.error(
+        error instanceof Error && error.message ? error.message : copy.error,
+        {
+          id: copy.toastId,
+        },
+      );
     },
   });
 

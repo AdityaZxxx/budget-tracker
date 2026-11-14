@@ -33,7 +33,11 @@ const NotificationBell = () => {
 
   const { data: notifications = [] } = useQuery({
     queryKey: ["notifications"],
-    queryFn: listNotifications,
+    queryFn: async () => {
+      const res = await listNotifications();
+      if (!res.ok) throw new Error(res.message);
+      return res.data;
+    },
     staleTime: POLL_INTERVAL,
     refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,
@@ -48,16 +52,25 @@ const NotificationBell = () => {
   );
 
   const { mutate: markRead, isPending } = useMutation({
-    mutationFn: markAllRead,
+    mutationFn: async () => {
+      const res = await markAllRead();
+      if (!res.ok) throw new Error(res.message);
+      return res.data;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["notifications"],
       });
     },
-    onError: () => {
-      toast.error("Unable to mark notifications as read. Try again.", {
-        id: "mark-all-read",
-      });
+    onError: (error) => {
+      toast.error(
+        error instanceof Error && error.message
+          ? error.message
+          : "Unable to mark the notifications as read. Refresh the page and try again.",
+        {
+          id: "mark-all-read",
+        },
+      );
     },
   });
 

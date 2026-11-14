@@ -152,7 +152,11 @@ const CreateTransactionDialog = ({
 
   const goalsQuery = useQuery({
     queryKey: ["goals"],
-    queryFn: listGoals,
+    queryFn: async () => {
+      const res = await listGoals();
+      if (!res.ok) throw new Error(res.message);
+      return res.data;
+    },
     staleTime: POLL_INTERVAL,
     refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,
@@ -162,7 +166,11 @@ const CreateTransactionDialog = ({
 
   const memberCountQuery = useQuery({
     queryKey: ["memberCount"],
-    queryFn: getHouseholdMemberCount,
+    queryFn: async () => {
+      const res = await getHouseholdMemberCount();
+      if (!res.ok) throw new Error(res.message);
+      return res.data;
+    },
     staleTime: POLL_INTERVAL,
     refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,
@@ -184,7 +192,11 @@ const CreateTransactionDialog = ({
   const queryClient = useQueryClient();
 
   const { mutate, isPending } = useMutation({
-    mutationFn: CreateTransaction,
+    mutationFn: async (input: Parameters<typeof CreateTransaction>[0]) => {
+      const res = await CreateTransaction(input);
+      if (!res.ok) throw new Error(res.message);
+      return res.data;
+    },
     onSuccess: () => {
       toast.success("Transaction added", {
         id: "create-transaction",
@@ -205,12 +217,10 @@ const CreateTransactionDialog = ({
       setOpen(false);
     },
     onError: (error) => {
-      // Server actions throw domain errors (e.g. a hard budget rejecting the
-      // expense); surface the message when the runtime exposes it.
       toast.error(
         error instanceof Error && error.message
           ? error.message
-          : "Unable to create transaction. Try again.",
+          : "Unable to add the transaction. Refresh the page and try again.",
         {
           id: "create-transaction",
         },

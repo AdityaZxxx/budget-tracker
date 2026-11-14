@@ -42,7 +42,15 @@ const DashboardPage = async () => {
   }
 
   const canEdit = result.membership.role !== VIEW_ONLY_ROLE;
-  const memberCount = await getHouseholdMemberCount();
+  const memberCountResult = await getHouseholdMemberCount();
+  if (!memberCountResult.ok || memberCountResult.data === undefined) {
+    throw new Error(
+      memberCountResult.ok
+        ? "The member count is missing."
+        : memberCountResult.message,
+    );
+  }
+  const memberCount = memberCountResult.data;
 
   return (
     <div className="h-full bg-background px-6">
