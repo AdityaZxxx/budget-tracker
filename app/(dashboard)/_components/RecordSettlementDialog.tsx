@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Currencies } from "@/lib/currencies";
+import { hasTwoDecimals } from "@/lib/helpers";
 
 import { RecordSettlement } from "../_actions/balance";
 
@@ -36,12 +37,6 @@ interface Props {
   members: { userId: string; name: string }[];
   currency: string | null;
 }
-
-// The same precision rule the server applies: at most two decimals, and
-// the value has to survive cents math.
-const centsOk = (value: number) =>
-  Number.isFinite(value) &&
-  Math.abs(value * 100 - Math.round(value * 100)) < 1e-9;
 
 const RecordSettlementDialog = ({ trigger, members, currency }: Props) => {
   const [open, setOpen] = useState(false);
@@ -90,7 +85,7 @@ const RecordSettlementDialog = ({ trigger, members, currency }: Props) => {
       toast.error("Select a member", { id: "record-settlement" });
       return;
     }
-    if (!amount || amount <= 0 || !centsOk(amount)) {
+    if (!amount || amount <= 0 || !hasTwoDecimals(amount)) {
       toast.error(
         "Enter an amount greater than zero, with at most two decimals",
         {
@@ -147,10 +142,8 @@ const RecordSettlementDialog = ({ trigger, members, currency }: Props) => {
               customInput={Input}
               id="settlement-amount"
               placeholder="0.00"
-              min={0.01}
-              step="0.01"
               inputMode="decimal"
-              aria-invalid={amount > 0 && !centsOk(amount)}
+              aria-invalid={amount > 0 && !hasTwoDecimals(amount)}
               value={amount}
               onValueChange={(values) => {
                 setAmount(values.floatValue ?? 0);
@@ -180,7 +173,10 @@ const RecordSettlementDialog = ({ trigger, members, currency }: Props) => {
             <Button
               type="submit"
               disabled={
-                isPending || !memberId || !(amount > 0) || !centsOk(amount)
+                isPending ||
+                !memberId ||
+                !(amount > 0) ||
+                !hasTwoDecimals(amount)
               }
               className="w-full sm:w-auto"
             >

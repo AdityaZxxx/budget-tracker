@@ -69,6 +69,9 @@ const todayDateValue = () => {
   return `${now.getFullYear()}-${month}-${day}`;
 };
 
+// The schema's own message for a past expiry.
+const isFutureDate = (value: string) => !value || value >= todayDateValue();
+
 const AgentAccessSection = ({ canEdit }: { canEdit: boolean }) => {
   const queryClient = useQueryClient();
 
@@ -273,8 +276,8 @@ const CreateApiTokenDialog = ({
       setError("Enter a name");
       return;
     }
-    if (expiresAt && expiresAt < todayDateValue()) {
-      setExpiryError("Choose a date in the future");
+    if (!isFutureDate(expiresAt)) {
+      setExpiryError("Pick a future date");
       return;
     }
 
@@ -358,11 +361,20 @@ const CreateApiTokenDialog = ({
                   placeholder="Claude Desktop"
                   value={name}
                   maxLength={60}
+                  aria-invalid={name.length >= 60}
+                  aria-describedby={
+                    name.length >= 60 ? "token-name-error" : undefined
+                  }
                   onChange={(event) => setName(event.target.value)}
                 />
                 <FieldDescription className="text-xs sm:text-sm">
                   How you will recognise this token later
                 </FieldDescription>
+                {name.length >= 60 && (
+                  <FieldError id="token-name-error">
+                    Up to 60 characters
+                  </FieldError>
+                )}
               </Field>
 
               <Field>
@@ -411,10 +423,9 @@ const CreateApiTokenDialog = ({
                   onChange={(event) => {
                     setExpiresAt(event.target.value);
                     setExpiryError(
-                      event.target.value &&
-                        event.target.value < todayDateValue()
-                        ? "Choose a date in the future"
-                        : null,
+                      isFutureDate(event.target.value)
+                        ? null
+                        : "Pick a future date",
                     );
                   }}
                 />
