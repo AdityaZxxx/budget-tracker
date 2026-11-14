@@ -74,7 +74,7 @@ export const COMMANDS: Record<string, Command> = {
       };
 
       if (values.description !== undefined) {
-        args.description = values.description;
+        args.description = values.description.trim();
       }
 
       if (values.date !== undefined) {
@@ -97,7 +97,7 @@ export const COMMANDS: Record<string, Command> = {
       };
 
       if (values.description !== undefined) {
-        args.description = values.description;
+        args.description = values.description.trim();
       }
 
       if (values.date !== undefined) {
@@ -233,19 +233,24 @@ function requireValue(
     );
   }
 
-  return value;
+  return value.trim();
 }
 
 function parseAmount(value: string): number {
   const amount = Number(value);
 
-  if (!Number.isFinite(amount)) {
+  // The server's money rule: greater than zero, at most two decimals.
+  const cents = Math.round(amount * 100);
+  const withinCents =
+    Number.isFinite(amount) && Math.abs(amount * 100 - cents) < 1e-9;
+
+  if (!withinCents || amount <= 0) {
     throw new CliError(
-      `Invalid --amount: ${value}. Use a number, such as 500.`,
+      `Invalid --amount: ${value}. Use a positive number with at most two decimals, such as 500 or 12.50.`,
     );
   }
 
-  return amount;
+  return cents / 100;
 }
 
 function parseDate(value: string): string {
