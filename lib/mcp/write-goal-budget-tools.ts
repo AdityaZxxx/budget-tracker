@@ -11,7 +11,8 @@ import {
   deleteHouseholdGoal,
   updateHouseholdGoal,
 } from "@/lib/goals";
-import { amountNumber } from "@/schemas/money";
+import { budgetFields } from "@/schemas/budgets";
+import { goalFields } from "@/schemas/goals";
 
 import { parseDate, toolError, toolResult } from "./tools";
 
@@ -23,6 +24,8 @@ export function registerGoalBudgetWriteTools(
   server: McpServer,
   context: McpContext,
 ) {
+  const goalInput = goalFields(false);
+  const budgetInput = budgetFields(false);
   server.registerTool(
     "delete_goal",
     {
@@ -94,12 +97,8 @@ export function registerGoalBudgetWriteTools(
       description:
         "Create a Goal in the Household: an amount to save, with an optional deadline. A Goal is not tied to a Transaction; money reaches it through Transactions tagged with the Goal.",
       inputSchema: {
-        name: z
-          .string()
-          .min(1)
-          .max(50)
-          .describe("Name of the Goal, up to 50 characters."),
-        target: amountNumber(false).describe(
+        name: goalInput.name.describe("Name of the Goal, up to 50 characters."),
+        target: goalInput.target.describe(
           "Amount to save, in the Household's currency.",
         ),
         deadline: z
@@ -149,13 +148,10 @@ export function registerGoalBudgetWriteTools(
           .string()
           .min(1)
           .describe("Id of the Goal to update. Use list_goals to see them."),
-        name: z
-          .string()
-          .min(1)
-          .max(50)
+        name: goalInput.name
           .optional()
           .describe("New name for the Goal, up to 50 characters."),
-        target: amountNumber(false)
+        target: goalInput.target
           .optional()
           .describe("New amount to save, in the Household's currency."),
         deadline: z
@@ -211,17 +207,13 @@ export function registerGoalBudgetWriteTools(
       description:
         "Set the Household's monthly Budget for one expense Category: the limit, and whether it is soft (warns at the limit) or hard (rejects shared expenses over it). A Budget applies to shared expenses only. A Household has one Budget per Category, so setting a Category that already has one replaces its limit.",
       inputSchema: {
-        category: z
-          .string()
-          .min(1)
-          .describe(
-            "Name of an expense Category in the Household. Use list_categories to see them.",
-          ),
-        amount: amountNumber(false).describe(
+        category: budgetInput.category.describe(
+          "Name of an expense Category in the Household. Use list_categories to see them.",
+        ),
+        amount: budgetInput.amount.describe(
           "Monthly limit, in the Household's currency.",
         ),
-        mode: z
-          .enum(["soft", "hard"])
+        mode: budgetInput.mode
           .default("soft")
           .describe(
             "Soft warns at the limit; hard rejects shared expenses over it.",
