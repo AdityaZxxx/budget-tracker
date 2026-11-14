@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILL_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 REPO_ROOT="$(cd "$SKILL_DIR/../../.." && pwd)"
 
-STATE_DIR="$REPO_ROOT/.scratch/verify-sora"
+STATE_DIR="${SORA_VERIFY_STATE_DIR:-$REPO_ROOT/.scratch/verify-sora}"
 RUNS_DIR="$STATE_DIR/runs"
 ARTIFACTS_DIR="$STATE_DIR/artifacts"
 LOGS_DIR="$STATE_DIR/logs"
@@ -16,7 +16,6 @@ RUN_ENV="$STATE_DIR/run.env"
 PG_IMAGE="${SORA_VERIFY_PG_IMAGE:-public.ecr.aws/supabase/postgres:17.6.1.143}"
 PG_USER="postgres"
 PG_PASSWORD="postgres"
-DEFAULT_APP_PORT="3210"
 BETTER_AUTH_SECRET="sora-verify-$(openssl rand -hex 24)"
 EMAIL_DOMAIN="sora.test"
 PRIMARY_EMAIL="avery@$EMAIL_DOMAIN"
@@ -325,7 +324,7 @@ JSON
 
 cmd_launch() {
   local empty=0
-  local port="${SORA_VERIFY_PORT:-$DEFAULT_APP_PORT}"
+  local port="${SORA_VERIFY_PORT:-}"
   APP_MODE="${SORA_VERIFY_MODE:-dev}"
   while (($# > 0)); do
     case "$1" in
@@ -342,9 +341,18 @@ cmd_launch() {
     shift
   done
 
+  if [[ -n "$port" ]]; then
+    node -e "const net=require('node:net');const s=new net.createServer();s.on('error',()=>process.exit(1));s.listen($port,'127.0.0.1',()=>{s.close();process.exit(0)});" \
+      || die "Launch refused: port $port is already in use. Unset SORA_VERIFY_PORT to pick a free port."
+  fi
+
   ensure_tools
   stale_cleanup
   ensure_deps
+
+  if [[ -z "$port" ]]; then
+    port="$(pick_port)"
+  fi
 
   RUN_ID="${SORA_VERIFY_RUN_ID:-$(date -u +%Y%m%dT%H%M%SZ)-$RANDOM}"
   APP_PORT="$port"

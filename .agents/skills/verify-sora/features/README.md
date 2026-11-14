@@ -13,6 +13,7 @@ This directory is the maintained source for verifying Sora's user-facing behavio
 ## Driving conventions
 
 - Start every recipe from the baseline state unless its preconditions say otherwise.
+- Read `control-sora launch`'s output for the real base URL. The command prints `URL: http://127.0.0.1:<port>`; use that port everywhere `127.0.0.1:3210` appears below. Default ports move between runs.
 - Prefer accessible names over CSS selectors: `find role button click --name "New expense"`. Reach for a CSS selector only where two elements share a name (the transaction table's `Category` filter and its `Category` column header), and say so.
 - Keep commands literal. Quoted names and flags stay unchanged.
 - Run browser actions through `control-sora browser`, so every command in a run shares one browser session and one cookie jar.

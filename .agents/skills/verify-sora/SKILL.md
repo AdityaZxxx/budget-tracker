@@ -34,9 +34,11 @@ The feature map in `features/` is the source of truth for what to drive and what
 
 1. starts a disposable Postgres 17 container with TLS enabled, on a free port, named after the run;
 2. creates `sora_verify_<run-id>` and `sora_verify_<run-id>_shadow` and applies the Prisma migrations;
-3. starts Next.js on `127.0.0.1:3210`;
+3. starts Next.js on an ephemeral free port (override with `SORA_VERIFY_PORT` if you need a fixed one);
 4. builds `packages/sora-cli`;
 5. seeds the fixture household (see below) and writes `run.env` and `fixtures.json`.
+
+Parallel workflows point the harness at one shared scratch root with `SORA_VERIFY_STATE_DIR=<repo-root>/.scratch/verify-sora .agents/skills/verify-sora/scripts/control-sora launch --prod`. That way the run notes and artifacts land in one place and survive the worktree that produced them.
 
 It prints the URL, the run id, the database name, the artifact directory, and the log file. That output is the handle for everything else.
 
@@ -44,11 +46,11 @@ Why a container and not the Postgres already on the machine: `lib/prisma.ts` con
 
 Options:
 
-| Flag         | Effect                                                                      |
-| ------------ | --------------------------------------------------------------------------- |
-| `--empty`    | Skip the seed. The database is empty, so onboarding can be driven for real. |
-| `--prod`     | Build and serve the production bundle instead of the dev server.            |
-| `--port <n>` | Serve on another port (default 3210).                                       |
+| Flag         | Effect                                                                                                                             |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `--empty`    | Skip the seed. The database is empty, so onboarding can be driven for real.                                                        |
+| `--prod`     | Build and serve the production bundle instead of the dev server.                                                                   |
+| `--port <n>` | Pin the port instead of letting `control-sora` pick a free one. An explicit port that is busy fails fast; unset means free choice. |
 
 `SORA_VERIFY_MODE=prod` and `SORA_VERIFY_PORT` do the same thing through the environment.
 
