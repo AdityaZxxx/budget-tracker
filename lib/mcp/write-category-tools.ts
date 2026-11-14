@@ -13,6 +13,7 @@ import {
   categoryNameSchema,
   categoryTypeSchema,
 } from "@/schemas/categories";
+import { DeleteIdSchema } from "@/schemas/delete";
 
 import { toolError, toolErrorMessage, toolResult } from "./tools";
 
@@ -51,6 +52,7 @@ export function registerCategoryWriteTools(
         );
 
         return toolResult({
+          id: category.id,
           name: category.name,
           icon: category.icon,
           type: category.type,
@@ -94,6 +96,7 @@ export function registerCategoryWriteTools(
         );
 
         return toolResult({
+          id: category.id,
           name: category.name,
           icon: category.icon,
           type: category.type,
@@ -110,27 +113,25 @@ export function registerCategoryWriteTools(
     {
       title: "Delete category",
       description:
-        "Delete a Category from the Household. Use list_categories to see the Categories. The Settlement Category cannot be deleted.",
+        "Delete a Category from the Household. Use list_categories to find the Category's id. The Settlement Category cannot be deleted.",
       inputSchema: {
-        name: categoryLookupNameSchema.describe(
-          "Name of the Category to delete. Use list_categories to see them.",
-        ),
-        type: categoryTypeSchema.describe(
-          "Whether the Category labels income or expense Transactions.",
+        id: DeleteIdSchema.shape.id.describe(
+          "Id of the Category to delete. Use list_categories to see them.",
         ),
       },
     },
-    async ({ name, type }) => {
+    async ({ id }) => {
       if (context.scope !== READ_WRITE_SCOPE)
         return toolError("This token is read-only.");
       try {
         const category = await deleteHouseholdCategory(
           context.householdId,
-          { name, type },
+          id,
           context.role,
         );
 
         return toolResult({
+          id: category.id,
           name: category.name,
           icon: category.icon,
           type: category.type,

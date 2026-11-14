@@ -205,12 +205,25 @@ export async function deleteHouseholdBudget(
   role: MemberRole,
 ) {
   assertFullMemberRole(role);
-  const budget = await prisma.budget.delete({
+  const budget = await prisma.budget.findFirst({
     where: {
       id,
       householdId,
     },
   });
+  if (!budget) {
+    throw new DomainError("Budget not found");
+  }
+
+  const deleted = await prisma.budget.deleteMany({
+    where: {
+      id,
+      householdId,
+    },
+  });
+  if (deleted.count === 0) {
+    throw new DomainError("Budget not found");
+  }
 
   return { ...budget, amount: budget.amount.toNumber() };
 }

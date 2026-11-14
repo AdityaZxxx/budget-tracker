@@ -7,6 +7,7 @@ import { READ_WRITE_SCOPE } from "@/lib/constants";
 import { parseDate } from "@/lib/dates";
 import { recordSettlement } from "@/lib/settlements";
 import { createTransaction, deleteTransaction } from "@/lib/transactions";
+import { DeleteIdSchema } from "@/schemas/delete";
 import { settlementFields } from "@/schemas/settlement";
 import { transactionFields } from "@/schemas/transaction";
 
@@ -116,12 +117,9 @@ export function registerTransactionWriteTools(
       description:
         "Delete a Transaction from the Household's ledger. The Household's balances and history rollups move with it. Use list_transactions to find the Transaction's id.",
       inputSchema: {
-        id: z
-          .string()
-          .min(1)
-          .describe(
-            "Id of the Transaction to delete. Use list_transactions to see them.",
-          ),
+        id: DeleteIdSchema.shape.id.describe(
+          "Id of the Transaction to delete. Use list_transactions to see them.",
+        ),
       },
     },
     async ({ id }) => {

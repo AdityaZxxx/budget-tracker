@@ -25,9 +25,11 @@ interface Props {
 const DeleteTransactionDialog = ({ open, setOpen, transactionId }: Props) => {
   const queryClient = useQueryClient();
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const res = await DeleteTransaction(id);
-      if (!res.ok) throw new Error(res.message);
+    mutationFn: async (values: { id: string }) => {
+      const res = await DeleteTransaction(values);
+      if (!res.ok) {
+        throw new Error(res.message);
+      }
       return res.data;
     },
     onSuccess: async () => {
@@ -56,8 +58,8 @@ const DeleteTransactionDialog = ({ open, setOpen, transactionId }: Props) => {
         <AlertDialogHeader>
           <AlertDialogTitle>Delete transaction?</AlertDialogTitle>
           <AlertDialogDescription>
-            This permanently deletes the transaction. This action cannot be
-            undone.
+            Deleting this transaction cannot be undone. Balanced totals,
+            budgets, and goals recalculate immediately.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -68,7 +70,7 @@ const DeleteTransactionDialog = ({ open, setOpen, transactionId }: Props) => {
               toast.loading("Deleting transaction…", {
                 id: transactionId,
               });
-              deleteMutation.mutate(transactionId);
+              deleteMutation.mutate({ id: transactionId });
             }}
           >
             Delete transaction

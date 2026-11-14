@@ -473,64 +473,67 @@ export async function deleteTransaction(
   });
 
   if (!transaction) {
-    throw new DomainError("Bad request");
+    throw new DomainError("Transaction not found");
   }
 
-  await prisma.$transaction([
-    prisma.transaction.delete({
+  await prisma.$transaction(async (tx) => {
+    const deleted = await tx.transaction.deleteMany({
       where: {
         id,
         householdId,
       },
-    }),
-    // Personal transactions were never counted in the household rollups.
-    ...(transaction.shared
-      ? [
-          prisma.monthHistory.update({
-            where: {
-              day_month_year_householdId: {
-                householdId,
-                day: transaction.date.getUTCDate(),
-                month: transaction.date.getUTCMonth(),
-                year: transaction.date.getUTCFullYear(),
-              },
-            },
-            data: {
-              ...(transaction.type === "expense" && {
-                expense: {
-                  decrement: transaction.amount,
-                },
-              }),
-              ...(transaction.type === "income" && {
-                income: {
-                  decrement: transaction.amount,
-                },
-              }),
-            },
-          }),
+    });
+    if (deleted.count === 0) {
+      throw new DomainError("Transaction not found");
+    }
 
-          prisma.yearHistory.update({
-            where: {
-              month_year_householdId: {
-                householdId,
-                month: transaction.date.getUTCMonth(),
-                year: transaction.date.getUTCFullYear(),
-              },
-            },
-            data: {
-              ...(transaction.type === "expense" && {
-                expense: {
-                  decrement: transaction.amount,
-                },
-              }),
-              ...(transaction.type === "income" && {
-                income: {
-                  decrement: transaction.amount,
-                },
-              }),
-            },
-          }),
-        ]
-      : []),
-  ]);
+    if (!transaction.shared) {
+      return;
+    }
+
+    await tx.monthHistory.update({
+      where: {
+        day_month_year_householdId: {
+          householdId,
+          day: transaction.date.getUTCDate(),
+          month: transaction.date.getUTCMonth(),
+          year: transaction.date.getUTCFullYear(),
+        },
+      },
+      data: {
+        ...(transaction.type === "expense" && {
+          expense: {
+            decrement: transaction.amount,
+          },
+        }),
+        ...(transaction.type === "income" && {
+          income: {
+            decrement: transaction.amount,
+          },
+        }),
+      },
+    });
+
+    await tx.yearHistory.update({
+      where: {
+        month_year_householdId: {
+          householdId,
+          month: transaction.date.getUTCMonth(),
+          year: transaction.date.getUTCFullYear(),
+        },
+      },
+      data: {
+        ...(transaction.type === "expense" && {
+          expense: {
+            decrement: transaction.amount,
+          },
+        }),
+        ...(transaction.type === "income" && {
+          income: {
+            decrement: transaction.amount,
+          },
+        }),
+      },
+    });
+  });
 }

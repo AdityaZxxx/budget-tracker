@@ -1,6 +1,5 @@
 import type {
   CreateCategorySchemaType,
-  DeleteCategorySchemaType,
   UpdateCategorySchemaType,
 } from "@/schemas/categories";
 
@@ -10,7 +9,6 @@ import prisma from "@/lib/prisma";
 import { assertFullMemberRole, type MemberRole } from "@/lib/roles";
 import {
   CreateCategorySchema,
-  DeleteCategorySchema,
   UpdateCategorySchema,
 } from "@/schemas/categories";
 
@@ -140,26 +138,31 @@ export async function updateHouseholdCategory(
 
 export async function deleteHouseholdCategory(
   householdId: string,
-  input: DeleteCategorySchemaType,
+  id: string,
   role: MemberRole,
 ) {
   assertFullMemberRole(role);
-  const parsed = DeleteCategorySchema.safeParse(input);
-  if (!parsed.success) {
-    throw new DomainError(
-      parsed.error.issues[0]?.message ?? "Invalid category",
-    );
-  }
-
-  assertNotSettlementCategory(parsed.data.name);
-
-  return await prisma.category.delete({
+  const category = await prisma.category.findFirst({
     where: {
-      name_householdId_type: {
-        householdId,
-        name: parsed.data.name,
-        type: parsed.data.type,
-      },
+      id,
+      householdId,
     },
   });
+  if (!category) {
+    throw new DomainError("Category not found");
+  }
+
+  assertNotSettlementCategory(category.name);
+
+  const deleted = await prisma.category.deleteMany({
+    where: {
+      id,
+      householdId,
+    },
+  });
+  if (deleted.count === 0) {
+    throw new DomainError("Category not found");
+  }
+
+  return category;
 }

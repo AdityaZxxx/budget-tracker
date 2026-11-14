@@ -13,6 +13,7 @@ import {
   updateHouseholdGoal,
 } from "@/lib/goals";
 import { budgetFields } from "@/schemas/budgets";
+import { DeleteIdSchema } from "@/schemas/delete";
 import { goalFields } from "@/schemas/goals";
 
 import { toolError, toolErrorMessage, toolResult } from "./tools";
@@ -34,10 +35,9 @@ export function registerGoalBudgetWriteTools(
       description:
         "Delete a Goal from the Household. Transactions tagged with the Goal keep the money in the ledger and lose the tag. Use list_goals to find the Goal's id.",
       inputSchema: {
-        id: z
-          .string()
-          .min(1)
-          .describe("Id of the Goal to delete. Use list_goals to see them."),
+        id: DeleteIdSchema.shape.id.describe(
+          "Id of the Goal to delete. Use list_goals to see them.",
+        ),
       },
     },
     async ({ id }) => {
@@ -60,12 +60,9 @@ export function registerGoalBudgetWriteTools(
       description:
         "Delete the Household's Budget for one expense Category. Use list_budgets to find the Budget's id.",
       inputSchema: {
-        id: z
-          .string()
-          .min(1)
-          .describe(
-            "Id of the Budget to delete. Use list_budgets to see them.",
-          ),
+        id: DeleteIdSchema.shape.id.describe(
+          "Id of the Budget to delete. Use list_budgets to see them.",
+        ),
       },
     },
     async ({ id }) => {

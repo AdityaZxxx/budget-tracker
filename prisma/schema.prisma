@@ -147,6 +147,7 @@ model RateLimit {
 }
 
 model Category {
+  id String @id @default(dbgenerated("gen_random_uuid()::text"))
   createdAt DateTime @default(now())
   name String
   householdId String

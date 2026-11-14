@@ -29,12 +29,6 @@ export type CreateGoalSchemaType = {
   deadline?: Date;
 };
 
-export const DeleteGoalSchema = z.object({
-  id: z.string().min(1),
-});
-
-export type DeleteGoalSchemaType = z.infer<typeof DeleteGoalSchema>;
-
 // A `null` deadline clears it; an absent one leaves it unchanged. Dates are
 // real Date objects by the time either caller parses (the client form and the
 // MCP tool), so no coercion happens at this boundary.

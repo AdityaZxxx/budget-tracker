@@ -37,9 +37,3 @@ export type UpdateBudgetSchemaType = {
   amount: number;
   mode: "soft" | "hard";
 };
-
-export const DeleteBudgetSchema = z.object({
-  id: z.string().min(1),
-});
-
-export type DeleteBudgetSchemaType = z.infer<typeof DeleteBudgetSchema>;
