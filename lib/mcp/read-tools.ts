@@ -6,13 +6,13 @@ import { z } from "zod";
 import { getMemberBalances } from "@/lib/balances";
 import { getBudgetsWithProgress } from "@/lib/budgets";
 import { getCategories } from "@/lib/categories";
+import { resolveDateRange } from "@/lib/dates";
 import { getGoalsWithProgress } from "@/lib/goals";
 import prisma from "@/lib/prisma";
 import { getBalanceStats, getTransactionsHistory } from "@/lib/transactions";
 
 import {
   dateRangeSchema,
-  resolveDateRange,
   toolError,
   toolErrorMessage,
   toolResult,

@@ -23,7 +23,7 @@ export function transactionFields(coerced: boolean) {
 
 export const CreateTransactionSchema = z.object({
   ...transactionFields(true),
-  date: z.coerce.date(),
+  date: z.date(),
 });
 
 export type CreateTransactionSchemaType = {

@@ -15,8 +15,8 @@ const recurringItemFields = z.object({
   frequency: RecurringItemFrequency,
   weekday: z.coerce.number().int().min(0).max(6).optional(),
   dayOfMonth: z.coerce.number().int().min(1).max(31).optional(),
-  startDate: z.coerce.date().optional(),
-  endDate: z.coerce.date().optional(),
+  startDate: z.date().optional(),
+  endDate: z.date().optional(),
 });
 
 type RecurringItemFields = z.input<typeof recurringItemFields>;

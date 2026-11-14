@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { deleteHouseholdBudget, setHouseholdBudget } from "@/lib/budgets";
 import { READ_WRITE_SCOPE, VIEW_ONLY_ROLE } from "@/lib/constants";
+import { parseDate } from "@/lib/dates";
 import {
   createHouseholdGoal,
   deleteHouseholdGoal,
@@ -14,7 +15,7 @@ import {
 import { budgetFields } from "@/schemas/budgets";
 import { goalFields } from "@/schemas/goals";
 
-import { parseDate, toolError, toolErrorMessage, toolResult } from "./tools";
+import { toolError, toolErrorMessage, toolResult } from "./tools";
 
 const DEADLINE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 

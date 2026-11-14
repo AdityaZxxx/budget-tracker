@@ -4,12 +4,13 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
 import { READ_WRITE_SCOPE, VIEW_ONLY_ROLE } from "@/lib/constants";
+import { parseDate } from "@/lib/dates";
 import { recordSettlement } from "@/lib/settlements";
 import { createTransaction, deleteTransaction } from "@/lib/transactions";
 import { settlementFields } from "@/schemas/settlement";
 import { transactionFields } from "@/schemas/transaction";
 
-import { parseDate, toolError, toolErrorMessage, toolResult } from "./tools";
+import { toolError, toolErrorMessage, toolResult } from "./tools";
 
 // The write tools change the Household's ledger, so they answer to the
 // token's scope and to the Member's role, the same way the dashboard's own

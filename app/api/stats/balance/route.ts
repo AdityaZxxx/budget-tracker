@@ -1,13 +1,9 @@
 import { redirect } from "next/navigation";
 
+import { resolveDateRange } from "@/lib/dates";
+import { DomainError } from "@/lib/errors";
 import { requireHousehold } from "@/lib/household";
 import { getBalanceStats } from "@/lib/transactions";
-import { OverviewQuerySchema } from "@/schemas/overview";
-
-interface QueryParams {
-  from: string | null;
-  to: string | null;
-}
 
 export async function GET(request: Request): Promise<Response> {
   const result = await requireHousehold();
@@ -16,21 +12,22 @@ export async function GET(request: Request): Promise<Response> {
   }
 
   const { searchParams } = new URL(request.url);
-  const from: QueryParams["from"] = searchParams.get("from");
-  const to: QueryParams["to"] = searchParams.get("to");
 
-  const queryParams = OverviewQuerySchema.safeParse({ from, to });
-
-  if (!queryParams.success) {
-    return Response.json(queryParams.error.message, {
-      status: 400,
-    });
+  let range;
+  try {
+    range = resolveDateRange(
+      searchParams.get("from") ?? undefined,
+      searchParams.get("to") ?? undefined,
+    );
+  } catch (cause) {
+    if (!(cause instanceof DomainError)) throw cause;
+    return Response.json({ message: cause.message }, { status: 400 });
   }
 
   const stats = await getBalanceStats(
     result.household.id,
-    queryParams.data.from,
-    queryParams.data.to,
+    range.from,
+    range.to,
   );
 
   return Response.json(stats);
