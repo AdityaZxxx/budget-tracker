@@ -21,9 +21,7 @@ export type RecordSettlementInput = {
 };
 
 // A Settlement is a personal Transaction the payer records to say they have
-// paid the other Member back. It stays out of spending totals and Budgets,
-// and its description names the payee because the balance math reads it
-// back to know who was paid.
+// paid the other Member back. It stays out of spending totals and Budgets.
 export async function recordSettlement(
   householdId: string,
   userId: string,
@@ -138,6 +136,7 @@ async function runSettlement(
     data: {
       householdId,
       addedById: userId,
+      counterpartyId: memberId,
       amount,
       date: new Date(),
       description: `${SETTLEMENT_DESCRIPTION_PREFIX}${membership.user.name}`,
@@ -161,7 +160,7 @@ async function runSettlement(
   ).format(amount);
   const payerName = payer?.name ?? "A member";
 
-  // The payee reads "with you"; other Members see the payee's name.
+  // The counterparty reads "with you"; other Members see the counterparty's name.
   after(async () => {
     const otherMembers = await prisma.householdMembership.findMany({
       where: {

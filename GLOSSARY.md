@@ -49,6 +49,10 @@ _Avoid_: savings target
 A transaction that records one member paying what they owed another member, zeroing their balance. No money ever moves inside the app.
 _Avoid_: payment, transfer
 
+**Settlement counterparty**:
+The Member on the other side of a Settlement from the member who recorded it.
+_Avoid_: payee, recipient
+
 **Active household**:
 The household a user is currently working in when they belong to more than one. Remembered per browser and validated against memberships on every read; switching changes every screen at once.
 _Avoid_: current workspace, selected account

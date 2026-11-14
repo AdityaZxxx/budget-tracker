@@ -1,9 +1,8 @@
+import type { MemberBalance, SimplifiedTransfer } from "@/schemas/balances";
+
 import { Prisma } from "@prisma/client";
 
-import {
-  SETTLEMENT_CATEGORY_NAME,
-  SETTLEMENT_DESCRIPTION_PREFIX,
-} from "@/lib/constants";
+import { SETTLEMENT_CATEGORY_NAME } from "@/lib/constants";
 import prisma from "@/lib/prisma";
 
 const { Decimal } = Prisma;
@@ -49,7 +48,7 @@ async function loadBalanceInputs(householdId: string) {
         select: {
           addedById: true,
           amount: true,
-          description: true,
+          counterpartyId: true,
         },
       }),
       prisma.transactionShare.findMany({
@@ -116,28 +115,16 @@ function sharesOwedForExpense(
   return owed;
 }
 
-function settlementPayeeId(
-  description: string,
-  memberIdByName: Map<string, string>,
-) {
-  return description.startsWith(SETTLEMENT_DESCRIPTION_PREFIX)
-    ? memberIdByName.get(
-        description.slice(SETTLEMENT_DESCRIPTION_PREFIX.length),
-      )
-    : undefined;
-}
-
 // A balance is relative to the caller, so the caller is a parameter rather
 // than something read from a session.
-export async function getMemberBalances(householdId: string, callerId: string) {
+export async function getMemberBalances(
+  householdId: string,
+  callerId: string,
+): Promise<MemberBalance[]> {
   const { memberships, sharedExpenses, settlements, sharesByTransactionId } =
     await loadBalanceInputs(householdId);
 
   const memberCount = memberships.length;
-
-  const memberIdByName = new Map(
-    memberships.map((membership) => [membership.user.name, membership.user.id]),
-  );
 
   return memberships
     .filter((membership) => membership.user.id !== callerId)
@@ -163,15 +150,15 @@ export async function getMemberBalances(householdId: string, callerId: string) {
       }
 
       for (const settlement of settlements) {
-        const payeeId = settlementPayeeId(
-          settlement.description,
-          memberIdByName,
-        );
-        if (!payeeId) continue;
+        const counterpartyId = settlement.counterpartyId;
+        if (!counterpartyId) continue;
 
-        if (settlement.addedById === callerId && payeeId === otherId) {
+        if (settlement.addedById === callerId && counterpartyId === otherId) {
           balance = balance.minus(settlement.amount);
-        } else if (settlement.addedById === otherId && payeeId === callerId) {
+        } else if (
+          settlement.addedById === otherId &&
+          counterpartyId === callerId
+        ) {
           balance = balance.plus(settlement.amount);
         }
       }
@@ -184,18 +171,6 @@ export async function getMemberBalances(householdId: string, callerId: string) {
     });
 }
 
-export type MemberBalance = Awaited<
-  ReturnType<typeof getMemberBalances>
->[number];
-
-export type SimplifiedTransfer = {
-  fromUserId: string;
-  fromName: string;
-  toUserId: string;
-  toName: string;
-  amount: number;
-};
-
 export async function getSimplifiedTransfers(
   householdId: string,
 ): Promise<SimplifiedTransfer[]> {
@@ -203,10 +178,6 @@ export async function getSimplifiedTransfers(
     await loadBalanceInputs(householdId);
 
   const memberCount = memberships.length;
-
-  const memberIdByName = new Map(
-    memberships.map((membership) => [membership.user.name, membership.user.id]),
-  );
 
   const netReceivableByUserId = new Map<string, Prisma.Decimal>(
     memberships.map((membership) => [membership.user.id, new Decimal(0)]),
@@ -235,8 +206,14 @@ export async function getSimplifiedTransfers(
   }
 
   for (const settlement of settlements) {
-    const payeeId = settlementPayeeId(settlement.description, memberIdByName);
-    if (!payeeId) continue;
+    const counterpartyId = settlement.counterpartyId;
+    if (
+      !counterpartyId ||
+      !netReceivableByUserId.has(settlement.addedById) ||
+      !netReceivableByUserId.has(counterpartyId)
+    ) {
+      continue;
+    }
     netReceivableByUserId.set(
       settlement.addedById,
       (netReceivableByUserId.get(settlement.addedById) ?? new Decimal(0)).plus(
@@ -244,8 +221,8 @@ export async function getSimplifiedTransfers(
       ),
     );
     netReceivableByUserId.set(
-      payeeId,
-      (netReceivableByUserId.get(payeeId) ?? new Decimal(0)).minus(
+      counterpartyId,
+      (netReceivableByUserId.get(counterpartyId) ?? new Decimal(0)).minus(
         settlement.amount,
       ),
     );
