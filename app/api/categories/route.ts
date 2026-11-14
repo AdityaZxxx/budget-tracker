@@ -19,9 +19,14 @@ export async function GET(request: NextRequest) {
   const validator = z.enum(["expense", "income"]).nullable();
   const queryParams = validator.safeParse(paramType);
   if (!queryParams.success) {
-    return Response.json(queryParams.error, {
-      status: 400,
-    });
+    return Response.json(
+      {
+        message: queryParams.error.issues[0]?.message ?? "Invalid type",
+      },
+      {
+        status: 400,
+      },
+    );
   }
 
   const categories = await getCategories(result.household.id, queryParams.data);

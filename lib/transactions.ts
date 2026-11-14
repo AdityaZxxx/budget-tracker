@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import { after } from "next/server";
 
 import { getMonthSpentByCategory } from "@/lib/budgets";
+import { DomainError } from "@/lib/errors";
 import { getFormatterForCurrency } from "@/lib/helpers";
 import { notifyHouseholdExcept, notifyMembers } from "@/lib/notifications";
 import prisma from "@/lib/prisma";
@@ -131,7 +132,7 @@ async function resolveCategory(
   });
 
   if (!category) {
-    throw new Error("Category not found");
+    throw new DomainError("Category not found");
   }
 
   return category;
@@ -153,7 +154,9 @@ export async function createTransaction(
     category: categoryRow.name,
   });
   if (!parsedBody.success) {
-    throw new Error(parsedBody.error.message);
+    throw new DomainError(
+      parsedBody.error.issues[0]?.message ?? "Invalid transaction input",
+    );
   }
 
   const { amount, date, description, type, shared } = parsedBody.data;
@@ -210,10 +213,10 @@ export async function createTransaction(
     ]);
 
   if (goalId && !goal) {
-    throw new Error("Goal not found");
+    throw new DomainError("Goal not found");
   }
   if (recurringItemId && !recurringItem) {
-    throw new Error("Recurring item not found");
+    throw new DomainError("Recurring item not found");
   }
 
   const formatAmount = getFormatterForCurrency(
@@ -226,7 +229,7 @@ export async function createTransaction(
     shareUserIds.some((shareUserId) => !memberIds.has(shareUserId)) ||
     new Set(shareUserIds).size !== shareUserIds.length;
   if (hasForeignOrDuplicateMember) {
-    throw new Error(
+    throw new DomainError(
       "Shares must name each member of this household at most once",
     );
   }
@@ -235,7 +238,7 @@ export async function createTransaction(
     shareInput.reduce((sum, share) => sum + share.amount, 0) * 100,
   );
   if (shareInput.length > 0 && shareSum !== Math.round(amount * 100)) {
-    throw new Error(
+    throw new DomainError(
       `The member shares add up to ${formatAmount(shareSum / 100)} but the expense is ${formatAmount(amount)}.`,
     );
   }
@@ -266,7 +269,7 @@ export async function createTransaction(
         : spentAfter.div(budgetAmount).times(100).toNumber();
 
       if (budget.mode === "hard" && spentAfter.gt(budgetAmount)) {
-        throw new Error(
+        throw new DomainError(
           `Hard budget exceeded for ${categoryRow.name}: the monthly limit is ${formatAmount(budgetAmount.toNumber())} and ${formatAmount(spentBefore.toNumber())} is already spent, so this ${formatAmount(amount)} expense would bring the month to ${formatAmount(spentAfter.toNumber())}.`,
         );
       }
@@ -460,7 +463,7 @@ export async function deleteTransaction(householdId: string, id: string) {
   });
 
   if (!transaction) {
-    throw new Error("Bad request");
+    throw new DomainError("Bad request");
   }
 
   await prisma.$transaction([

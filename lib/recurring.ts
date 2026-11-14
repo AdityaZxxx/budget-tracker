@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 
+import { DomainError } from "@/lib/errors";
 import prisma from "@/lib/prisma";
 
 export type RecurringItemRow = {
@@ -188,7 +189,7 @@ async function resolveCategory(
     },
   });
   if (!category) {
-    throw new Error("Category not found");
+    throw new DomainError("Category not found");
   }
   return category;
 }
@@ -247,7 +248,7 @@ export async function updateRecurringItem(
     },
   });
   if (!existing) {
-    throw new Error("Bill not found");
+    throw new DomainError("Bill not found");
   }
   const category = await resolveCategory(
     householdId,
@@ -291,7 +292,7 @@ export async function setRecurringItemPaused(
     },
   });
   if (result.count === 0) {
-    throw new Error("Bill not found");
+    throw new DomainError("Bill not found");
   }
 }
 
@@ -303,6 +304,6 @@ export async function deleteRecurringItem(householdId: string, id: string) {
     },
   });
   if (result.count === 0) {
-    throw new Error("Bill not found");
+    throw new DomainError("Bill not found");
   }
 }

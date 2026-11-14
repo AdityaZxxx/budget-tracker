@@ -2,6 +2,8 @@ import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
 import { z } from "zod";
 
+import { DomainError } from "@/lib/errors";
+
 // A tool's payload is the JSON an agent reads, so every value in it is a
 // JSON value.
 export type ToolPayload =
@@ -29,6 +31,15 @@ export function toolError(message: string): CallToolResult {
   };
 }
 
+// A domain rejection is the agent's fault, and its message is how to fix the
+// call; any other failure is ours, and the agent gets generic copy instead
+// of the internals.
+export function toolErrorMessage(cause: unknown): string {
+  return cause instanceof DomainError
+    ? cause.message
+    : "Something went wrong. Try again.";
+}
+
 export const dateRangeSchema = {
   from: z
     .string()
@@ -46,7 +57,7 @@ export function parseDate(value: string) {
   const match = DATE_PATTERN.exec(value);
 
   if (!match) {
-    throw new Error(`Invalid date: ${value}. Use the YYYY-MM-DD format.`);
+    throw new DomainError(`Invalid date: ${value}. Use the YYYY-MM-DD format.`);
   }
 
   const year = Number(match[1]);
@@ -61,7 +72,7 @@ export function parseDate(value: string) {
     date.getUTCMonth() !== month - 1 ||
     date.getUTCDate() !== day
   ) {
-    throw new Error(`Invalid date: ${value}. Use the YYYY-MM-DD format.`);
+    throw new DomainError(`Invalid date: ${value}. Use the YYYY-MM-DD format.`);
   }
 
   return date;
@@ -100,7 +111,7 @@ export function resolveDateRange(from?: string, to?: string) {
       );
 
   if (start > end) {
-    throw new Error("The start date is after the end date.");
+    throw new DomainError("The start date is after the end date.");
   }
 
   return { from: start, to: end };

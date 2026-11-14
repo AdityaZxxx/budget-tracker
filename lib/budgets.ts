@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 
 import { SETTLEMENT_CATEGORY_NAME } from "@/lib/constants";
+import { DomainError } from "@/lib/errors";
 import prisma from "@/lib/prisma";
 import { CreateBudgetSchema, UpdateBudgetSchema } from "@/schemas/budgets";
 
@@ -113,7 +114,7 @@ async function findExpenseCategory(householdId: string, name: string) {
   });
 
   if (!category) {
-    throw new Error("Category not found");
+    throw new DomainError("Category not found");
   }
 
   return category;
@@ -125,7 +126,7 @@ export async function createHouseholdBudget(
 ) {
   const parsed = CreateBudgetSchema.safeParse(input);
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Invalid budget");
+    throw new DomainError(parsed.error.issues[0]?.message ?? "Invalid budget");
   }
 
   const { category, amount, mode } = parsed.data;
@@ -149,7 +150,7 @@ export async function updateHouseholdBudget(
 ) {
   const parsed = UpdateBudgetSchema.safeParse(input);
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Invalid budget");
+    throw new DomainError(parsed.error.issues[0]?.message ?? "Invalid budget");
   }
 
   const { id, category, amount, mode } = parsed.data;

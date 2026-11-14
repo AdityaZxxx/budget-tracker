@@ -14,6 +14,7 @@ import {
   dateRangeSchema,
   resolveDateRange,
   toolError,
+  toolErrorMessage,
   toolResult,
 } from "./tools";
 
@@ -46,7 +47,7 @@ export function registerReadTools(server: McpServer, context: McpContext) {
           net: stats.income - stats.expense,
         });
       } catch (error) {
-        return toolError(errorMessage(error));
+        return toolError(toolErrorMessage(error));
       }
     },
   );
@@ -99,7 +100,7 @@ export function registerReadTools(server: McpServer, context: McpContext) {
           })),
         });
       } catch (error) {
-        return toolError(errorMessage(error));
+        return toolError(toolErrorMessage(error));
       }
     },
   );
@@ -134,7 +135,7 @@ export function registerReadTools(server: McpServer, context: McpContext) {
           })),
         });
       } catch (error) {
-        return toolError(errorMessage(error));
+        return toolError(toolErrorMessage(error));
       }
     },
   );
@@ -164,7 +165,7 @@ export function registerReadTools(server: McpServer, context: McpContext) {
           })),
         });
       } catch (error) {
-        return toolError(errorMessage(error));
+        return toolError(toolErrorMessage(error));
       }
     },
   );
@@ -192,7 +193,7 @@ export function registerReadTools(server: McpServer, context: McpContext) {
           })),
         });
       } catch (error) {
-        return toolError(errorMessage(error));
+        return toolError(toolErrorMessage(error));
       }
     },
   );
@@ -227,7 +228,7 @@ export function registerReadTools(server: McpServer, context: McpContext) {
           })),
         });
       } catch (error) {
-        return toolError(errorMessage(error));
+        return toolError(toolErrorMessage(error));
       }
     },
   );
@@ -257,12 +258,8 @@ export function registerReadTools(server: McpServer, context: McpContext) {
           })),
         });
       } catch (error) {
-        return toolError(errorMessage(error));
+        return toolError(toolErrorMessage(error));
       }
     },
   );
-}
-
-function errorMessage(cause: unknown) {
-  return cause instanceof Error ? cause.message : String(cause);
 }

@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 
+import { DomainError } from "@/lib/errors";
 import prisma from "@/lib/prisma";
 import {
   CreateGoalSchema,
@@ -58,7 +59,7 @@ export async function updateHouseholdGoal(
 ) {
   const parsed = UpdateGoalSchema.safeParse(input);
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Invalid goal");
+    throw new DomainError(parsed.error.issues[0]?.message ?? "Invalid goal");
   }
 
   const { id, name, target, deadline } = parsed.data;
@@ -74,7 +75,7 @@ export async function updateHouseholdGoal(
     data.deadline = deadline;
   }
   if (Object.keys(data).length === 0) {
-    throw new Error("Nothing to update");
+    throw new DomainError("Nothing to update");
   }
 
   const goal = await prisma.goal.update({
@@ -101,7 +102,7 @@ export async function createHouseholdGoal(
 ) {
   const parsed = CreateGoalSchema.safeParse(input);
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Invalid goal");
+    throw new DomainError(parsed.error.issues[0]?.message ?? "Invalid goal");
   }
 
   const { name, target, deadline } = parsed.data;
