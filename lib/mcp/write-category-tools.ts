@@ -26,7 +26,7 @@ export function registerCategoryWriteTools(
     {
       title: "Create category",
       description:
-        "Create a Category in the Household: a label for Transactions, of type expense or income. A Transaction's category must match one of the Household's Categories.",
+        "Create a Category in the Household: a label for Transactions, of type expense or income. A Transaction's category must match one of the Household's Categories. The Settlement Category cannot be created.",
       inputSchema: {
         name: categoryNameSchema.describe(
           "Name of the Category, 3 to 20 characters.",
@@ -120,7 +120,7 @@ export function registerCategoryWriteTools(
     {
       title: "Delete category",
       description:
-        "Delete a Category from the Household. Use list_categories to see the Categories.",
+        "Delete a Category from the Household. Use list_categories to see the Categories. The Settlement Category cannot be deleted.",
       inputSchema: {
         name: categoryNameSchema.describe(
           "Name of the Category to delete. Use list_categories to see them.",
