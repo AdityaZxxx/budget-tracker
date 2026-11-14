@@ -7,6 +7,7 @@ import {
 } from "@/lib/constants";
 import { DomainError } from "@/lib/errors";
 import { getFormatterForCurrency } from "@/lib/helpers";
+import { log } from "@/lib/log";
 import { notify } from "@/lib/notifications";
 import prisma from "@/lib/prisma";
 import { assertFullMemberRole, type MemberRole } from "@/lib/roles";
@@ -28,6 +29,36 @@ export async function recordSettlement(
   userId: string,
   input: RecordSettlementInput,
   role: MemberRole,
+) {
+  const startedAt = Date.now();
+  try {
+    return await runSettlement(householdId, userId, input, role, startedAt);
+  } catch (cause) {
+    if (cause instanceof DomainError) {
+      log("warn", "settlement.recorded", {
+        householdId,
+        userId,
+        outcome: "rejected",
+        durationMs: Date.now() - startedAt,
+      });
+    } else {
+      log("error", "settlement.recorded", {
+        householdId,
+        userId,
+        outcome: "failed",
+        durationMs: Date.now() - startedAt,
+      });
+    }
+    throw cause;
+  }
+}
+
+async function runSettlement(
+  householdId: string,
+  userId: string,
+  input: RecordSettlementInput,
+  role: MemberRole,
+  startedAt: number,
 ) {
   assertFullMemberRole(role);
   const parsedBody = RecordSettlementSchema.safeParse({
@@ -116,6 +147,13 @@ export async function recordSettlement(
       categoryIcon: category.icon,
       addedVia: input.addedVia ?? null,
     },
+  });
+
+  log("info", "settlement.recorded", {
+    householdId,
+    userId,
+    outcome: "ok",
+    durationMs: Date.now() - startedAt,
   });
 
   const amountText = getFormatterForCurrency(
