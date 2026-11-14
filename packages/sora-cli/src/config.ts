@@ -23,9 +23,19 @@ export async function resolveConfig(): Promise<ResolvedConfig> {
 }
 
 function validEndpoint(endpoint: string): string {
-  if (!URL.canParse(endpoint)) {
+  let url: URL;
+
+  try {
+    url = new URL(endpoint);
+  } catch {
     throw new Error(
       `Invalid endpoint URL: ${endpoint}. Set SORA_URL to the full URL of the Sora MCP endpoint.`,
+    );
+  }
+
+  if (url.protocol !== "http:" && url.protocol !== "https:") {
+    throw new Error(
+      `Invalid endpoint URL: ${endpoint}. Set SORA_URL to an http(s) URL of the Sora MCP endpoint.`,
     );
   }
 
