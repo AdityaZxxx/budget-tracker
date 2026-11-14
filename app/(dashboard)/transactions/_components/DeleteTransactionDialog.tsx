@@ -1,9 +1,6 @@
 "use client";
 
-import type { ReactElement, ReactNode } from "react";
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
 import { toast } from "sonner";
 
 import {
@@ -15,7 +12,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
 import { DeleteTransaction } from "../_actions/DeleteTransaction";
