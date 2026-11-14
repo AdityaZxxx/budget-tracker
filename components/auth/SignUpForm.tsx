@@ -69,7 +69,6 @@ export default function SignUpForm({ next }: { next?: string }) {
     >
       <form
         method="post"
-        noValidate
         onSubmit={(e) => {
           e.preventDefault();
           form.handleSubmit();
@@ -85,6 +84,7 @@ export default function SignUpForm({ next }: { next?: string }) {
               autoComplete="name"
               autoCapitalize="words"
               enterKeyHint="next"
+              required
               placeholder="Your name"
               value={field.state.value}
               onChange={field.handleChange}
@@ -108,6 +108,7 @@ export default function SignUpForm({ next }: { next?: string }) {
               autoCorrect="off"
               spellCheck={false}
               enterKeyHint="next"
+              required
               placeholder="you@example.com"
               value={field.state.value}
               onChange={field.handleChange}
@@ -127,6 +128,8 @@ export default function SignUpForm({ next }: { next?: string }) {
               type="password"
               autoComplete="new-password"
               enterKeyHint="done"
+              required
+              minLength={8}
               placeholder="At least 8 characters"
               value={field.state.value}
               onChange={field.handleChange}

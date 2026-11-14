@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/select";
 import { type BudgetWithProgress } from "@/lib/budgets";
 import { Currencies } from "@/lib/currencies";
+import { hasTwoDecimals } from "@/lib/helpers";
 
 import { createBudget, updateBudget } from "../../_actions/budgets";
 import CategoryPicker from "../../_components/CategoryPicker";
@@ -131,6 +132,8 @@ const BudgetDialog = ({
     if (!category) nextErrors.category = "Select a category";
     if (!amount || amount <= 0)
       nextErrors.amount = "Enter an amount greater than zero";
+    else if (!hasTwoDecimals(amount))
+      nextErrors.amount = "Enter an amount with at most two decimals";
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
@@ -194,6 +197,8 @@ const BudgetDialog = ({
               decimalSeparator={decimalSeparator}
               decimalScale={2}
               allowNegative={false}
+              inputMode="decimal"
+              aria-invalid={amount > 0 && !hasTwoDecimals(amount)}
             />
             <FieldDescription className="text-xs sm:text-sm">
               Monthly limit for this category
@@ -247,7 +252,7 @@ const BudgetDialog = ({
             </DialogClose>
             <Button
               type="submit"
-              disabled={isPending}
+              disabled={isPending || !category || !(amount > 0)}
               className="w-full sm:w-auto"
             >
               {!isPending ? (

@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Currencies } from "@/lib/currencies";
+import { hasTwoDecimals } from "@/lib/helpers";
 
 import { RecordSettlement } from "../_actions/balance";
 
@@ -84,10 +85,13 @@ const RecordSettlementDialog = ({ trigger, members, currency }: Props) => {
       toast.error("Select a member", { id: "record-settlement" });
       return;
     }
-    if (!amount || amount <= 0) {
-      toast.error("Enter an amount greater than zero", {
-        id: "record-settlement",
-      });
+    if (!amount || amount <= 0 || !hasTwoDecimals(amount)) {
+      toast.error(
+        "Enter an amount greater than zero, with at most two decimals",
+        {
+          id: "record-settlement",
+        },
+      );
       return;
     }
     toast.loading("Recording settlement…", { id: "record-settlement" });
@@ -138,6 +142,8 @@ const RecordSettlementDialog = ({ trigger, members, currency }: Props) => {
               customInput={Input}
               id="settlement-amount"
               placeholder="0.00"
+              inputMode="decimal"
+              aria-invalid={amount > 0 && !hasTwoDecimals(amount)}
               value={amount}
               onValueChange={(values) => {
                 setAmount(values.floatValue ?? 0);
@@ -166,7 +172,12 @@ const RecordSettlementDialog = ({ trigger, members, currency }: Props) => {
             </DialogClose>
             <Button
               type="submit"
-              disabled={isPending}
+              disabled={
+                isPending ||
+                !memberId ||
+                !(amount > 0) ||
+                !hasTwoDecimals(amount)
+              }
               className="w-full sm:w-auto"
             >
               {!isPending ? "Record" : <Loader2 className="animate-spin" />}
