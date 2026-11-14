@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { amountNumber, sharesArray } from "@/schemas/money";
+import { freeText } from "@/schemas/text";
 
 // The rules both surfaces that write a Transaction compose, so they cannot
 // drift apart; the web coerces form strings, the MCP tool keeps the JSON
@@ -8,7 +9,7 @@ import { amountNumber, sharesArray } from "@/schemas/money";
 export function transactionFields(coerced: boolean) {
   return {
     amount: amountNumber(coerced),
-    description: z.string().trim().max(200).optional(),
+    description: freeText({ max: 200 }).optional(),
     category: z.string().min(1, "Select a category"),
     type: z.enum(["income", "expense"]),
     shared: z.boolean().default(true),

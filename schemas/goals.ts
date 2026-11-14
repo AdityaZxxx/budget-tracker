@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { amountNumber } from "@/schemas/money";
+import { freeText } from "@/schemas/text";
 
 // The rules both surfaces that write a Goal compose, so they cannot drift
 // apart; the web coerces form strings, the MCP tool keeps the JSON types.
@@ -8,7 +9,7 @@ import { amountNumber } from "@/schemas/money";
 // YYYY-MM-DD string.
 export function goalFields(coerced: boolean) {
   return {
-    name: z.string().trim().min(1, "Enter a name").max(50),
+    name: freeText({ min: 1, max: 50, minMessage: "Enter a name" }),
     target: amountNumber(coerced),
   };
 }
