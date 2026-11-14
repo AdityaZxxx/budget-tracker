@@ -5,6 +5,7 @@ import type {
 } from "@/schemas/categories";
 
 import { SETTLEMENT_CATEGORY_NAME } from "@/lib/constants";
+import { DomainError } from "@/lib/errors";
 import prisma from "@/lib/prisma";
 import {
   CreateCategorySchema,
@@ -37,7 +38,9 @@ export async function createHouseholdCategory(
 ) {
   const parsed = CreateCategorySchema.safeParse(input);
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Invalid category");
+    throw new DomainError(
+      parsed.error.issues[0]?.message ?? "Invalid category",
+    );
   }
 
   const { name, icon, type } = parsed.data;
@@ -58,13 +61,15 @@ export async function updateHouseholdCategory(
 ) {
   const parsed = UpdateCategorySchema.safeParse(input);
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Invalid category");
+    throw new DomainError(
+      parsed.error.issues[0]?.message ?? "Invalid category",
+    );
   }
 
   const { originalName, name, icon, type } = parsed.data;
 
   if (originalName === SETTLEMENT_CATEGORY_NAME) {
-    throw new Error("This category cannot be edited");
+    throw new DomainError("This category cannot be edited");
   }
 
   const existing = await prisma.category.findUnique({
@@ -78,7 +83,7 @@ export async function updateHouseholdCategory(
   });
 
   if (!existing) {
-    throw new Error("Category not found");
+    throw new DomainError("Category not found");
   }
 
   return await prisma.$transaction(async (tx) => {
@@ -125,7 +130,9 @@ export async function deleteHouseholdCategory(
 ) {
   const parsed = DeleteCategorySchema.safeParse(input);
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Invalid category");
+    throw new DomainError(
+      parsed.error.issues[0]?.message ?? "Invalid category",
+    );
   }
 
   return await prisma.category.delete({

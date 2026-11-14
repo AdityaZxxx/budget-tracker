@@ -14,7 +14,7 @@ import {
 import { budgetFields } from "@/schemas/budgets";
 import { goalFields } from "@/schemas/goals";
 
-import { parseDate, toolError, toolResult } from "./tools";
+import { parseDate, toolError, toolErrorMessage, toolResult } from "./tools";
 
 const DEADLINE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -52,7 +52,7 @@ export function registerGoalBudgetWriteTools(
 
         return toolResult({ deleted: id, memberId: context.userId });
       } catch (error) {
-        return toolError(errorMessage(error));
+        return toolError(toolErrorMessage(error));
       }
     },
   );
@@ -85,7 +85,7 @@ export function registerGoalBudgetWriteTools(
 
         return toolResult({ deleted: id, memberId: context.userId });
       } catch (error) {
-        return toolError(errorMessage(error));
+        return toolError(toolErrorMessage(error));
       }
     },
   );
@@ -132,7 +132,7 @@ export function registerGoalBudgetWriteTools(
           memberId: context.userId,
         });
       } catch (error) {
-        return toolError(errorMessage(error));
+        return toolError(toolErrorMessage(error));
       }
     },
   );
@@ -195,7 +195,7 @@ export function registerGoalBudgetWriteTools(
           memberId: context.userId,
         });
       } catch (error) {
-        return toolError(errorMessage(error));
+        return toolError(toolErrorMessage(error));
       }
     },
   );
@@ -244,12 +244,8 @@ export function registerGoalBudgetWriteTools(
           memberId: context.userId,
         });
       } catch (error) {
-        return toolError(errorMessage(error));
+        return toolError(toolErrorMessage(error));
       }
     },
   );
-}
-
-function errorMessage(cause: unknown) {
-  return cause instanceof Error ? cause.message : String(cause);
 }

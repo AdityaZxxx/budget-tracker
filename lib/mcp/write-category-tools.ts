@@ -13,7 +13,7 @@ import {
   categoryTypeSchema,
 } from "@/schemas/categories";
 
-import { toolError, toolResult } from "./tools";
+import { toolError, toolErrorMessage, toolResult } from "./tools";
 
 // MCP writes follow the dashboard's authorization rule: token scope and
 // Member role.
@@ -61,7 +61,7 @@ export function registerCategoryWriteTools(
           memberId: context.userId,
         });
       } catch (error) {
-        return toolError(errorMessage(error));
+        return toolError(toolErrorMessage(error));
       }
     },
   );
@@ -110,7 +110,7 @@ export function registerCategoryWriteTools(
           memberId: context.userId,
         });
       } catch (error) {
-        return toolError(errorMessage(error));
+        return toolError(toolErrorMessage(error));
       }
     },
   );
@@ -151,12 +151,8 @@ export function registerCategoryWriteTools(
           memberId: context.userId,
         });
       } catch (error) {
-        return toolError(errorMessage(error));
+        return toolError(toolErrorMessage(error));
       }
     },
   );
-}
-
-function errorMessage(cause: unknown) {
-  return cause instanceof Error ? cause.message : String(cause);
 }

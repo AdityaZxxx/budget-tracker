@@ -9,7 +9,7 @@ import { createTransaction, deleteTransaction } from "@/lib/transactions";
 import { settlementFields } from "@/schemas/settlement";
 import { transactionFields } from "@/schemas/transaction";
 
-import { parseDate, toolError, toolResult } from "./tools";
+import { parseDate, toolError, toolErrorMessage, toolResult } from "./tools";
 
 // The write tools change the Household's ledger, so they answer to the
 // token's scope and to the Member's role, the same way the dashboard's own
@@ -107,7 +107,7 @@ export function registerTransactionWriteTools(
           memberId: context.userId,
         });
       } catch (error) {
-        return toolError(errorMessage(error));
+        return toolError(toolErrorMessage(error));
       }
     },
   );
@@ -140,7 +140,7 @@ export function registerTransactionWriteTools(
 
         return toolResult({ deleted: id, memberId: context.userId });
       } catch (error) {
-        return toolError(errorMessage(error));
+        return toolError(toolErrorMessage(error));
       }
     },
   );
@@ -188,14 +188,10 @@ export function registerTransactionWriteTools(
           memberId: context.userId,
         });
       } catch (error) {
-        return toolError(errorMessage(error));
+        return toolError(toolErrorMessage(error));
       }
     },
   );
-}
-
-function errorMessage(cause: unknown) {
-  return cause instanceof Error ? cause.message : String(cause);
 }
 
 // The calendar day is the caller's own, like the ranges the read tools

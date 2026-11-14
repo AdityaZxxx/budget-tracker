@@ -5,6 +5,7 @@ import {
   SETTLEMENT_CATEGORY_NAME,
   SETTLEMENT_DESCRIPTION_PREFIX,
 } from "@/lib/constants";
+import { DomainError } from "@/lib/errors";
 import { getFormatterForCurrency } from "@/lib/helpers";
 import { notify } from "@/lib/notifications";
 import prisma from "@/lib/prisma";
@@ -31,13 +32,15 @@ export async function recordSettlement(
     amount: input.amount,
   });
   if (!parsedBody.success) {
-    throw new Error(parsedBody.error.message);
+    throw new DomainError(
+      parsedBody.error.issues[0]?.message ?? "Invalid settlement input",
+    );
   }
 
   const { memberId, amount } = parsedBody.data;
 
   if (memberId === userId) {
-    throw new Error("Cannot record a settlement with yourself");
+    throw new DomainError("Cannot record a settlement with yourself");
   }
 
   const [membership, household, payer] = await Promise.all([
@@ -75,7 +78,7 @@ export async function recordSettlement(
   ]);
 
   if (!membership) {
-    throw new Error("Member not found");
+    throw new DomainError("Member not found");
   }
 
   const category = await prisma.category.upsert({
