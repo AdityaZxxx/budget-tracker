@@ -28,6 +28,7 @@ model User {
 
   memberships       HouseholdMembership[]
   addedTransactions Transaction[]
+  counterpartyTransactions Transaction[] @relation("TransactionCounterparty")
   createdInviteLinks InviteLink[]
   notifications     Notification[]
   transactionShares TransactionShare[]
@@ -170,6 +171,8 @@ model Transaction {
   household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
   addedById String
   addedBy User @relation(fields: [addedById], references: [id], onDelete: Cascade)
+  counterpartyId String?
+  counterparty User? @relation("TransactionCounterparty", fields: [counterpartyId], references: [id], onDelete: SetNull)
   type String @default("income")
 
   // false = personal: visible only to addedById, excluded from household

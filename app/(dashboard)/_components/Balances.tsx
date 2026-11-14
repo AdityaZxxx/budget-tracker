@@ -9,9 +9,10 @@ import { CardContent } from "@/components/ui/card";
 import { CardShell, CardShellHeader } from "@/components/ui/card-shell";
 import EmptyState from "@/components/ui/empty-state";
 import { POLL_INTERVAL } from "@/lib/constants";
+import { fetchJson } from "@/lib/fetch-json";
 import { getFormatterForCurrency } from "@/lib/helpers";
+import { MemberBalancesSchema, type MemberBalance } from "@/schemas/balances";
 
-import { getHouseholdBalances } from "../_actions/balance";
 import RecordSettlementDialog from "./RecordSettlementDialog";
 
 interface Props {
@@ -22,13 +23,14 @@ interface Props {
 const Balances = ({ currency, canEdit = true }: Props) => {
   const formatter = getFormatterForCurrency(currency ?? "USD");
 
-  const balancesQuery = useQuery({
+  const balancesQuery = useQuery<MemberBalance[]>({
     queryKey: ["balances"],
-    queryFn: async () => {
-      const res = await getHouseholdBalances();
-      if (!res.ok) throw new Error(res.message);
-      return res.data;
-    },
+    queryFn: () =>
+      fetchJson(
+        "/api/balances",
+        MemberBalancesSchema,
+        "Failed to fetch balances",
+      ),
     staleTime: POLL_INTERVAL,
     refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,

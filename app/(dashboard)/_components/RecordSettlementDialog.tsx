@@ -72,6 +72,9 @@ const RecordSettlementDialog = ({ trigger, members, currency }: Props) => {
       queryClient.invalidateQueries({
         queryKey: ["overview"],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["simplified-debts"],
+      });
       setMemberId("");
       setAmount(0);
       setOpen(false);
