@@ -80,24 +80,29 @@ const BudgetDialog = ({
   const decimalSeparator = numberParts.find((p) => p.type === "decimal")?.value;
 
   const { mutate, isPending } = useMutation({
-    mutationFn: (values: {
+    mutationFn: async (values: {
       id?: string;
       category: string;
       amount: number;
       mode: "soft" | "hard";
-    }) =>
-      values.id
-        ? updateBudget({
+    }) => {
+      const res = values.id
+        ? await updateBudget({
             id: values.id,
             category: values.category,
             amount: values.amount,
             mode: values.mode,
           })
-        : createBudget({
+        : await createBudget({
             category: values.category,
             amount: values.amount,
             mode: values.mode,
-          }),
+          });
+      if (!res.ok) {
+        throw new Error(res.message);
+      }
+      return res.data;
+    },
     onSuccess: () => {
       toast.success(isEditing ? "Budget updated" : "Budget added", {
         id: "budget-dialog",

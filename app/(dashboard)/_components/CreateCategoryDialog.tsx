@@ -52,8 +52,17 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
   const theme = useTheme();
 
   const { mutate, isPending } = useMutation({
-    mutationFn: CreateCategory,
-    onSuccess: async (category: Category) => {
+    mutationFn: async (input: Parameters<typeof CreateCategory>[0]) => {
+      const res = await CreateCategory(input);
+      if (!res.ok) throw new Error(res.message);
+      if (!res.data) {
+        throw new Error(
+          "Unable to create the category. Refresh the page and try again.",
+        );
+      }
+      return res.data;
+    },
+    onSuccess: async (category) => {
       form.reset();
       toast.success(`Category "${category.name}" added`, {
         id: "create-category",
@@ -67,10 +76,15 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
 
       setOpen(false);
     },
-    onError: () => {
-      toast.error("Unable to create category. Try again.", {
-        id: "create-category",
-      });
+    onError: (error) => {
+      toast.error(
+        error instanceof Error && error.message
+          ? error.message
+          : "Unable to create the category. Refresh the page and try again.",
+        {
+          id: "create-category",
+        },
+      );
     },
   });
 

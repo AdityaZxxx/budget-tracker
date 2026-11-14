@@ -46,7 +46,11 @@ const Goals = ({
 
   const goalsQuery = useQuery({
     queryKey: ["goals"],
-    queryFn: listGoals,
+    queryFn: async () => {
+      const res = await listGoals();
+      if (!res.ok) throw new Error(res.message);
+      return res.data;
+    },
     staleTime: POLL_INTERVAL,
     refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,

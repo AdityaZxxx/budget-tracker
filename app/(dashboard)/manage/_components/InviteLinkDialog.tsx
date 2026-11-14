@@ -57,34 +57,56 @@ const InviteLinkDialog = ({ trigger }: Props) => {
 
   const { data: inviteLinks = [], isLoading } = useQuery<InviteLink[]>({
     queryKey: ["inviteLinks"],
-    queryFn: listInviteLinks,
+    queryFn: async () => {
+      const res = await listInviteLinks();
+      if (!res.ok) throw new Error(res.message);
+      return res.data ?? [];
+    },
     enabled: open,
     staleTime: POLL_INTERVAL,
   });
 
   const createMutation = useMutation({
-    mutationFn: createInviteLink,
+    mutationFn: async () => {
+      const res = await createInviteLink();
+      if (!res.ok) throw new Error(res.message);
+      return res.data;
+    },
     onSuccess: async () => {
       toast.success("Invite link created", { id: "invite-link" });
       await queryClient.invalidateQueries({ queryKey: ["inviteLinks"] });
     },
-    onError: () => {
-      toast.error("Unable to create invite link. Try again.", {
-        id: "invite-link",
-      });
+    onError: (error) => {
+      toast.error(
+        error instanceof Error && error.message
+          ? error.message
+          : "Unable to create the invite link. Try again.",
+        {
+          id: "invite-link",
+        },
+      );
     },
   });
 
   const revokeMutation = useMutation({
-    mutationFn: revokeInviteLink,
+    mutationFn: async (input: Parameters<typeof revokeInviteLink>[0]) => {
+      const res = await revokeInviteLink(input);
+      if (!res.ok) throw new Error(res.message);
+      return res.data;
+    },
     onSuccess: async () => {
       toast.success("Invite link revoked", { id: "invite-link" });
       await queryClient.invalidateQueries({ queryKey: ["inviteLinks"] });
     },
-    onError: () => {
-      toast.error("Unable to revoke invite link. Try again.", {
-        id: "invite-link",
-      });
+    onError: (error) => {
+      toast.error(
+        error instanceof Error && error.message
+          ? error.message
+          : "Unable to revoke the invite link. Try again.",
+        {
+          id: "invite-link",
+        },
+      );
     },
   });
 

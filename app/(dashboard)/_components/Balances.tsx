@@ -24,7 +24,11 @@ const Balances = ({ currency, canEdit = true }: Props) => {
 
   const balancesQuery = useQuery({
     queryKey: ["balances"],
-    queryFn: getHouseholdBalances,
+    queryFn: async () => {
+      const res = await getHouseholdBalances();
+      if (!res.ok) throw new Error(res.message);
+      return res.data;
+    },
     staleTime: POLL_INTERVAL,
     refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,

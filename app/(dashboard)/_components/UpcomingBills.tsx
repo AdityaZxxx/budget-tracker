@@ -92,14 +92,22 @@ const UpcomingBills = ({ currency, canEdit }: Props) => {
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ["recurringItems"],
-    queryFn: listRecurringItemsAction,
+    queryFn: async () => {
+      const res = await listRecurringItemsAction();
+      if (!res.ok) throw new Error(res.message);
+      return res.data;
+    },
     staleTime: POLL_INTERVAL,
     refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,
   });
 
   const pauseMutation = useMutation({
-    mutationFn: SetRecurringItemPaused,
+    mutationFn: async (input: { id: string; paused: boolean }) => {
+      const res = await SetRecurringItemPaused(input);
+      if (!res.ok) throw new Error(res.message);
+      return res.data;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["recurringItems"] });
     },
@@ -107,14 +115,18 @@ const UpcomingBills = ({ currency, canEdit }: Props) => {
       toast.error(
         error instanceof Error && error.message
           ? error.message
-          : "Unable to update the bill. Try again.",
+          : "Unable to update the bill. Refresh the page and try again.",
         { id: "pause-recurring-item" },
       );
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: DeleteRecurringItem,
+    mutationFn: async (input: { id: string }) => {
+      const res = await DeleteRecurringItem(input);
+      if (!res.ok) throw new Error(res.message);
+      return res.data;
+    },
     onSuccess: () => {
       toast.success("Bill deleted", { id: "delete-recurring-item" });
       setDeleteTarget(null);
@@ -124,7 +136,7 @@ const UpcomingBills = ({ currency, canEdit }: Props) => {
       toast.error(
         error instanceof Error && error.message
           ? error.message
-          : "Unable to delete the bill. Try again.",
+          : "Unable to delete the bill. Refresh the page and try again.",
         { id: "delete-recurring-item" },
       );
     },
@@ -310,8 +322,8 @@ const UpcomingBills = ({ currency, canEdit }: Props) => {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete {deleteTarget?.name}?</AlertDialogTitle>
             <AlertDialogDescription>
-              The bill is removed from your list. Transactions already recorded
-              stay in the ledger.
+              This permanently deletes the bill. Transactions already recorded
+              stay in the ledger. This cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -328,7 +340,7 @@ const UpcomingBills = ({ currency, canEdit }: Props) => {
               {deleteMutation.isPending ? (
                 <Loader2 className="animate-spin" />
               ) : (
-                "Delete"
+                "Delete bill"
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

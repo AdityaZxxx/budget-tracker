@@ -62,21 +62,11 @@ const MembersSection = () => {
   const canEdit = callerRole !== VIEW_ONLY_ROLE;
 
   const { mutate: toggleDigest, isPending: isTogglingDigest } = useMutation({
-    mutationFn: setEmailDigest,
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["householdMembers"],
-      });
+    mutationFn: async (input: Parameters<typeof setEmailDigest>[0]) => {
+      const res = await setEmailDigest(input);
+      if (!res.ok) throw new Error(res.message);
+      return res.data;
     },
-    onError: () => {
-      toast.error("Unable to update email digest. Try again.", {
-        id: "email-digest",
-      });
-    },
-  });
-
-  const { mutate: changeRole } = useMutation({
-    mutationFn: setMemberRole,
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["householdMembers"],
@@ -86,7 +76,30 @@ const MembersSection = () => {
       toast.error(
         error instanceof Error && error.message
           ? error.message
-          : "Unable to update the member role. Try again.",
+          : "Unable to update the email digest. Try again.",
+        {
+          id: "email-digest",
+        },
+      );
+    },
+  });
+
+  const { mutate: changeRole } = useMutation({
+    mutationFn: async (input: Parameters<typeof setMemberRole>[0]) => {
+      const res = await setMemberRole(input);
+      if (!res.ok) throw new Error(res.message);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["householdMembers"],
+      });
+    },
+    onError: (error) => {
+      toast.error(
+        error instanceof Error && error.message
+          ? error.message
+          : "Unable to change this member's access. Try again.",
         {
           id: "member-role",
         },
