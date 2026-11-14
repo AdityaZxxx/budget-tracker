@@ -65,47 +65,13 @@ export const COMMANDS: Record<string, Command> = {
     tool: "add_transaction",
     summary: "Record a shared expense Transaction.",
     flags: [amountFlag, categoryFlag, descriptionFlag, dateFlag],
-    build: (values) => {
-      const args: ToolArguments = {
-        amount: parseAmount(requireValue(values, "amount", "add-expense")),
-        category: requireValue(values, "category", "add-expense"),
-        type: "expense",
-        shared: true,
-      };
-
-      if (values.description !== undefined) {
-        args.description = values.description;
-      }
-
-      if (values.date !== undefined) {
-        args.date = parseDate(values.date);
-      }
-
-      return args;
-    },
+    build: (values) => transactionArgs(values, "add-expense", "expense"),
   },
   "add-income": {
     tool: "add_transaction",
     summary: "Record a shared income Transaction.",
     flags: [amountFlag, categoryFlag, descriptionFlag, dateFlag],
-    build: (values) => {
-      const args: ToolArguments = {
-        amount: parseAmount(requireValue(values, "amount", "add-income")),
-        category: requireValue(values, "category", "add-income"),
-        type: "income",
-        shared: true,
-      };
-
-      if (values.description !== undefined) {
-        args.description = values.description;
-      }
-
-      if (values.date !== undefined) {
-        args.date = parseDate(values.date);
-      }
-
-      return args;
-    },
+    build: (values) => transactionArgs(values, "add-income", "income"),
   },
   balance: {
     tool: "get_balances",
@@ -233,19 +199,40 @@ function requireValue(
     );
   }
 
-  return value;
+  return value.trim();
 }
 
 function parseAmount(value: string): number {
-  const amount = Number(value);
-
-  if (!Number.isFinite(amount)) {
+  if (!/^\d+(\.\d{1,2})?$/.test(value) || Number(value) <= 0) {
     throw new CliError(
-      `Invalid --amount: ${value}. Use a number, such as 500.`,
+      `Invalid --amount: ${value}. Use a positive number with at most two decimals, such as 500 or 12.50.`,
     );
   }
 
-  return amount;
+  return Number(value);
+}
+
+function transactionArgs(
+  values: FlagValues,
+  command: string,
+  type: "income" | "expense",
+): ToolArguments {
+  const args: ToolArguments = {
+    amount: parseAmount(requireValue(values, "amount", command)),
+    category: requireValue(values, "category", command),
+    type,
+    shared: true,
+  };
+
+  if (values.description) {
+    args.description = values.description;
+  }
+
+  if (values.date) {
+    args.date = parseDate(values.date);
+  }
+
+  return args;
 }
 
 function parseDate(value: string): string {

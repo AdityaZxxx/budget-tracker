@@ -103,7 +103,7 @@ function parseFlags(
 
   for (const [name, value] of Object.entries(parsed.values)) {
     if (typeof value === "string") {
-      values[name] = value;
+      values[name] = value.trim();
     }
   }
 

@@ -48,6 +48,13 @@ export async function callTool(
 
     const text = textFromContent(result.content);
 
+    if (text === null) {
+      return {
+        text: "The tool answered with content the CLI could not read.",
+        isError: true,
+      };
+    }
+
     return { text, isError: result.isError === true };
   } catch (error) {
     throw new Error(describeFailure(error, endpoint), { cause: error });
@@ -60,19 +67,21 @@ export async function callTool(
 // result, so the content is parsed here rather than assumed.
 function textFromContent(
   content: CallToolResult["content"] | CompatibilityCallToolResult["content"],
-): string {
+): string | null {
   const parts = z.array(ContentPartSchema).safeParse(content);
 
   if (!parts.success) {
-    return "";
+    return null;
   }
 
-  return parts.data
+  const text = parts.data
     .filter(
       (part): part is { type: "text"; text: string } => part.type === "text",
     )
     .map((part) => part.text)
     .join("\n");
+
+  return text === "" ? null : text;
 }
 
 function describeFailure(cause: unknown, endpoint: string): string {
