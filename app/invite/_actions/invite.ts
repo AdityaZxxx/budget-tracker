@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 
+import { fail, type ActionResult } from "@/lib/action-result";
 import { getSession } from "@/lib/auth";
 import { setActiveHouseholdCookie } from "@/lib/household";
 import { notify, notifyMembers } from "@/lib/notifications";
@@ -9,7 +10,9 @@ import prisma from "@/lib/prisma";
 
 // The join lives in a Server Action rather than the page render: Next.js
 // forbids writing cookies while a page renders.
-export async function joinHouseholdByToken(token: string) {
+export async function joinHouseholdByToken(
+  token: string,
+): Promise<ActionResult> {
   const session = await getSession();
   if (!session) {
     redirect(`/sign-in?next=${encodeURIComponent(`/invite/${token}`)}`);
@@ -22,7 +25,9 @@ export async function joinHouseholdByToken(token: string) {
     },
   });
   if (!inviteLink) {
-    throw new Error("This invite link is invalid or has been revoked");
+    return fail(
+      "This invite link is invalid or has been revoked. Ask for a new one.",
+    );
   }
 
   const existingMembership = await prisma.householdMembership.findUnique({

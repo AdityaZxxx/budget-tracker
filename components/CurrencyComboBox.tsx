@@ -51,21 +51,35 @@ export function CurrencyComboBox() {
     : null;
 
   const mutation = useMutation({
-    mutationFn: UpdateUserCurrency,
-    onSuccess: (data: Household) => {
+    mutationFn: async (currency: string) => {
+      const result = await UpdateUserCurrency(currency);
+      if (!result.ok) {
+        throw new Error(result.message);
+      }
+      return result.data;
+    },
+    onSuccess: (saved) => {
       toast.success("Currency updated", {
         id: "update-currency",
       });
+      if (!saved) {
+        return;
+      }
       // Write the saved currency into the cache so the new value shows at
       // once, and a later refetch still replaces it with the server's copy.
       queryClient.setQueryData<Household>(["household"], (previous) =>
-        previous ? { ...previous, currency: data.currency } : previous,
+        previous ? { ...previous, currency: saved.currency } : previous,
       );
     },
-    onError: () => {
-      toast.error("Unable to update currency. Try again.", {
-        id: "update-currency",
-      });
+    onError: (error) => {
+      toast.error(
+        error instanceof Error && error.message
+          ? error.message
+          : "Unable to update currency. Try again.",
+        {
+          id: "update-currency",
+        },
+      );
     },
   });
 
