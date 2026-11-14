@@ -64,9 +64,7 @@ export async function callTool(
 }
 
 // The SDK types the tool result as a union that includes the compatibility
-// result, so the content is parsed here rather than assumed. Null means the
-// tool answered but the CLI cannot read it; that is an error, not an empty
-// success.
+// result, so the content is parsed here rather than assumed.
 function textFromContent(
   content: CallToolResult["content"] | CompatibilityCallToolResult["content"],
 ): string | null {
