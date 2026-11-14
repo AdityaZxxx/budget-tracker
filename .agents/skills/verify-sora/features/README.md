@@ -49,4 +49,6 @@ Keep implementation details out of the map. Name only user paths, stable handles
 - [Budgets](./budgets.md) covers creating, editing, and deleting a budget, its progress, and the hard limit.
 - [Goals](./goals.md) covers creating and deleting a goal and tracking contributions towards it.
 - [Balances and settlements](./balances-settlements.md) covers who owes what, recording a settlement, and the shared spending card.
+- [Manage](./manage.md) covers the space name, invite links, members, digest, export, and account deletion.
 - [Agent access](./agent-access.md) covers the agent access switch, API tokens, and what a token can and cannot do.
+- [Validation](./validation.md) covers rejected input at every entry point: the web form, the MCP surface, and the CLI.

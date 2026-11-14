@@ -149,14 +149,16 @@ Run `stop` after every failed attempt too, so a broken iteration does not strand
 
 `features/README.md` indexes the map. One file per user-facing feature:
 
-| File                               | Covers                                                          |
-| ---------------------------------- | --------------------------------------------------------------- |
-| `features/onboarding.md`           | Sign up, the currency wizard, the first dashboard               |
-| `features/overview.md`             | The dashboard's totals, category stats, and history chart       |
-| `features/transactions.md`         | The transaction table, filters, CSV export, adding and deleting |
-| `features/budgets.md`              | Budgets on the Manage page, their progress, and the hard limit  |
-| `features/goals.md`                | Goals, their progress, and contributions                        |
-| `features/balances-settlements.md` | Who owes what, and recording a settlement                       |
-| `features/agent-access.md`         | Agent access, API tokens, and what a token can do               |
+| File                               | Covers                                                              |
+| ---------------------------------- | ------------------------------------------------------------------- |
+| `features/onboarding.md`           | Sign up, the currency wizard, the first dashboard                   |
+| `features/overview.md`             | The dashboard's totals, category stats, and history chart           |
+| `features/transactions.md`         | The transaction table, filters, CSV export, adding and deleting     |
+| `features/budgets.md`              | Budgets on the Manage page, their progress, and the hard limit      |
+| `features/goals.md`                | Goals, their progress, and contributions                            |
+| `features/balances-settlements.md` | Who owes what, and recording a settlement                           |
+| `features/manage.md`               | Space name, invite links, members, digest, export, account deletion |
+| `features/agent-access.md`         | Agent access, API tokens, and what a token can do                   |
+| `features/validation.md`           | Rejected input at the web form, MCP surface, and the CLI            |
 
 To add a feature: copy the shape of an existing file, keep the four H2s, and prove the new journey before you commit it.
