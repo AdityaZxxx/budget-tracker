@@ -52,7 +52,12 @@ export default function GoogleSignInButton({
     });
     if (error) {
       setIsLoading(false);
-      toast.error(error.message || "Unable to sign in with Google. Try again.");
+      // better-auth errors are plain objects, not Error instances.
+      toast.error(
+        error.message
+          ? error.message
+          : "Unable to continue with Google. Check your connection and try again.",
+      );
     }
   };
 

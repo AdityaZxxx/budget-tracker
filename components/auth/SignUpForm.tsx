@@ -13,7 +13,7 @@ import AuthField from "./AuthField";
 import AuthSubmitButton from "./AuthSubmitButton";
 
 const signUpSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, "Enter your name"),
   email: z.string().email("Enter a valid email"),
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
@@ -44,8 +44,11 @@ export default function SignUpForm({ next }: { next?: string }) {
       setIsLoading(false);
 
       if (error) {
+        // better-auth errors are plain objects, not Error instances.
         toast.error(
-          error.message || "Unable to create your account. Try again.",
+          error.message
+            ? error.message
+            : "Unable to create your account. Check your details and try again.",
         );
         return;
       }
