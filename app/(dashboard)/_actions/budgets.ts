@@ -14,7 +14,7 @@ import {
   getBudgetsWithProgress,
   updateHouseholdBudget,
 } from "@/lib/budgets";
-import { assertFullMember, requireHousehold } from "@/lib/household";
+import { requireHousehold } from "@/lib/household";
 import {
   CreateBudgetSchema,
   DeleteBudgetSchema,
@@ -40,9 +40,11 @@ export async function createBudget(form: CreateBudgetSchemaType) {
   if (!result) {
     redirect("/sign-in");
   }
-  assertFullMember(result);
-
-  return await createHouseholdBudget(result.household.id, parsedBody.data);
+  return await createHouseholdBudget(
+    result.household.id,
+    parsedBody.data,
+    result.membership.role,
+  );
 }
 
 export async function updateBudget(form: UpdateBudgetSchemaType) {
@@ -55,9 +57,11 @@ export async function updateBudget(form: UpdateBudgetSchemaType) {
   if (!result) {
     redirect("/sign-in");
   }
-  assertFullMember(result);
-
-  return await updateHouseholdBudget(result.household.id, parsedBody.data);
+  return await updateHouseholdBudget(
+    result.household.id,
+    parsedBody.data,
+    result.membership.role,
+  );
 }
 
 export async function deleteBudget(form: DeleteBudgetSchemaType) {
@@ -70,7 +74,9 @@ export async function deleteBudget(form: DeleteBudgetSchemaType) {
   if (!result) {
     redirect("/sign-in");
   }
-  assertFullMember(result);
-
-  return await deleteHouseholdBudget(result.household.id, parsedBody.data.id);
+  return await deleteHouseholdBudget(
+    result.household.id,
+    parsedBody.data.id,
+    result.membership.role,
+  );
 }

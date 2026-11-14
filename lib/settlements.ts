@@ -9,6 +9,7 @@ import { DomainError } from "@/lib/errors";
 import { getFormatterForCurrency } from "@/lib/helpers";
 import { notify } from "@/lib/notifications";
 import prisma from "@/lib/prisma";
+import { assertFullMemberRole, type MemberRole } from "@/lib/roles";
 import { RecordSettlementSchema } from "@/schemas/settlement";
 
 export type RecordSettlementInput = {
@@ -26,7 +27,9 @@ export async function recordSettlement(
   householdId: string,
   userId: string,
   input: RecordSettlementInput,
+  role: MemberRole,
 ) {
+  assertFullMemberRole(role);
   const parsedBody = RecordSettlementSchema.safeParse({
     memberId: input.memberId,
     amount: input.amount,

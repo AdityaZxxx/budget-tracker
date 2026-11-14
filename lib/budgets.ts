@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { SETTLEMENT_CATEGORY_NAME } from "@/lib/constants";
 import { DomainError } from "@/lib/errors";
 import prisma from "@/lib/prisma";
+import { assertFullMemberRole, type MemberRole } from "@/lib/roles";
 import { CreateBudgetSchema, UpdateBudgetSchema } from "@/schemas/budgets";
 
 // Budget months follow the UTC calendar: transaction dates are stored as UTC
@@ -123,7 +124,9 @@ async function findExpenseCategory(householdId: string, name: string) {
 export async function createHouseholdBudget(
   householdId: string,
   input: CreateBudgetInput,
+  role: MemberRole,
 ) {
+  assertFullMemberRole(role);
   const parsed = CreateBudgetSchema.safeParse(input);
   if (!parsed.success) {
     throw new DomainError(parsed.error.issues[0]?.message ?? "Invalid budget");
@@ -147,7 +150,9 @@ export async function createHouseholdBudget(
 export async function updateHouseholdBudget(
   householdId: string,
   input: UpdateBudgetInput,
+  role: MemberRole,
 ) {
+  assertFullMemberRole(role);
   const parsed = UpdateBudgetSchema.safeParse(input);
   if (!parsed.success) {
     throw new DomainError(parsed.error.issues[0]?.message ?? "Invalid budget");
@@ -174,6 +179,7 @@ export async function updateHouseholdBudget(
 export async function setHouseholdBudget(
   householdId: string,
   input: CreateBudgetInput,
+  role: MemberRole,
 ) {
   const existing = await prisma.budget.findFirst({
     where: {
@@ -183,16 +189,22 @@ export async function setHouseholdBudget(
   });
 
   if (existing) {
-    return await updateHouseholdBudget(householdId, {
-      ...input,
-      id: existing.id,
-    });
+    return await updateHouseholdBudget(
+      householdId,
+      { ...input, id: existing.id },
+      role,
+    );
   }
 
-  return await createHouseholdBudget(householdId, input);
+  return await createHouseholdBudget(householdId, input, role);
 }
 
-export async function deleteHouseholdBudget(householdId: string, id: string) {
+export async function deleteHouseholdBudget(
+  householdId: string,
+  id: string,
+  role: MemberRole,
+) {
+  assertFullMemberRole(role);
   const budget = await prisma.budget.delete({
     where: {
       id,

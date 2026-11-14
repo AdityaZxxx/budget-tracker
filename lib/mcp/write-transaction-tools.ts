@@ -3,7 +3,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 import { z } from "zod";
 
-import { READ_WRITE_SCOPE, VIEW_ONLY_ROLE } from "@/lib/constants";
+import { READ_WRITE_SCOPE } from "@/lib/constants";
 import { parseDate } from "@/lib/dates";
 import { recordSettlement } from "@/lib/settlements";
 import { createTransaction, deleteTransaction } from "@/lib/transactions";
@@ -33,7 +33,7 @@ export function registerTransactionWriteTools(
           "Amount, in the Household's currency.",
         ),
         description: transactionInput.description.describe(
-          "What the Transaction was for.",
+          "What the Transaction was for, up to 200 characters.",
         ),
         date: z
           .string()
@@ -72,11 +72,6 @@ export function registerTransactionWriteTools(
     }) => {
       if (context.scope !== READ_WRITE_SCOPE)
         return toolError("This token is read-only.");
-      if (context.role === VIEW_ONLY_ROLE)
-        return toolError(
-          "View-only members cannot make changes in this household.",
-        );
-
       try {
         const transaction = await createTransaction(
           context.householdId,
@@ -94,6 +89,7 @@ export function registerTransactionWriteTools(
             // The ledger keeps one answer to who added the Transaction.
             addedVia: "agent",
           },
+          context.role,
         );
 
         return toolResult({
@@ -131,13 +127,8 @@ export function registerTransactionWriteTools(
     async ({ id }) => {
       if (context.scope !== READ_WRITE_SCOPE)
         return toolError("This token is read-only.");
-      if (context.role === VIEW_ONLY_ROLE)
-        return toolError(
-          "View-only members cannot make changes in this household.",
-        );
-
       try {
-        await deleteTransaction(context.householdId, id);
+        await deleteTransaction(context.householdId, id, context.role);
 
         return toolResult({ deleted: id, memberId: context.userId });
       } catch (error) {
@@ -164,11 +155,6 @@ export function registerTransactionWriteTools(
     async ({ memberId, amount }) => {
       if (context.scope !== READ_WRITE_SCOPE)
         return toolError("This token is read-only.");
-      if (context.role === VIEW_ONLY_ROLE)
-        return toolError(
-          "View-only members cannot make changes in this household.",
-        );
-
       try {
         const settlement = await recordSettlement(
           context.householdId,
@@ -178,6 +164,7 @@ export function registerTransactionWriteTools(
             amount,
             addedVia: "agent",
           },
+          context.role,
         );
 
         return toolResult({

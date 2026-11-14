@@ -7,6 +7,7 @@ import type {
 import { SETTLEMENT_CATEGORY_NAME } from "@/lib/constants";
 import { DomainError } from "@/lib/errors";
 import prisma from "@/lib/prisma";
+import { assertFullMemberRole, type MemberRole } from "@/lib/roles";
 import {
   CreateCategorySchema,
   DeleteCategorySchema,
@@ -35,7 +36,9 @@ export async function getCategories(
 export async function createHouseholdCategory(
   householdId: string,
   input: CreateCategorySchemaType,
+  role: MemberRole,
 ) {
+  assertFullMemberRole(role);
   const parsed = CreateCategorySchema.safeParse(input);
   if (!parsed.success) {
     throw new DomainError(
@@ -44,6 +47,8 @@ export async function createHouseholdCategory(
   }
 
   const { name, icon, type } = parsed.data;
+
+  assertNotSettlementCategory(name);
 
   return await prisma.category.create({
     data: {
@@ -55,10 +60,18 @@ export async function createHouseholdCategory(
   });
 }
 
+function assertNotSettlementCategory(name: string) {
+  if (name === SETTLEMENT_CATEGORY_NAME) {
+    throw new DomainError("Sora manages the Settlement category.");
+  }
+}
+
 export async function updateHouseholdCategory(
   householdId: string,
   input: UpdateCategorySchemaType,
+  role: MemberRole,
 ) {
+  assertFullMemberRole(role);
   const parsed = UpdateCategorySchema.safeParse(input);
   if (!parsed.success) {
     throw new DomainError(
@@ -68,8 +81,9 @@ export async function updateHouseholdCategory(
 
   const { originalName, name, icon, type } = parsed.data;
 
-  if (originalName === SETTLEMENT_CATEGORY_NAME) {
-    throw new DomainError("This category cannot be edited");
+  assertNotSettlementCategory(originalName);
+  if (name !== originalName) {
+    assertNotSettlementCategory(name);
   }
 
   const existing = await prisma.category.findUnique({
@@ -127,13 +141,17 @@ export async function updateHouseholdCategory(
 export async function deleteHouseholdCategory(
   householdId: string,
   input: DeleteCategorySchemaType,
+  role: MemberRole,
 ) {
+  assertFullMemberRole(role);
   const parsed = DeleteCategorySchema.safeParse(input);
   if (!parsed.success) {
     throw new DomainError(
       parsed.error.issues[0]?.message ?? "Invalid category",
     );
   }
+
+  assertNotSettlementCategory(parsed.data.name);
 
   return await prisma.category.delete({
     where: {

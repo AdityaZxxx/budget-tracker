@@ -1,7 +1,9 @@
 import { z } from "zod";
 
+import { freeText } from "@/schemas/text";
+
 export const CreateApiTokenSchema = z.object({
-  name: z.string().min(1, "Enter a name").max(60),
+  name: freeText({ min: 1, minMessage: "Enter a name", max: 60 }),
   scope: z.enum(["read-only", "read-write"]),
   expiresAt: z.coerce
     .date()

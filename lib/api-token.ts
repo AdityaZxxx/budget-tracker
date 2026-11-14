@@ -11,6 +11,7 @@ import { createHash, randomBytes } from "node:crypto";
 
 import { READ_WRITE_SCOPE, VIEW_ONLY_ROLE } from "@/lib/constants";
 import prisma from "@/lib/prisma";
+import { assertFullMemberRole, type MemberRole } from "@/lib/roles";
 
 // The token carries 256 bits of entropy, so hashing it is enough to make a
 // leaked database useless. A slow key derivation would only slow down every
@@ -101,4 +102,30 @@ export async function requireToken(scope: TokenScope): Promise<TokenAuth> {
     membership,
     token,
   };
+}
+
+export async function setAgentAccess(
+  householdId: string,
+  enabled: boolean,
+  role: MemberRole,
+) {
+  assertFullMemberRole(role);
+  await prisma.$transaction(async (tx) => {
+    await tx.household.update({
+      where: { id: householdId },
+      data: { agentAccessEnabled: enabled },
+    });
+
+    // Turning agent access off revokes every token in the household, so the
+    // setting is a kill switch rather than a promise.
+    if (!enabled) {
+      await tx.apiToken.updateMany({
+        where: {
+          householdId,
+          revokedAt: null,
+        },
+        data: { revokedAt: new Date() },
+      });
+    }
+  });
 }
