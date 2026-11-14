@@ -55,6 +55,14 @@ export async function createHouseholdCategory(
   });
 }
 
+// The Settlement category is the anchor the balance math reads back; the
+// MCP tools reach this seam too, so the guard lives here, not in the UI.
+function assertSystemCategoryUntouchable(name: string) {
+  if (name === SETTLEMENT_CATEGORY_NAME) {
+    throw new DomainError("Sora manages the Settlement category.");
+  }
+}
+
 export async function updateHouseholdCategory(
   householdId: string,
   input: UpdateCategorySchemaType,
@@ -68,9 +76,7 @@ export async function updateHouseholdCategory(
 
   const { originalName, name, icon, type } = parsed.data;
 
-  if (originalName === SETTLEMENT_CATEGORY_NAME) {
-    throw new DomainError("This category cannot be edited");
-  }
+  assertSystemCategoryUntouchable(originalName);
 
   const existing = await prisma.category.findUnique({
     where: {
@@ -134,6 +140,8 @@ export async function deleteHouseholdCategory(
       parsed.error.issues[0]?.message ?? "Invalid category",
     );
   }
+
+  assertSystemCategoryUntouchable(parsed.data.name);
 
   return await prisma.category.delete({
     where: {
