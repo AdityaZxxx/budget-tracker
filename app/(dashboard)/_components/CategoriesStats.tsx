@@ -3,6 +3,7 @@
 import type { TransactionType } from "@/lib/types";
 
 import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { TrendingDown, TrendingUp } from "lucide-react";
 
 import SkeletonWrapper from "@/components/SkeletonWrapper";
@@ -11,7 +12,7 @@ import EmptyState from "@/components/ui/empty-state";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { POLL_INTERVAL } from "@/lib/constants";
-import { dateToUtcDate, getFormatterForCurrency } from "@/lib/helpers";
+import { getFormatterForCurrency } from "@/lib/helpers";
 
 import { type GetCategoriesStatsResponseType } from "../../api/stats/categories/route";
 
@@ -33,8 +34,9 @@ const CategoriesStats = ({ from, to, currency }: Props) => {
     queryKey: ["overview", "stats", "categories", from, to],
     queryFn: async () => {
       const response = await fetch(
-        `/api/stats/categories?from=${dateToUtcDate(from)}&to=${dateToUtcDate(
+        `/api/stats/categories?from=${format(from, "yyyy-MM-dd")}&to=${format(
           to,
+          "yyyy-MM-dd",
         )}`,
       );
       if (!response.ok) {
