@@ -51,6 +51,11 @@ export async function renameHousehold(name: string) {
 }
 
 export async function createHousehold(name: string) {
+  const parsedName = HouseholdNameSchema.safeParse(name);
+  if (!parsedName.success) {
+    throw new Error(parsedName.error.issues[0]?.message ?? "Invalid name");
+  }
+
   const session = await getSession();
   if (!session) {
     redirect("/sign-in");
@@ -59,7 +64,7 @@ export async function createHousehold(name: string) {
   const household = await prisma.$transaction(async (tx) => {
     const created = await tx.household.create({
       data: {
-        name: name.trim() || null,
+        name: parsedName.data || null,
       },
     });
     await tx.householdMembership.create({
