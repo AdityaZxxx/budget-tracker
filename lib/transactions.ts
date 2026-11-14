@@ -166,8 +166,10 @@ export async function createTransaction(
   const goalId = parsedBody.data.goalId || undefined;
   const addedVia = input.addedVia ?? null;
   const recurringItemId = input.recurringItemId || undefined;
-  const shareInput =
-    type === "expense" && shared ? (parsedBody.data.shares ?? []) : [];
+  const shareInput = parsedBody.data.shares ?? [];
+  if (shareInput.length > 0 && (type !== "expense" || !shared)) {
+    throw new DomainError("Shares are only valid for shared expenses");
+  }
 
   const [household, actor, goal, memberships, recurringItem] =
     await Promise.all([
