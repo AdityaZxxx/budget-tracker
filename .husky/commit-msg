@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# Reject bodies: Conventional Commit is a type, a short subject, no body.
+# See CODING_STANDARDS.md "Commit protocol".
+
+# Merge commits and automated commits are exempt.
+if head -n 1 "$1" | grep -qE "^(Merge|Revert)"; then
+  exit 0
+fi
+
+rest="$(sed -n '2,$p' "$1")"
+case "$rest" in
+  (*) [ -z "$(printf '%s' "$rest" | tr -d '[:space:]')" ] && exit 0 ;;
+esac
+
+printf 'Commit messages carry no body in this repo (CODING_STANDARDS.md).\n' >&2
+printf 'Second line: %s\n' "$(sed -n '2p' "$1")" >&2
+exit 1
