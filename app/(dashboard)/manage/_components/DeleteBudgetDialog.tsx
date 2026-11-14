@@ -41,7 +41,13 @@ const DeleteBudgetDialog = ({
 
   const queryClient = useQueryClient();
   const deleteMutation = useMutation({
-    mutationFn: deleteBudget,
+    mutationFn: async (values: { id: string }) => {
+      const res = await deleteBudget(values);
+      if (!res.ok) {
+        throw new Error(res.message);
+      }
+      return res.data;
+    },
     onSuccess: async () => {
       toast.success("Budget deleted", {
         id: budgetIdentifier,
@@ -50,10 +56,15 @@ const DeleteBudgetDialog = ({
         queryKey: ["budgets"],
       });
     },
-    onError: () => {
-      toast.error("Unable to delete budget. Try again.", {
-        id: budgetIdentifier,
-      });
+    onError: (error) => {
+      toast.error(
+        error instanceof Error && error.message
+          ? error.message
+          : "Unable to delete budget. Try again.",
+        {
+          id: budgetIdentifier,
+        },
+      );
     },
   });
 

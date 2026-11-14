@@ -9,6 +9,7 @@ import { useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { toast } from "sonner";
 
+import { writtenIssue } from "@/app/(dashboard)/_actions/plain-issue";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -72,7 +73,7 @@ function handleSaveError(error: Error) {
   toast.error(
     error instanceof Error && error.message
       ? error.message
-      : "Unable to save the bill. Try again.",
+      : "Unable to save the bill. Check the name, amount and category, then try again.",
     { id: "recurring-item" },
   );
 }
@@ -142,12 +143,20 @@ export default function RecurringItemDialog({
   };
 
   const createMutation = useMutation({
-    mutationFn: CreateRecurringItem,
+    mutationFn: async (input: Parameters<typeof CreateRecurringItem>[0]) => {
+      const res = await CreateRecurringItem(input);
+      if (!res.ok) throw new Error(res.message);
+      return res.data;
+    },
     onSuccess: handleSaved,
     onError: handleSaveError,
   });
   const updateMutation = useMutation({
-    mutationFn: UpdateRecurringItem,
+    mutationFn: async (input: Parameters<typeof UpdateRecurringItem>[0]) => {
+      const res = await UpdateRecurringItem(input);
+      if (!res.ok) throw new Error(res.message);
+      return res.data;
+    },
     onSuccess: handleSaved,
     onError: handleSaveError,
   });
@@ -181,9 +190,15 @@ export default function RecurringItemDialog({
         id: item?.id,
       });
       if (!parsed.success) {
-        toast.error(parsed.error.issues[0]?.message ?? "Check the form", {
-          id: "recurring-item",
-        });
+        toast.error(
+          writtenIssue(
+            parsed.error.issues[0]?.message,
+            "Unable to save the bill. Check the name, amount and category, then try again.",
+          ),
+          {
+            id: "recurring-item",
+          },
+        );
         return;
       }
       updateMutation.mutate(parsed.data);
@@ -191,9 +206,15 @@ export default function RecurringItemDialog({
     }
     const parsed = CreateRecurringItemSchema.safeParse(shared);
     if (!parsed.success) {
-      toast.error(parsed.error.issues[0]?.message ?? "Check the form", {
-        id: "recurring-item",
-      });
+      toast.error(
+        writtenIssue(
+          parsed.error.issues[0]?.message,
+          "Unable to save the bill. Check the name, amount and category, then try again.",
+        ),
+        {
+          id: "recurring-item",
+        },
+      );
       return;
     }
     createMutation.mutate(parsed.data);

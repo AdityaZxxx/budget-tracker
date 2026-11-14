@@ -41,7 +41,11 @@ const DeleteGoalDialog = ({
 
   const queryClient = useQueryClient();
   const deleteMutation = useMutation({
-    mutationFn: deleteGoal,
+    mutationFn: async (input: { id: string }) => {
+      const res = await deleteGoal(input);
+      if (!res.ok) throw new Error(res.message);
+      return res.data;
+    },
     onSuccess: async () => {
       toast.success("Goal deleted", {
         id: goalIdentifier,
@@ -51,10 +55,15 @@ const DeleteGoalDialog = ({
       });
       setOpen(false);
     },
-    onError: () => {
-      toast.error("Unable to delete goal. Try again.", {
-        id: goalIdentifier,
-      });
+    onError: (error) => {
+      toast.error(
+        error instanceof Error && error.message
+          ? error.message
+          : "Unable to delete the goal. Refresh the page and try again.",
+        {
+          id: goalIdentifier,
+        },
+      );
     },
   });
 

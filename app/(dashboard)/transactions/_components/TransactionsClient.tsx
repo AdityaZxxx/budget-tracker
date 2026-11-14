@@ -37,7 +37,7 @@ const TransactionsClient = () => {
                 if (!from || !to) return;
                 if (differenceInDays(to, from) > MAX_DATE_RANGE) {
                   toast.error(
-                    `The selected date range is too big. Max allowed range is ${MAX_DATE_RANGE} days.`,
+                    `The selected date range is too big. Choose a range of ${MAX_DATE_RANGE} days or less.`,
                   );
                   return;
                 }

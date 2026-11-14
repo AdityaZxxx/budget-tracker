@@ -61,8 +61,17 @@ const EditCategoryDialog = ({
   const theme = useTheme();
 
   const { mutate, isPending } = useMutation({
-    mutationFn: UpdateCategory,
-    onSuccess: async (updated: Category) => {
+    mutationFn: async (input: Parameters<typeof UpdateCategory>[0]) => {
+      const res = await UpdateCategory(input);
+      if (!res.ok) throw new Error(res.message);
+      if (!res.data) {
+        throw new Error(
+          "Unable to update the category. Refresh the page and try again.",
+        );
+      }
+      return res.data;
+    },
+    onSuccess: async (updated) => {
       toast.success(`Category "${updated.name}" updated`, {
         id: "update-category",
       });
@@ -78,9 +87,9 @@ const EditCategoryDialog = ({
     },
     onError: (error) => {
       toast.error(
-        error instanceof Error && error.message === "Bad request"
-          ? "Unable to update category. Check the name and try again."
-          : "Unable to update category. Try again.",
+        error instanceof Error && error.message
+          ? error.message
+          : "Unable to update the category. Refresh the page and try again.",
         {
           id: "update-category",
         },

@@ -21,7 +21,11 @@ const SimplifyDebts = ({ currency }: Props) => {
 
   const debtsQuery = useQuery({
     queryKey: ["simplified-debts"],
-    queryFn: getSimplifiedDebts,
+    queryFn: async () => {
+      const res = await getSimplifiedDebts();
+      if (!res.ok) throw new Error(res.message);
+      return res.data;
+    },
     staleTime: POLL_INTERVAL,
     refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,

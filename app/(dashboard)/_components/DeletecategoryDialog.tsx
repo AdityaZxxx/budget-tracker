@@ -42,7 +42,11 @@ const DeleteCategoryDialog = ({
 
   const queryClient = useQueryClient();
   const deleteMutation = useMutation({
-    mutationFn: DeleteCategory,
+    mutationFn: async (input: Parameters<typeof DeleteCategory>[0]) => {
+      const res = await DeleteCategory(input);
+      if (!res.ok) throw new Error(res.message);
+      return res.data;
+    },
     onSuccess: async () => {
       toast.success("Category deleted", {
         id: categoryIdentifier,
@@ -51,10 +55,15 @@ const DeleteCategoryDialog = ({
         queryKey: ["categories"],
       });
     },
-    onError: () => {
-      toast.error("Unable to delete category. Try again.", {
-        id: categoryIdentifier,
-      });
+    onError: (error) => {
+      toast.error(
+        error instanceof Error && error.message
+          ? error.message
+          : "Unable to delete the category. Refresh the page and try again.",
+        {
+          id: categoryIdentifier,
+        },
+      );
     },
   });
 
