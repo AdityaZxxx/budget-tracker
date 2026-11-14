@@ -1,6 +1,5 @@
 "use client";
 
-import type { TransactionType } from "@/lib/types";
 import type { Category } from "@prisma/client";
 import type { ReactElement, ReactNode } from "react";
 
@@ -86,10 +85,7 @@ const DeleteCategoryDialog = ({
             variant="destructive"
             onClick={() => {
               toast.loading("Deleting category…", { id: categoryIdentifier });
-              deleteMutation.mutate({
-                name: category.name,
-                type: category.type as TransactionType,
-              });
+              deleteMutation.mutate({ id: category.id });
             }}
           >
             Delete category

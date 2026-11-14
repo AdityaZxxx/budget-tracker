@@ -132,12 +132,25 @@ export async function deleteHouseholdGoal(
   role: MemberRole,
 ) {
   assertFullMemberRole(role);
-  const goal = await prisma.goal.delete({
+  const goal = await prisma.goal.findFirst({
     where: {
       id,
       householdId,
     },
   });
+  if (!goal) {
+    throw new DomainError("Goal not found");
+  }
+
+  const deleted = await prisma.goal.deleteMany({
+    where: {
+      id,
+      householdId,
+    },
+  });
+  if (deleted.count === 0) {
+    throw new DomainError("Goal not found");
+  }
 
   return { ...goal, target: goal.target.toNumber() };
 }

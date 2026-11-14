@@ -252,6 +252,7 @@ export function registerReadTools(server: McpServer, context: McpContext) {
 
         return toolResult({
           categories: categories.map((category) => ({
+            id: category.id,
             name: category.name,
             icon: category.icon,
             type: category.type,

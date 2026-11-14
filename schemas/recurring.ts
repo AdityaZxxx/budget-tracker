@@ -61,9 +61,5 @@ export const SetRecurringItemPausedSchema = z.object({
   paused: z.boolean(),
 });
 
-export const DeleteRecurringItemSchema = z.object({
-  id: z.string().min(1),
-});
-
 export type CreateRecurringItemType = z.input<typeof CreateRecurringItemSchema>;
 export type UpdateRecurringItemType = z.input<typeof UpdateRecurringItemSchema>;

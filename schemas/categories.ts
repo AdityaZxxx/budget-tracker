@@ -28,13 +28,6 @@ export const CreateCategorySchema = z.object({
 
 export type CreateCategorySchemaType = z.infer<typeof CreateCategorySchema>;
 
-export const DeleteCategorySchema = z.object({
-  name: categoryLookupNameSchema,
-  type: categoryTypeSchema,
-});
-
-export type DeleteCategorySchemaType = z.infer<typeof DeleteCategorySchema>;
-
 export const UpdateCategorySchema = z.object({
   originalName: categoryLookupNameSchema,
   name: categoryNameSchema,
