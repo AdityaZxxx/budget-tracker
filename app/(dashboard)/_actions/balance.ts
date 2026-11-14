@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 
 import { getMemberBalances, getSimplifiedTransfers } from "@/lib/balances";
 import { requireHousehold } from "@/lib/household";
+import { withRequestId } from "@/lib/request-id";
 import { recordSettlement } from "@/lib/settlements";
 import { RecordSettlementSchema } from "@/schemas/settlement";
 
@@ -40,10 +41,12 @@ export async function RecordSettlement(form: RecordSettlementSchemaType) {
   const { session, household } = result;
   const { memberId, amount } = parsedBody.data;
 
-  await recordSettlement(
-    household.id,
-    session.user.id,
-    { memberId, amount },
-    result.membership.role,
-  );
+  await withRequestId(async () => {
+    await recordSettlement(
+      household.id,
+      session.user.id,
+      { memberId, amount },
+      result.membership.role,
+    );
+  });
 }
