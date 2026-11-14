@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 
+// seam-parse-exempt: only server-resolved, validated values reach these helpers.
 export async function notify(
   householdId: string,
   userId: string,
@@ -16,6 +17,7 @@ export async function notify(
   });
 }
 
+// seam-parse-exempt: only server-resolved, validated values reach these helpers.
 export async function notifyMembers(
   householdId: string,
   userIds: string[],

@@ -11,6 +11,7 @@ import {
   CreateCategorySchema,
   UpdateCategorySchema,
 } from "@/schemas/categories";
+import { DeleteIdSchema } from "@/schemas/delete";
 
 export async function getCategories(
   householdId: string,
@@ -142,6 +143,14 @@ export async function deleteHouseholdCategory(
   role: MemberRole,
 ) {
   assertFullMemberRole(role);
+
+  const parsedId = DeleteIdSchema.safeParse({ id });
+  if (!parsedId.success) {
+    throw new DomainError(
+      parsedId.error.issues[0]?.message ?? "Category not found",
+    );
+  }
+
   const category = await prisma.category.findFirst({
     where: {
       id,

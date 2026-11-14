@@ -4,6 +4,7 @@ import type { z } from "zod";
 import { DomainError } from "@/lib/errors";
 import prisma from "@/lib/prisma";
 import { assertFullMemberRole, type MemberRole } from "@/lib/roles";
+import { DeleteIdSchema } from "@/schemas/delete";
 import {
   CreateRecurringItemSchema,
   UpdateRecurringItemSchema,
@@ -296,6 +297,13 @@ export async function setRecurringItemPaused(
   role: MemberRole,
 ) {
   assertFullMemberRole(role);
+
+  const parsedId = DeleteIdSchema.safeParse({ id });
+  if (!parsedId.success) {
+    throw new DomainError(
+      parsedId.error.issues[0]?.message ?? "Bill not found",
+    );
+  }
   const result = await prisma.recurringItem.updateMany({
     where: {
       id,
@@ -316,6 +324,13 @@ export async function deleteRecurringItem(
   role: MemberRole,
 ) {
   assertFullMemberRole(role);
+
+  const parsedId = DeleteIdSchema.safeParse({ id });
+  if (!parsedId.success) {
+    throw new DomainError(
+      parsedId.error.issues[0]?.message ?? "Bill not found",
+    );
+  }
   const result = await prisma.recurringItem.deleteMany({
     where: {
       id,

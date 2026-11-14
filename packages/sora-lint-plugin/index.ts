@@ -22,6 +22,7 @@ import { noUnknownTypeAliasesRule } from "./rules/no-unknown-type-aliases.ts";
 import { noUnsafeDictionaryTypeRule } from "./rules/no-unsafe-dictionary-type.ts";
 import noUnscopedHas from "./rules/no-unscoped-has.ts";
 import { noWidenThenAssertRule } from "./rules/no-widen-then-assert.ts";
+import requireSeamParse from "./rules/require-seam-parse.ts";
 import requireSuppressionReason from "./rules/require-suppression-reason.ts";
 
 // The anti-slop rules come from an ESLint-style plugin, so they are converted
@@ -61,5 +62,6 @@ export default definePlugin({
     "no-outset-state-indicators": noOutsetStateIndicators,
     "no-unscoped-has": noUnscopedHas,
     "require-suppression-reason": requireSuppressionReason,
+    "require-seam-parse": requireSeamParse,
   },
 });

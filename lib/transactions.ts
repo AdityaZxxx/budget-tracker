@@ -10,6 +10,7 @@ import { notifyHouseholdExcept, notifyMembers } from "@/lib/notifications";
 import prisma from "@/lib/prisma";
 import { assertFullMemberRole, type MemberRole } from "@/lib/roles";
 import { evaluateUnusualSpending } from "@/lib/unusual-spending";
+import { DeleteIdSchema } from "@/schemas/delete";
 import { CreateTransactionSchema } from "@/schemas/transaction";
 
 export async function getTransactionsHistory(
@@ -465,6 +466,14 @@ export async function deleteTransaction(
   role: MemberRole,
 ) {
   assertFullMemberRole(role);
+
+  const parsedId = DeleteIdSchema.safeParse({ id });
+  if (!parsedId.success) {
+    throw new DomainError(
+      parsedId.error.issues[0]?.message ?? "Transaction not found",
+    );
+  }
+
   const transaction = await prisma.transaction.findUnique({
     where: {
       householdId,

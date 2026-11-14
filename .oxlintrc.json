@@ -63,6 +63,7 @@
     "sora/no-native-title-tooltip": "error",
     "sora/no-outset-state-indicators": "error",
     "sora/no-unscoped-has": "error",
+    "sora/require-seam-parse": "error",
     "sora/require-suppression-reason": "error",
     "sora/no-array-filter-map": "error",
     "sora/no-chained-type-assertions": "error",
