@@ -8,7 +8,7 @@ import { amountNumber } from "@/schemas/money";
 // YYYY-MM-DD string.
 export function goalFields(coerced: boolean) {
   return {
-    name: z.string().min(1, "Enter a name").max(50),
+    name: z.string().trim().min(1, "Enter a name").max(50),
     target: amountNumber(coerced),
   };
 }

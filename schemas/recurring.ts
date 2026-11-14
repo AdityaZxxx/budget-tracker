@@ -8,7 +8,7 @@ export const RecurringItemFrequency = z.union([
 ]);
 
 const recurringItemFields = z.object({
-  name: z.string().trim().min(1, "Name the bill"),
+  name: z.string().trim().min(1, "Name the bill").max(60),
   amount: amountNumber(true),
   category: z.string().min(1, "Select a category"),
   type: z.union([z.literal("income"), z.literal("expense")]),

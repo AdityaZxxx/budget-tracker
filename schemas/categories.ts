@@ -2,8 +2,16 @@ import { z } from "zod";
 
 // The rules both surfaces that write a Category compose, so they cannot
 // drift apart.
-export const categoryNameSchema = z.string().min(3).max(20);
-export const categoryIconSchema = z.string().max(20);
+export const categoryNameSchema = z
+  .string()
+  .trim()
+  .min(3, "Name the category in at least 3 characters")
+  .max(20);
+export const categoryIconSchema = z
+  .string()
+  .trim()
+  .min(1, "Pick an icon")
+  .max(20);
 export const categoryTypeSchema = z.enum(["income", "expense"]);
 
 export const CreateCategorySchema = z.object({

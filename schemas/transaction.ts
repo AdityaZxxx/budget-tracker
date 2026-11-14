@@ -8,7 +8,7 @@ import { amountNumber, sharesArray } from "@/schemas/money";
 export function transactionFields(coerced: boolean) {
   return {
     amount: amountNumber(coerced),
-    description: z.string().optional(),
+    description: z.string().trim().max(200).optional(),
     category: z.string().min(1, "Select a category"),
     type: z.enum(["income", "expense"]),
     shared: z.boolean().default(true),
