@@ -2,9 +2,21 @@ import { z } from "zod";
 
 import { amountNumber } from "@/schemas/money";
 
+// The rules both surfaces that write a Goal compose, so they cannot drift
+// apart; the web coerces form strings, the MCP tool keeps the JSON types.
+// The deadline is not shared: the web parses a Date, the MCP tool takes a
+// YYYY-MM-DD string.
+export function goalFields(coerced: boolean) {
+  return {
+    name: z.string().min(1, "Enter a name").max(50),
+    target: amountNumber(coerced),
+  };
+}
+
+const fields = goalFields(true);
+
 export const CreateGoalSchema = z.object({
-  name: z.string().min(1, "Enter a name").max(50),
-  target: amountNumber(true),
+  ...fields,
   deadline: z.coerce.date().optional(),
 });
 
@@ -27,8 +39,8 @@ export type DeleteGoalSchemaType = z.infer<typeof DeleteGoalSchema>;
 // MCP tool), so no coercion happens at this boundary.
 export const UpdateGoalSchema = z.object({
   id: z.string().min(1),
-  name: z.string().min(1, "Enter a name").max(50).optional(),
-  target: amountNumber(true).optional(),
+  name: fields.name.optional(),
+  target: fields.target.optional(),
   deadline: z.date().nullish(),
 });
 

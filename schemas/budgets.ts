@@ -4,11 +4,19 @@ import { amountNumber } from "@/schemas/money";
 
 export const BudgetModeSchema = z.enum(["soft", "hard"]);
 
-export const CreateBudgetSchema = z.object({
-  category: z.string().min(1, "Select a category"),
-  amount: amountNumber(true),
-  mode: BudgetModeSchema,
-});
+// The rules both surfaces that set a Budget compose, so they cannot drift
+// apart; the web coerces form strings, the MCP tool keeps the JSON types.
+export function budgetFields(coerced: boolean) {
+  return {
+    category: z.string().min(1, "Select a category"),
+    amount: amountNumber(coerced),
+    mode: BudgetModeSchema,
+  };
+}
+
+const fields = budgetFields(true);
+
+export const CreateBudgetSchema = z.object(fields);
 
 // The schema uses z.coerce, so its input type differs from the form values;
 // the values are already typed correctly client-side.
@@ -20,9 +28,7 @@ export type CreateBudgetSchemaType = {
 
 export const UpdateBudgetSchema = z.object({
   id: z.string().min(1),
-  category: z.string().min(1, "Select a category"),
-  amount: amountNumber(true),
-  mode: BudgetModeSchema,
+  ...fields,
 });
 
 export type UpdateBudgetSchemaType = {

@@ -1,25 +1,31 @@
 import { z } from "zod";
 
+// The rules both surfaces that write a Category compose, so they cannot
+// drift apart.
+export const categoryNameSchema = z.string().min(3).max(20);
+export const categoryIconSchema = z.string().max(20);
+export const categoryTypeSchema = z.enum(["income", "expense"]);
+
 export const CreateCategorySchema = z.object({
-  name: z.string().min(3).max(20),
-  icon: z.string().max(20),
-  type: z.enum(["income", "expense"]),
+  name: categoryNameSchema,
+  icon: categoryIconSchema,
+  type: categoryTypeSchema,
 });
 
 export type CreateCategorySchemaType = z.infer<typeof CreateCategorySchema>;
 
 export const DeleteCategorySchema = z.object({
-  name: z.string().min(3).max(20),
-  type: z.enum(["income", "expense"]),
+  name: categoryNameSchema,
+  type: categoryTypeSchema,
 });
 
 export type DeleteCategorySchemaType = z.infer<typeof DeleteCategorySchema>;
 
 export const UpdateCategorySchema = z.object({
-  originalName: z.string().min(3).max(20),
-  name: z.string().min(3).max(20),
-  icon: z.string().max(20),
-  type: z.enum(["income", "expense"]),
+  originalName: categoryNameSchema,
+  name: categoryNameSchema,
+  icon: categoryIconSchema,
+  type: categoryTypeSchema,
 });
 
 export type UpdateCategorySchemaType = z.infer<typeof UpdateCategorySchema>;
