@@ -31,7 +31,11 @@ const RemoveMemberDialog = ({ trigger, member }: Props) => {
 
   const queryClient = useQueryClient();
   const removeMutation = useMutation({
-    mutationFn: removeMember,
+    mutationFn: async (input: Parameters<typeof removeMember>[0]) => {
+      const res = await removeMember(input);
+      if (!res.ok) throw new Error(res.message);
+      return res.data;
+    },
     onSuccess: async () => {
       toast.success(`${member.user.name} removed from the household`, {
         id: toastId,
@@ -40,10 +44,15 @@ const RemoveMemberDialog = ({ trigger, member }: Props) => {
         queryKey: ["householdMembers"],
       });
     },
-    onError: () => {
-      toast.error("Unable to remove member. Try again.", {
-        id: toastId,
-      });
+    onError: (error) => {
+      toast.error(
+        error instanceof Error && error.message
+          ? error.message
+          : "Unable to remove this member. Try again.",
+        {
+          id: toastId,
+        },
+      );
     },
   });
 

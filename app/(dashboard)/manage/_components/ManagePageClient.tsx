@@ -162,7 +162,9 @@ function CategoryList({
       fetch(`/api/categories?type=${type}`).then(async (res) => {
         if (!res.ok) {
           const error = await res.json();
-          throw new Error(error.message || "Failed to fetch categories");
+          throw new Error(
+            error.message || "Unable to load categories. Try again.",
+          );
         }
         return res.json();
       }),
@@ -286,7 +288,7 @@ function ErrorState({
         <TrashIcon className="h-6 w-6 text-destructive" />
       </div>
       <p className="mb-2 text-sm font-medium text-destructive">
-        Failed to load {type} categories
+        Unable to load {type} categories. Try again.
       </p>
       <Button
         variant="ghost"

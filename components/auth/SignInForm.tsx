@@ -41,9 +41,11 @@ export default function SignInForm({ next }: { next?: string }) {
       setIsLoading(false);
 
       if (error) {
+        // better-auth errors are plain objects, not Error instances.
         toast.error(
-          error.message ||
-            "Unable to sign in. Check your credentials and try again.",
+          error.message
+            ? error.message
+            : "Unable to sign in. Check your details and try again.",
         );
         return;
       }

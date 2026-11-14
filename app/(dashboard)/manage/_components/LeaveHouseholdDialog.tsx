@@ -30,18 +30,24 @@ const LeaveHouseholdDialog = ({ trigger, memberCount }: Props) => {
   const isOnlyMember = memberCount === 1;
 
   const leaveMutation = useMutation({
-    mutationFn: leaveHousehold,
+    mutationFn: async () => {
+      const res = await leaveHousehold();
+      if (!res.ok) throw new Error(res.message);
+      return res.data;
+    },
     onSuccess: () => {
       toast.success(isOnlyMember ? "Space deleted" : "You left the household", {
         id: "leave-household",
       });
       router.refresh();
     },
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        isOnlyMember
-          ? "Unable to delete the space. Try again."
-          : "Unable to leave the household. Try again.",
+        error instanceof Error && error.message
+          ? error.message
+          : isOnlyMember
+            ? "Unable to delete the space. Try again."
+            : "Unable to leave the household. Try again.",
         {
           id: "leave-household",
         },

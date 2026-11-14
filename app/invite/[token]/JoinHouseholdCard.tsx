@@ -23,7 +23,13 @@ interface Props {
 
 const JoinHouseholdCard = ({ token, householdName, inviterName }: Props) => {
   const { mutate: join, isPending } = useMutation({
-    mutationFn: () => joinHouseholdByToken(token),
+    mutationFn: async () => {
+      const result = await joinHouseholdByToken(token);
+      if (!result.ok) {
+        throw new Error(result.message);
+      }
+      return result.data;
+    },
     onError: (error) => {
       toast.error(
         error instanceof Error && error.message
