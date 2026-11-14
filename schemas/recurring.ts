@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { amountNumber } from "@/schemas/money";
+import { freeText } from "@/schemas/text";
 
 export const RecurringItemFrequency = z.union([
   z.literal("weekly"),
@@ -8,7 +9,7 @@ export const RecurringItemFrequency = z.union([
 ]);
 
 const recurringItemFields = z.object({
-  name: z.string().trim().min(1, "Name the bill"),
+  name: freeText({ min: 1, max: 60, minMessage: "Name the bill" }),
   amount: amountNumber(true),
   category: z.string().min(1, "Select a category"),
   type: z.union([z.literal("income"), z.literal("expense")]),

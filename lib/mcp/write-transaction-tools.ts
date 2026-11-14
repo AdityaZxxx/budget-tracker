@@ -33,7 +33,7 @@ export function registerTransactionWriteTools(
           "Amount, in the Household's currency.",
         ),
         description: transactionInput.description.describe(
-          "What the Transaction was for.",
+          "What the Transaction was for, up to 200 characters.",
         ),
         date: z
           .string()

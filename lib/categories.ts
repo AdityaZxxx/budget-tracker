@@ -48,6 +48,8 @@ export async function createHouseholdCategory(
 
   const { name, icon, type } = parsed.data;
 
+  assertNotSettlementCategory(name);
+
   return await prisma.category.create({
     data: {
       householdId,
@@ -56,6 +58,12 @@ export async function createHouseholdCategory(
       type,
     },
   });
+}
+
+function assertNotSettlementCategory(name: string) {
+  if (name === SETTLEMENT_CATEGORY_NAME) {
+    throw new DomainError("Sora manages the Settlement category.");
+  }
 }
 
 export async function updateHouseholdCategory(
@@ -73,8 +81,9 @@ export async function updateHouseholdCategory(
 
   const { originalName, name, icon, type } = parsed.data;
 
-  if (originalName === SETTLEMENT_CATEGORY_NAME) {
-    throw new DomainError("This category cannot be edited");
+  assertNotSettlementCategory(originalName);
+  if (name !== originalName) {
+    assertNotSettlementCategory(name);
   }
 
   const existing = await prisma.category.findUnique({
@@ -141,6 +150,8 @@ export async function deleteHouseholdCategory(
       parsed.error.issues[0]?.message ?? "Invalid category",
     );
   }
+
+  assertNotSettlementCategory(parsed.data.name);
 
   return await prisma.category.delete({
     where: {
