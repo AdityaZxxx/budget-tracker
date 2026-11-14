@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { DomainError } from "@/lib/errors";
 import prisma from "@/lib/prisma";
 import { assertFullMemberRole, type MemberRole } from "@/lib/roles";
+import { DeleteIdSchema } from "@/schemas/delete";
 import {
   CreateGoalSchema,
   type UpdateGoalSchemaType,
@@ -132,6 +133,14 @@ export async function deleteHouseholdGoal(
   role: MemberRole,
 ) {
   assertFullMemberRole(role);
+
+  const parsedId = DeleteIdSchema.safeParse({ id });
+  if (!parsedId.success) {
+    throw new DomainError(
+      parsedId.error.issues[0]?.message ?? "Goal not found",
+    );
+  }
+
   const goal = await prisma.goal.findFirst({
     where: {
       id,

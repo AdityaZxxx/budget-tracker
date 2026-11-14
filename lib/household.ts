@@ -13,6 +13,7 @@ import {
 import { HouseholdNameSchema } from "@/schemas/household";
 import { UpdateUserCurrencySchema } from "@/schemas/userSetting";
 
+// seam-parse-exempt: input is the session's user id, never user-controlled.
 export async function getOrCreatePersonalHousehold(userId: string) {
   const memberships = await prisma.householdMembership.findMany({
     where: {

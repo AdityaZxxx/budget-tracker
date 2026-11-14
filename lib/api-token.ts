@@ -10,8 +10,10 @@ import { headers } from "next/headers";
 import { createHash, randomBytes } from "node:crypto";
 
 import { READ_WRITE_SCOPE, VIEW_ONLY_ROLE } from "@/lib/constants";
+import { DomainError } from "@/lib/errors";
 import prisma from "@/lib/prisma";
 import { assertFullMemberRole, type MemberRole } from "@/lib/roles";
+import { SetAgentAccessSchema } from "@/schemas/api-tokens";
 
 // The token carries 256 bits of entropy, so hashing it is enough to make a
 // leaked database useless. A slow key derivation would only slow down every
@@ -110,6 +112,12 @@ export async function setAgentAccess(
   role: MemberRole,
 ) {
   assertFullMemberRole(role);
+
+  const parsed = SetAgentAccessSchema.safeParse({ enabled });
+  if (!parsed.success) {
+    throw new DomainError(parsed.error.issues[0]?.message ?? "Invalid setting");
+  }
+
   await prisma.$transaction(async (tx) => {
     await tx.household.update({
       where: { id: householdId },

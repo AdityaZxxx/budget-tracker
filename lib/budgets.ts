@@ -5,6 +5,7 @@ import { DomainError } from "@/lib/errors";
 import prisma from "@/lib/prisma";
 import { assertFullMemberRole, type MemberRole } from "@/lib/roles";
 import { CreateBudgetSchema, UpdateBudgetSchema } from "@/schemas/budgets";
+import { DeleteIdSchema } from "@/schemas/delete";
 
 // Budget months follow the UTC calendar: transaction dates are stored as UTC
 // (dateToUtcDate) and the rollups bucket them with UTC getters, so a
@@ -181,10 +182,15 @@ export async function setHouseholdBudget(
   input: CreateBudgetInput,
   role: MemberRole,
 ) {
+  const parsed = CreateBudgetSchema.safeParse(input);
+  if (!parsed.success) {
+    throw new DomainError(parsed.error.issues[0]?.message ?? "Invalid budget");
+  }
+
   const existing = await prisma.budget.findFirst({
     where: {
       householdId,
-      category: input.category,
+      category: parsed.data.category,
     },
   });
 
@@ -205,6 +211,14 @@ export async function deleteHouseholdBudget(
   role: MemberRole,
 ) {
   assertFullMemberRole(role);
+
+  const parsedId = DeleteIdSchema.safeParse({ id });
+  if (!parsedId.success) {
+    throw new DomainError(
+      parsedId.error.issues[0]?.message ?? "Budget not found",
+    );
+  }
+
   const budget = await prisma.budget.findFirst({
     where: {
       id,
