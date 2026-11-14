@@ -4,7 +4,7 @@ import type { CreateTransactionSchemaType } from "@/schemas/transaction";
 
 import { redirect } from "next/navigation";
 
-import { assertFullMember, requireHousehold } from "@/lib/household";
+import { requireHousehold } from "@/lib/household";
 import { createTransaction } from "@/lib/transactions";
 import { CreateTransactionSchema } from "@/schemas/transaction";
 
@@ -18,8 +18,6 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
   if (!result) {
     redirect("/sign-in");
   }
-  assertFullMember(result);
-
   const { session, household } = result;
   const {
     amount,
@@ -33,15 +31,20 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
     recurringItemId,
   } = parsedBody.data;
 
-  await createTransaction(household.id, session.user.id, {
-    amount,
-    category,
-    description,
-    date,
-    type,
-    shared,
-    goalId: goalId || undefined,
-    shares,
-    recurringItemId,
-  });
+  await createTransaction(
+    household.id,
+    session.user.id,
+    {
+      amount,
+      category,
+      description,
+      date,
+      type,
+      shared,
+      goalId: goalId || undefined,
+      shares,
+      recurringItemId,
+    },
+    result.membership.role,
+  );
 }

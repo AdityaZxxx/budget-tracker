@@ -6,9 +6,10 @@ import {
   deleteHouseholdCategory,
   updateHouseholdCategory,
 } from "@/lib/categories";
-import { READ_WRITE_SCOPE, VIEW_ONLY_ROLE } from "@/lib/constants";
+import { READ_WRITE_SCOPE } from "@/lib/constants";
 import {
   categoryIconSchema,
+  categoryLookupNameSchema,
   categoryNameSchema,
   categoryTypeSchema,
 } from "@/schemas/categories";
@@ -26,7 +27,7 @@ export function registerCategoryWriteTools(
     {
       title: "Create category",
       description:
-        "Create a Category in the Household: a label for Transactions, of type expense or income. A Transaction's category must match one of the Household's Categories.",
+        "Create a Category in the Household: a label for Transactions, of type expense or income. A Transaction's category must match one of the Household's Categories. The Settlement Category cannot be created.",
       inputSchema: {
         name: categoryNameSchema.describe(
           "Name of the Category, 3 to 20 characters.",
@@ -42,17 +43,12 @@ export function registerCategoryWriteTools(
     async ({ name, icon, type }) => {
       if (context.scope !== READ_WRITE_SCOPE)
         return toolError("This token is read-only.");
-      if (context.role === VIEW_ONLY_ROLE)
-        return toolError(
-          "View-only members cannot make changes in this household.",
-        );
-
       try {
-        const category = await createHouseholdCategory(context.householdId, {
-          name,
-          icon,
-          type,
-        });
+        const category = await createHouseholdCategory(
+          context.householdId,
+          { name, icon, type },
+          context.role,
+        );
 
         return toolResult({
           name: category.name,
@@ -73,7 +69,7 @@ export function registerCategoryWriteTools(
       description:
         "Rename a Category in the Household or change its icon. Transactions and Budgets that used the old name move with it. The Settlement Category cannot be edited.",
       inputSchema: {
-        originalName: categoryNameSchema.describe(
+        originalName: categoryLookupNameSchema.describe(
           "Current name of the Category. Use list_categories to see them.",
         ),
         name: categoryNameSchema.describe(
@@ -90,18 +86,12 @@ export function registerCategoryWriteTools(
     async ({ originalName, name, icon, type }) => {
       if (context.scope !== READ_WRITE_SCOPE)
         return toolError("This token is read-only.");
-      if (context.role === VIEW_ONLY_ROLE)
-        return toolError(
-          "View-only members cannot make changes in this household.",
-        );
-
       try {
-        const category = await updateHouseholdCategory(context.householdId, {
-          originalName,
-          name,
-          icon,
-          type,
-        });
+        const category = await updateHouseholdCategory(
+          context.householdId,
+          { originalName, name, icon, type },
+          context.role,
+        );
 
         return toolResult({
           name: category.name,
@@ -120,9 +110,9 @@ export function registerCategoryWriteTools(
     {
       title: "Delete category",
       description:
-        "Delete a Category from the Household. Use list_categories to see the Categories.",
+        "Delete a Category from the Household. Use list_categories to see the Categories. The Settlement Category cannot be deleted.",
       inputSchema: {
-        name: categoryNameSchema.describe(
+        name: categoryLookupNameSchema.describe(
           "Name of the Category to delete. Use list_categories to see them.",
         ),
         type: categoryTypeSchema.describe(
@@ -133,16 +123,12 @@ export function registerCategoryWriteTools(
     async ({ name, type }) => {
       if (context.scope !== READ_WRITE_SCOPE)
         return toolError("This token is read-only.");
-      if (context.role === VIEW_ONLY_ROLE)
-        return toolError(
-          "View-only members cannot make changes in this household.",
-        );
-
       try {
-        const category = await deleteHouseholdCategory(context.householdId, {
-          name,
-          type,
-        });
+        const category = await deleteHouseholdCategory(
+          context.householdId,
+          { name, type },
+          context.role,
+        );
 
         return toolResult({
           name: category.name,

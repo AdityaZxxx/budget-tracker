@@ -8,9 +8,12 @@ import type {
 
 import { redirect } from "next/navigation";
 
-import { generateApiToken } from "@/lib/api-token";
+import {
+  generateApiToken,
+  setAgentAccess as setAgentAccessSeam,
+} from "@/lib/api-token";
 import { FULL_MEMBER_ROLE, READ_WRITE_SCOPE } from "@/lib/constants";
-import { assertFullMember, requireHousehold } from "@/lib/household";
+import { requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 import {
   CreateApiTokenSchema,
@@ -147,26 +150,10 @@ export async function setAgentAccess(form: SetAgentAccessSchemaType) {
   if (!result) {
     redirect("/sign-in");
   }
-  assertFullMember(result);
 
-  const { household } = result;
-
-  await prisma.$transaction(async (tx) => {
-    await tx.household.update({
-      where: { id: household.id },
-      data: { agentAccessEnabled: parsedBody.data.enabled },
-    });
-
-    // Turning agent access off revokes every token in the household, so the
-    // setting is a kill switch rather than a promise.
-    if (!parsedBody.data.enabled) {
-      await tx.apiToken.updateMany({
-        where: {
-          householdId: household.id,
-          revokedAt: null,
-        },
-        data: { revokedAt: new Date() },
-      });
-    }
-  });
+  await setAgentAccessSeam(
+    result.household.id,
+    parsedBody.data.enabled,
+    result.membership.role,
+  );
 }

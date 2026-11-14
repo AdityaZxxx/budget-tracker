@@ -1,6 +1,8 @@
 import type { TokenAuth } from "@/lib/api-token";
 import type { TokenScope } from "@/lib/types";
 
+import { parseMemberRole, type MemberRole } from "@/lib/roles";
+
 // The token is the only credential, so no tool depends on a browser session.
 export type McpContext = {
   householdId: string;
@@ -8,7 +10,7 @@ export type McpContext = {
   currency: string | null;
   userId: string;
   userName: string;
-  role: string;
+  role: MemberRole;
   scope: TokenScope;
 };
 
@@ -21,7 +23,7 @@ export function contextFromToken(
     currency: auth.household.currency,
     userId: auth.user.id,
     userName: auth.user.name,
-    role: auth.membership.role,
+    role: parseMemberRole(auth.membership.role),
     scope: auth.token.scope as TokenScope,
   };
 }

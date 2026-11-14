@@ -14,7 +14,7 @@ import {
   getGoalsWithProgress,
   updateHouseholdGoal,
 } from "@/lib/goals";
-import { assertFullMember, requireHousehold } from "@/lib/household";
+import { requireHousehold } from "@/lib/household";
 import {
   CreateGoalSchema,
   DeleteGoalSchema,
@@ -40,9 +40,11 @@ export async function createGoal(form: CreateGoalSchemaType) {
   if (!result) {
     redirect("/sign-in");
   }
-  assertFullMember(result);
-
-  return await createHouseholdGoal(result.household.id, parsedBody.data);
+  return await createHouseholdGoal(
+    result.household.id,
+    parsedBody.data,
+    result.membership.role,
+  );
 }
 
 export async function updateGoal(form: UpdateGoalSchemaType) {
@@ -55,9 +57,11 @@ export async function updateGoal(form: UpdateGoalSchemaType) {
   if (!result) {
     redirect("/sign-in");
   }
-  assertFullMember(result);
-
-  return await updateHouseholdGoal(result.household.id, parsedBody.data);
+  return await updateHouseholdGoal(
+    result.household.id,
+    parsedBody.data,
+    result.membership.role,
+  );
 }
 
 export async function deleteGoal(form: DeleteGoalSchemaType) {
@@ -70,7 +74,9 @@ export async function deleteGoal(form: DeleteGoalSchemaType) {
   if (!result) {
     redirect("/sign-in");
   }
-  assertFullMember(result);
-
-  return await deleteHouseholdGoal(result.household.id, parsedBody.data.id);
+  return await deleteHouseholdGoal(
+    result.household.id,
+    parsedBody.data.id,
+    result.membership.role,
+  );
 }

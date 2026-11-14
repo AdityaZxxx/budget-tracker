@@ -163,7 +163,7 @@ model Transaction {
   updatedAt DateTime @default(now())
 
   amount Decimal
-  description String
+  description String @db.VarChar(200)
   date DateTime
   householdId String
   household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
