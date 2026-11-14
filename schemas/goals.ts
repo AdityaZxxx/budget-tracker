@@ -17,7 +17,7 @@ const fields = goalFields(true);
 
 export const CreateGoalSchema = z.object({
   ...fields,
-  deadline: z.coerce.date().optional(),
+  deadline: z.date().optional(),
 });
 
 // The schema uses z.coerce, so its input type differs from the form values;

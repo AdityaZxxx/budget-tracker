@@ -13,6 +13,7 @@ import {
   flexRender,
   useTable,
 } from "@tanstack/react-table";
+import { format } from "date-fns";
 import {
   ChevronLeft,
   ChevronRight,
@@ -66,7 +67,7 @@ import {
 import { useCallerRole } from "@/hooks/use-members";
 import { useSession } from "@/lib/auth-client";
 import { POLL_INTERVAL } from "@/lib/constants";
-import { dateToUtcDate, getFormatterForCurrency } from "@/lib/helpers";
+import { getFormatterForCurrency } from "@/lib/helpers";
 import { type GetTransactionsHistoryResponseType } from "@/lib/transactions";
 import { cn } from "@/lib/utils";
 
@@ -232,9 +233,10 @@ const TransactionTable = ({ from, to }: Props) => {
     queryKey: ["transactions", "history", from, to],
     queryFn: async () => {
       const response = await fetch(
-        `/api/transaction-history?from=${dateToUtcDate(
+        `/api/transaction-history?from=${format(
           from,
-        )}&to=${dateToUtcDate(to)}`,
+          "yyyy-MM-dd",
+        )}&to=${format(to, "yyyy-MM-dd")}`,
       );
       if (!response.ok) throw new Error("Failed to fetch transaction history");
       return response.json();

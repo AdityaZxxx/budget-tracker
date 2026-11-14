@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 
 import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { useState } from "react";
 import CountUp from "react-countup";
@@ -10,7 +11,7 @@ import CountUp from "react-countup";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Card } from "@/components/ui/card";
 import { POLL_INTERVAL } from "@/lib/constants";
-import { dateToUtcDate, getFormatterForCurrency } from "@/lib/helpers";
+import { getFormatterForCurrency } from "@/lib/helpers";
 import { type GetBalanceStatsResponseType } from "@/lib/transactions";
 
 interface Props {
@@ -25,8 +26,9 @@ const StatsCards = ({ from, to, currency }: Props) => {
     queryFn: async () => {
       try {
         const response = await fetch(
-          `/api/stats/balance?from=${dateToUtcDate(from)}&to=${dateToUtcDate(
+          `/api/stats/balance?from=${format(from, "yyyy-MM-dd")}&to=${format(
             to,
+            "yyyy-MM-dd",
           )}`,
         );
         if (!response.ok) {
