@@ -1,7 +1,14 @@
 import type { Prisma } from "@prisma/client";
+import type { z } from "zod";
 
 import { DomainError } from "@/lib/errors";
 import prisma from "@/lib/prisma";
+import {
+  CreateRecurringItemSchema,
+  UpdateRecurringItemSchema,
+  type CreateRecurringItemType,
+  type UpdateRecurringItemType,
+} from "@/schemas/recurring";
 
 export type RecurringItemRow = {
   id: string;
@@ -194,19 +201,9 @@ async function resolveCategory(
   return category;
 }
 
-type RecurringItemInput = {
-  name: string;
-  amount: number;
-  category: string;
-  type: "income" | "expense";
-  frequency: "weekly" | "monthly";
-  weekday?: number | undefined;
-  dayOfMonth?: number | undefined;
-  startDate?: Date | undefined;
-  endDate?: Date | undefined;
-};
+type ParsedRecurringItem = z.output<typeof CreateRecurringItemSchema>;
 
-function scheduleFields(input: RecurringItemInput) {
+function scheduleFields(input: ParsedRecurringItem) {
   return input.frequency === "weekly"
     ? { weekday: input.weekday ?? null, dayOfMonth: null }
     : { weekday: null, dayOfMonth: input.dayOfMonth ?? null };
@@ -214,36 +211,46 @@ function scheduleFields(input: RecurringItemInput) {
 
 export async function createRecurringItem(
   householdId: string,
-  input: RecurringItemInput,
+  input: CreateRecurringItemType,
 ) {
+  const parsed = CreateRecurringItemSchema.safeParse(input);
+  if (!parsed.success) {
+    throw new DomainError(parsed.error.issues[0]?.message ?? "Invalid bill");
+  }
+
   const category = await resolveCategory(
     householdId,
-    input.type,
-    input.category,
+    parsed.data.type,
+    parsed.data.category,
   );
   return prisma.recurringItem.create({
     data: {
       householdId,
-      name: input.name,
-      amount: input.amount,
+      name: parsed.data.name,
+      amount: parsed.data.amount,
       category: category.name,
       categoryIcon: category.icon,
-      type: input.type,
-      frequency: input.frequency,
-      ...scheduleFields(input),
-      startDate: input.startDate ?? null,
-      endDate: input.endDate ?? null,
+      type: parsed.data.type,
+      frequency: parsed.data.frequency,
+      ...scheduleFields(parsed.data),
+      startDate: parsed.data.startDate ?? null,
+      endDate: parsed.data.endDate ?? null,
     },
   });
 }
 
 export async function updateRecurringItem(
   householdId: string,
-  input: RecurringItemInput & { id: string; paused?: boolean | undefined },
+  input: UpdateRecurringItemType,
 ) {
+  const parsed = UpdateRecurringItemSchema.safeParse(input);
+  if (!parsed.success) {
+    throw new DomainError(parsed.error.issues[0]?.message ?? "Invalid bill");
+  }
+
   const existing = await prisma.recurringItem.findFirst({
     where: {
-      id: input.id,
+      id: parsed.data.id,
       householdId,
     },
   });
@@ -252,22 +259,22 @@ export async function updateRecurringItem(
   }
   const category = await resolveCategory(
     householdId,
-    input.type,
-    input.category,
+    parsed.data.type,
+    parsed.data.category,
   );
   const data: Prisma.RecurringItemUpdateInput = {
-    name: input.name,
-    amount: input.amount,
+    name: parsed.data.name,
+    amount: parsed.data.amount,
     category: category.name,
     categoryIcon: category.icon,
-    type: input.type,
-    frequency: input.frequency,
-    ...scheduleFields(input),
-    startDate: input.startDate ?? null,
-    endDate: input.endDate ?? null,
+    type: parsed.data.type,
+    frequency: parsed.data.frequency,
+    ...scheduleFields(parsed.data),
+    startDate: parsed.data.startDate ?? null,
+    endDate: parsed.data.endDate ?? null,
   };
-  if (input.paused !== undefined) {
-    data.paused = input.paused;
+  if (parsed.data.paused !== undefined) {
+    data.paused = parsed.data.paused;
   }
   return prisma.recurringItem.update({
     where: {
