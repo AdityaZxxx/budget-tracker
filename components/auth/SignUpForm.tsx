@@ -13,7 +13,10 @@ import AuthField from "./AuthField";
 import AuthSubmitButton from "./AuthSubmitButton";
 
 const signUpSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z
+    .string()
+    .min(1, "Name is required")
+    .max(50, "Keep the name under 50 characters"),
   email: z.string().email("Enter a valid email"),
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
@@ -69,7 +72,6 @@ export default function SignUpForm({ next }: { next?: string }) {
     >
       <form
         method="post"
-        noValidate
         onSubmit={(e) => {
           e.preventDefault();
           form.handleSubmit();
@@ -85,6 +87,9 @@ export default function SignUpForm({ next }: { next?: string }) {
               autoComplete="name"
               autoCapitalize="words"
               enterKeyHint="next"
+              required
+              minLength={1}
+              maxLength={50}
               placeholder="Your name"
               value={field.state.value}
               onChange={field.handleChange}
@@ -108,6 +113,8 @@ export default function SignUpForm({ next }: { next?: string }) {
               autoCorrect="off"
               spellCheck={false}
               enterKeyHint="next"
+              required
+              maxLength={254}
               placeholder="you@example.com"
               value={field.state.value}
               onChange={field.handleChange}
@@ -127,6 +134,9 @@ export default function SignUpForm({ next }: { next?: string }) {
               type="password"
               autoComplete="new-password"
               enterKeyHint="done"
+              required
+              minLength={8}
+              maxLength={128}
               placeholder="At least 8 characters"
               value={field.state.value}
               onChange={field.handleChange}

@@ -62,6 +62,13 @@ import {
   setAgentAccess,
 } from "../_actions/api-tokens";
 
+const todayDateValue = () => {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${now.getFullYear()}-${month}-${day}`;
+};
+
 const AgentAccessSection = ({ canEdit }: { canEdit: boolean }) => {
   const queryClient = useQueryClient();
 
@@ -234,6 +241,7 @@ const CreateApiTokenDialog = ({
   const [scope, setScope] = useState<TokenScope>(READ_ONLY_SCOPE);
   const [expiresAt, setExpiresAt] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [expiryError, setExpiryError] = useState<string | null>(null);
   const [created, setCreated] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -265,6 +273,10 @@ const CreateApiTokenDialog = ({
       setError("Enter a name");
       return;
     }
+    if (expiresAt && expiresAt < todayDateValue()) {
+      setExpiryError("Choose a date in the future");
+      return;
+    }
 
     setError(null);
     createMutation.mutate({
@@ -289,6 +301,7 @@ const CreateApiTokenDialog = ({
         if (!next) {
           setCreated(null);
           setError(null);
+          setExpiryError(null);
           setCopied(false);
         }
       }}
@@ -344,6 +357,7 @@ const CreateApiTokenDialog = ({
                   id="token-name"
                   placeholder="Claude Desktop"
                   value={name}
+                  maxLength={60}
                   onChange={(event) => setName(event.target.value)}
                 />
                 <FieldDescription className="text-xs sm:text-sm">
@@ -389,19 +403,39 @@ const CreateApiTokenDialog = ({
                   id="token-expiry"
                   type="date"
                   value={expiresAt}
-                  onChange={(event) => setExpiresAt(event.target.value)}
+                  min={todayDateValue()}
+                  aria-invalid={Boolean(expiryError)}
+                  aria-describedby={
+                    expiryError ? "token-expiry-error" : undefined
+                  }
+                  onChange={(event) => {
+                    setExpiresAt(event.target.value);
+                    setExpiryError(
+                      event.target.value &&
+                        event.target.value < todayDateValue()
+                        ? "Choose a date in the future"
+                        : null,
+                    );
+                  }}
                 />
                 <FieldDescription className="text-xs sm:text-sm">
                   Leave empty for a token that lasts until you revoke it
                 </FieldDescription>
               </Field>
 
+              {expiryError && (
+                <FieldError id="token-expiry-error">{expiryError}</FieldError>
+              )}
               {error && <FieldError>{error}</FieldError>}
 
               <DialogFooter>
                 <Button
                   type="submit"
-                  disabled={createMutation.isPending}
+                  disabled={
+                    createMutation.isPending ||
+                    !name.trim() ||
+                    Boolean(expiryError)
+                  }
                   className="gap-2"
                 >
                   {createMutation.isPending ? (

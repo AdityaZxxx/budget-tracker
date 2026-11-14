@@ -158,6 +158,8 @@ const EditCategoryDialog = ({
                       isInvalid ? `${field.name}-error` : undefined
                     }
                     placeholder="Category name"
+                    minLength={3}
+                    maxLength={20}
                   />
                   <FieldDescription>
                     Transactions and budgets using this category are updated

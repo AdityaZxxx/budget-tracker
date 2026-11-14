@@ -149,6 +149,8 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
                       isInvalid ? `${field.name}-error` : undefined
                     }
                     placeholder="Category name"
+                    minLength={3}
+                    maxLength={20}
                   />
                   <FieldDescription>
                     This is how your category will appear in the app.

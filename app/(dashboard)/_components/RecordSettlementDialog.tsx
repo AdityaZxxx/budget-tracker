@@ -37,6 +37,12 @@ interface Props {
   currency: string | null;
 }
 
+// The same precision rule the server applies: at most two decimals, and
+// the value has to survive cents math.
+const centsOk = (value: number) =>
+  Number.isFinite(value) &&
+  Math.abs(value * 100 - Math.round(value * 100)) < 1e-9;
+
 const RecordSettlementDialog = ({ trigger, members, currency }: Props) => {
   const [open, setOpen] = useState(false);
   const [memberId, setMemberId] = useState("");
@@ -84,10 +90,13 @@ const RecordSettlementDialog = ({ trigger, members, currency }: Props) => {
       toast.error("Select a member", { id: "record-settlement" });
       return;
     }
-    if (!amount || amount <= 0) {
-      toast.error("Enter an amount greater than zero", {
-        id: "record-settlement",
-      });
+    if (!amount || amount <= 0 || !centsOk(amount)) {
+      toast.error(
+        "Enter an amount greater than zero, with at most two decimals",
+        {
+          id: "record-settlement",
+        },
+      );
       return;
     }
     toast.loading("Recording settlement…", { id: "record-settlement" });
@@ -138,6 +147,10 @@ const RecordSettlementDialog = ({ trigger, members, currency }: Props) => {
               customInput={Input}
               id="settlement-amount"
               placeholder="0.00"
+              min={0.01}
+              step="0.01"
+              inputMode="decimal"
+              aria-invalid={amount > 0 && !centsOk(amount)}
               value={amount}
               onValueChange={(values) => {
                 setAmount(values.floatValue ?? 0);
@@ -166,7 +179,9 @@ const RecordSettlementDialog = ({ trigger, members, currency }: Props) => {
             </DialogClose>
             <Button
               type="submit"
-              disabled={isPending}
+              disabled={
+                isPending || !memberId || !(amount > 0) || !centsOk(amount)
+              }
               className="w-full sm:w-auto"
             >
               {!isPending ? "Record" : <Loader2 className="animate-spin" />}

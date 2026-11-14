@@ -47,6 +47,10 @@ interface Props {
   onOpenChange?: (open: boolean) => void;
 }
 
+const centsOk = (value: number) =>
+  Number.isFinite(value) &&
+  Math.abs(value * 100 - Math.round(value * 100)) < 1e-9;
+
 const BudgetDialog = ({
   trigger,
   household,
@@ -131,6 +135,8 @@ const BudgetDialog = ({
     if (!category) nextErrors.category = "Select a category";
     if (!amount || amount <= 0)
       nextErrors.amount = "Enter an amount greater than zero";
+    else if (!centsOk(amount))
+      nextErrors.amount = "Enter an amount with at most two decimals";
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
@@ -194,6 +200,9 @@ const BudgetDialog = ({
               decimalSeparator={decimalSeparator}
               decimalScale={2}
               allowNegative={false}
+              min={0.01}
+              step="0.01"
+              inputMode="decimal"
             />
             <FieldDescription className="text-xs sm:text-sm">
               Monthly limit for this category
@@ -247,7 +256,9 @@ const BudgetDialog = ({
             </DialogClose>
             <Button
               type="submit"
-              disabled={isPending}
+              disabled={
+                isPending || !category || !(amount > 0) || !centsOk(amount)
+              }
               className="w-full sm:w-auto"
             >
               {!isPending ? (
