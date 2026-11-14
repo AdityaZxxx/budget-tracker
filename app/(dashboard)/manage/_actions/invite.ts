@@ -4,7 +4,11 @@ import type { RevokeInviteLinkSchemaType } from "@/schemas/invite";
 
 import { redirect } from "next/navigation";
 
-import { assertFullMember, requireHousehold } from "@/lib/household";
+import { requireHousehold } from "@/lib/household";
+import {
+  createInviteLink as createInviteLinkSeam,
+  revokeInviteLink as revokeInviteLinkSeam,
+} from "@/lib/invites";
 import prisma from "@/lib/prisma";
 import { RevokeInviteLinkSchema } from "@/schemas/invite";
 
@@ -13,17 +17,14 @@ export async function createInviteLink() {
   if (!result) {
     redirect("/sign-in");
   }
-  assertFullMember(result);
 
   const { session, household } = result;
 
-  return await prisma.inviteLink.create({
-    data: {
-      token: crypto.randomUUID(),
-      householdId: household.id,
-      createdById: session.user.id,
-    },
-  });
+  return await createInviteLinkSeam(
+    household.id,
+    session.user.id,
+    result.membership.role,
+  );
 }
 
 export async function revokeInviteLink(form: RevokeInviteLinkSchemaType) {
@@ -36,20 +37,12 @@ export async function revokeInviteLink(form: RevokeInviteLinkSchemaType) {
   if (!result) {
     redirect("/sign-in");
   }
-  assertFullMember(result);
 
-  const { household } = result;
-
-  await prisma.inviteLink.updateMany({
-    where: {
-      id: parsedBody.data.id,
-      householdId: household.id,
-      revokedAt: null,
-    },
-    data: {
-      revokedAt: new Date(),
-    },
-  });
+  await revokeInviteLinkSeam(
+    result.household.id,
+    parsedBody.data.id,
+    result.membership.role,
+  );
 }
 
 export async function listInviteLinks() {

@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { SETTLEMENT_CATEGORY_NAME } from "@/lib/constants";
 import { DomainError } from "@/lib/errors";
 import prisma from "@/lib/prisma";
-import { assertCanWrite } from "@/lib/roles";
+import { assertFullMemberRole, type MemberRole } from "@/lib/roles";
 import { CreateBudgetSchema, UpdateBudgetSchema } from "@/schemas/budgets";
 
 // Budget months follow the UTC calendar: transaction dates are stored as UTC
@@ -124,9 +124,9 @@ async function findExpenseCategory(householdId: string, name: string) {
 export async function createHouseholdBudget(
   householdId: string,
   input: CreateBudgetInput,
-  role: string,
+  role: MemberRole,
 ) {
-  assertCanWrite(role);
+  assertFullMemberRole(role);
   const parsed = CreateBudgetSchema.safeParse(input);
   if (!parsed.success) {
     throw new DomainError(parsed.error.issues[0]?.message ?? "Invalid budget");
@@ -150,9 +150,9 @@ export async function createHouseholdBudget(
 export async function updateHouseholdBudget(
   householdId: string,
   input: UpdateBudgetInput,
-  role: string,
+  role: MemberRole,
 ) {
-  assertCanWrite(role);
+  assertFullMemberRole(role);
   const parsed = UpdateBudgetSchema.safeParse(input);
   if (!parsed.success) {
     throw new DomainError(parsed.error.issues[0]?.message ?? "Invalid budget");
@@ -179,10 +179,8 @@ export async function updateHouseholdBudget(
 export async function setHouseholdBudget(
   householdId: string,
   input: CreateBudgetInput,
-  role: string,
+  role: MemberRole,
 ) {
-  assertCanWrite(role);
-
   const existing = await prisma.budget.findFirst({
     where: {
       householdId,
@@ -204,9 +202,9 @@ export async function setHouseholdBudget(
 export async function deleteHouseholdBudget(
   householdId: string,
   id: string,
-  role: string,
+  role: MemberRole,
 ) {
-  assertCanWrite(role);
+  assertFullMemberRole(role);
   const budget = await prisma.budget.delete({
     where: {
       id,

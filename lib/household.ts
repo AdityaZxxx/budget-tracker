@@ -2,15 +2,16 @@ import { cookies } from "next/headers";
 import { cache } from "react";
 
 import { getSession } from "@/lib/auth";
-import {
-  ACTIVE_HOUSEHOLD_COOKIE,
-  FULL_MEMBER_ROLE,
-  VIEW_ONLY_ROLE,
-} from "@/lib/constants";
+import { ACTIVE_HOUSEHOLD_COOKIE } from "@/lib/constants";
+import { DomainError } from "@/lib/errors";
 import prisma from "@/lib/prisma";
-import { assertCanWrite } from "@/lib/roles";
-
-export { FULL_MEMBER_ROLE, VIEW_ONLY_ROLE };
+import {
+  assertFullMemberRole,
+  parseMemberRole,
+  type MemberRole,
+} from "@/lib/roles";
+import { HouseholdNameSchema } from "@/schemas/household";
+import { UpdateUserCurrencySchema } from "@/schemas/userSetting";
 
 export async function getOrCreatePersonalHousehold(userId: string) {
   const memberships = await prisma.householdMembership.findMany({
@@ -67,8 +68,49 @@ export const requireHousehold = cache(async () => {
   }
 
   const membership = await getOrCreatePersonalHousehold(session.user.id);
-  return { session, household: membership.household, membership };
+  return {
+    session,
+    household: membership.household,
+    membership: { ...membership, role: parseMemberRole(membership.role) },
+  };
 });
+
+export async function renameHousehold(
+  householdId: string,
+  name: string,
+  role: MemberRole,
+) {
+  assertFullMemberRole(role);
+  const parsed = HouseholdNameSchema.safeParse(name);
+  if (!parsed.success) {
+    throw new DomainError(
+      parsed.error.issues[0]?.message ?? "Check the household name",
+    );
+  }
+  // An empty name clears it, the same shape the UI uses for a fresh space.
+  return await prisma.household.update({
+    where: { id: householdId },
+    data: { name: parsed.data || null },
+  });
+}
+
+export async function updateHouseholdCurrency(
+  householdId: string,
+  currency: string,
+  role: MemberRole,
+) {
+  assertFullMemberRole(role);
+  const parsed = UpdateUserCurrencySchema.safeParse({ currency });
+  if (!parsed.success) {
+    throw new DomainError(
+      parsed.error.issues[0]?.message ?? "Check the currency",
+    );
+  }
+  return await prisma.household.update({
+    where: { id: householdId },
+    data: { currency: parsed.data.currency },
+  });
+}
 
 // Only call from a Server Action or Route Handler: cookies cannot be written
 // while a page renders.
@@ -85,10 +127,4 @@ export async function setActiveHouseholdCookie(householdId: string) {
 export async function clearActiveHouseholdCookie() {
   const cookieStore = await cookies();
   cookieStore.delete(ACTIVE_HOUSEHOLD_COOKIE);
-}
-
-export function assertFullMember(
-  result: NonNullable<Awaited<ReturnType<typeof requireHousehold>>>,
-) {
-  assertCanWrite(result.membership.role);
 }

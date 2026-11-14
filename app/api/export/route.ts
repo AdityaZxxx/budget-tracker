@@ -1,14 +1,17 @@
 import { redirect } from "next/navigation";
 
-import { FULL_MEMBER_ROLE, requireHousehold } from "@/lib/household";
+import { requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
+import { assertFullMemberRole } from "@/lib/roles";
 
 export async function GET() {
   const result = await requireHousehold();
   if (!result) {
     redirect("/sign-in");
   }
-  if (result.membership.role !== FULL_MEMBER_ROLE) {
+  try {
+    assertFullMemberRole(result.membership.role);
+  } catch {
     return Response.json(
       { message: "Only full members can export household data" },
       { status: 403 },
