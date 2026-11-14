@@ -45,6 +45,8 @@ export async function createHouseholdCategory(
 
   const { name, icon, type } = parsed.data;
 
+  assertNotSettlementCategory(name);
+
   return await prisma.category.create({
     data: {
       householdId,
@@ -55,9 +57,7 @@ export async function createHouseholdCategory(
   });
 }
 
-// The Settlement category is the anchor the balance math reads back; the
-// MCP tools reach this seam too, so the guard lives here, not in the UI.
-function assertSystemCategoryUntouchable(name: string) {
+function assertNotSettlementCategory(name: string) {
   if (name === SETTLEMENT_CATEGORY_NAME) {
     throw new DomainError("Sora manages the Settlement category.");
   }
@@ -76,7 +76,10 @@ export async function updateHouseholdCategory(
 
   const { originalName, name, icon, type } = parsed.data;
 
-  assertSystemCategoryUntouchable(originalName);
+  assertNotSettlementCategory(originalName);
+  if (name !== originalName) {
+    assertNotSettlementCategory(name);
+  }
 
   const existing = await prisma.category.findUnique({
     where: {
@@ -141,7 +144,7 @@ export async function deleteHouseholdCategory(
     );
   }
 
-  assertSystemCategoryUntouchable(parsed.data.name);
+  assertNotSettlementCategory(parsed.data.name);
 
   return await prisma.category.delete({
     where: {
