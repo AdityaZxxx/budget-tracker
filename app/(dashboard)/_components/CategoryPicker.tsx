@@ -53,8 +53,13 @@ const CategoryPicker = ({
 
   const categoriesQuery = useQuery({
     queryKey: ["categories", type],
-    queryFn: () =>
-      fetch(`api/categories?type=${type}`).then((res) => res.json()),
+    queryFn: async () => {
+      const res = await fetch(`api/categories?type=${type}`);
+      if (!res.ok) {
+        throw new Error("Failed to fetch categories");
+      }
+      return res.json();
+    },
     staleTime: POLL_INTERVAL,
     refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,

@@ -220,7 +220,13 @@ const TransactionTable = ({ from, to }: Props) => {
   });
   const householdQuery = useQuery<Household>({
     queryKey: ["household"],
-    queryFn: () => fetch("/api/user-settings").then((res) => res.json()),
+    queryFn: async () => {
+      const res = await fetch("/api/user-settings");
+      if (!res.ok) {
+        throw new Error("Failed to fetch user settings");
+      }
+      return res.json();
+    },
     staleTime: POLL_INTERVAL,
     refetchInterval: POLL_INTERVAL,
     refetchOnWindowFocus: true,

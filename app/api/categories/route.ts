@@ -1,16 +1,16 @@
 import type { NextRequest } from "next/server";
 
-import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { getCategories } from "@/lib/categories";
+import { unauthorized } from "@/lib/errors";
 import { requireHousehold } from "@/lib/household";
 
 export async function GET(request: NextRequest) {
   const result = await requireHousehold();
 
   if (!result) {
-    redirect("/sign-in");
+    return unauthorized();
   }
 
   const { searchParams } = new URL(request.url);

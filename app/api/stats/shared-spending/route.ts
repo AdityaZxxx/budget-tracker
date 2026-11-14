@@ -1,17 +1,16 @@
-import { redirect } from "next/navigation";
-
 import {
   monthRangeFor,
   previousMonthRange,
   sharedSpendingFilter,
 } from "@/lib/budgets";
+import { unauthorized } from "@/lib/errors";
 import { requireHousehold } from "@/lib/household";
 import prisma from "@/lib/prisma";
 
 export async function GET() {
   const result = await requireHousehold();
   if (!result) {
-    redirect("/sign-in");
+    return unauthorized();
   }
 
   const stats = await getSharedSpending(result.household.id);
