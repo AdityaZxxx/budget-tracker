@@ -108,6 +108,7 @@ const HouseholdSection = ({ canEdit }: { canEdit: boolean }) => {
                     <Input
                       id="household-rename"
                       value={name}
+                      maxLength={50}
                       placeholder="e.g. Family, Flat 12"
                       onChange={(event) => setName(event.target.value)}
                       onKeyDown={(event) => {
