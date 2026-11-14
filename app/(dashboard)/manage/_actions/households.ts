@@ -5,12 +5,11 @@ import { redirect } from "next/navigation";
 
 import { getSession } from "@/lib/auth";
 import {
-  assertFullMember,
+  renameHousehold as renameHouseholdSeam,
   requireHousehold,
   setActiveHouseholdCookie,
 } from "@/lib/household";
 import prisma from "@/lib/prisma";
-import { HouseholdNameSchema } from "@/schemas/household";
 
 export async function switchHousehold(householdId: string) {
   const session = await getSession();
@@ -36,26 +35,16 @@ export async function switchHousehold(householdId: string) {
 }
 
 export async function renameHousehold(name: string) {
-  const parsedName = HouseholdNameSchema.safeParse(name);
-  if (!parsedName.success) {
-    throw new Error(parsedName.error.issues[0]?.message ?? "Invalid name");
-  }
-
   const result = await requireHousehold();
   if (!result) {
     redirect("/sign-in");
   }
-  assertFullMember(result);
 
-  // Empty clears the name, like createHousehold; the UI renders the default.
-  const household = await prisma.household.update({
-    where: {
-      id: result.household.id,
-    },
-    data: {
-      name: parsedName.data || null,
-    },
-  });
+  const household = await renameHouseholdSeam(
+    result.household.id,
+    name,
+    result.membership.role,
+  );
 
   revalidatePath("/", "layout");
   return household;

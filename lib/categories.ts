@@ -7,6 +7,7 @@ import type {
 import { SETTLEMENT_CATEGORY_NAME } from "@/lib/constants";
 import { DomainError } from "@/lib/errors";
 import prisma from "@/lib/prisma";
+import { assertFullMemberRole, type MemberRole } from "@/lib/roles";
 import {
   CreateCategorySchema,
   DeleteCategorySchema,
@@ -35,7 +36,9 @@ export async function getCategories(
 export async function createHouseholdCategory(
   householdId: string,
   input: CreateCategorySchemaType,
+  role: MemberRole,
 ) {
+  assertFullMemberRole(role);
   const parsed = CreateCategorySchema.safeParse(input);
   if (!parsed.success) {
     throw new DomainError(
@@ -66,7 +69,9 @@ function assertNotSettlementCategory(name: string) {
 export async function updateHouseholdCategory(
   householdId: string,
   input: UpdateCategorySchemaType,
+  role: MemberRole,
 ) {
+  assertFullMemberRole(role);
   const parsed = UpdateCategorySchema.safeParse(input);
   if (!parsed.success) {
     throw new DomainError(
@@ -136,7 +141,9 @@ export async function updateHouseholdCategory(
 export async function deleteHouseholdCategory(
   householdId: string,
   input: DeleteCategorySchemaType,
+  role: MemberRole,
 ) {
+  assertFullMemberRole(role);
   const parsed = DeleteCategorySchema.safeParse(input);
   if (!parsed.success) {
     throw new DomainError(

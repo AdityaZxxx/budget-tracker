@@ -5,7 +5,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
 import { deleteHouseholdBudget, setHouseholdBudget } from "@/lib/budgets";
-import { READ_WRITE_SCOPE, VIEW_ONLY_ROLE } from "@/lib/constants";
+import { READ_WRITE_SCOPE } from "@/lib/constants";
 import { parseDate } from "@/lib/dates";
 import {
   createHouseholdGoal,
@@ -43,13 +43,8 @@ export function registerGoalBudgetWriteTools(
     async ({ id }) => {
       if (context.scope !== READ_WRITE_SCOPE)
         return toolError("This token is read-only.");
-      if (context.role === VIEW_ONLY_ROLE)
-        return toolError(
-          "View-only members cannot make changes in this household.",
-        );
-
       try {
-        await deleteHouseholdGoal(context.householdId, id);
+        await deleteHouseholdGoal(context.householdId, id, context.role);
 
         return toolResult({ deleted: id, memberId: context.userId });
       } catch (error) {
@@ -76,13 +71,8 @@ export function registerGoalBudgetWriteTools(
     async ({ id }) => {
       if (context.scope !== READ_WRITE_SCOPE)
         return toolError("This token is read-only.");
-      if (context.role === VIEW_ONLY_ROLE)
-        return toolError(
-          "View-only members cannot make changes in this household.",
-        );
-
       try {
-        await deleteHouseholdBudget(context.householdId, id);
+        await deleteHouseholdBudget(context.householdId, id, context.role);
 
         return toolResult({ deleted: id, memberId: context.userId });
       } catch (error) {
@@ -112,17 +102,16 @@ export function registerGoalBudgetWriteTools(
     async ({ name, target, deadline }) => {
       if (context.scope !== READ_WRITE_SCOPE)
         return toolError("This token is read-only.");
-      if (context.role === VIEW_ONLY_ROLE)
-        return toolError(
-          "View-only members cannot make changes in this household.",
-        );
-
       try {
-        const goal = await createHouseholdGoal(context.householdId, {
-          name,
-          target,
-          deadline: deadline ? parseDate(deadline) : undefined,
-        });
+        const goal = await createHouseholdGoal(
+          context.householdId,
+          {
+            name,
+            target,
+            deadline: deadline ? parseDate(deadline) : undefined,
+          },
+          context.role,
+        );
 
         return toolResult({
           id: goal.id,
@@ -167,11 +156,6 @@ export function registerGoalBudgetWriteTools(
     async ({ id, name, target, deadline }) => {
       if (context.scope !== READ_WRITE_SCOPE)
         return toolError("This token is read-only.");
-      if (context.role === VIEW_ONLY_ROLE)
-        return toolError(
-          "View-only members cannot make changes in this household.",
-        );
-
       try {
         const update: UpdateGoalSchemaType = { id };
         if (name !== undefined) {
@@ -185,7 +169,11 @@ export function registerGoalBudgetWriteTools(
             deadline === null || deadline === "" ? null : parseDate(deadline);
         }
 
-        const goal = await updateHouseholdGoal(context.householdId, update);
+        const goal = await updateHouseholdGoal(
+          context.householdId,
+          update,
+          context.role,
+        );
 
         return toolResult({
           id: goal.id,
@@ -224,17 +212,12 @@ export function registerGoalBudgetWriteTools(
     async ({ category, amount, mode }) => {
       if (context.scope !== READ_WRITE_SCOPE)
         return toolError("This token is read-only.");
-      if (context.role === VIEW_ONLY_ROLE)
-        return toolError(
-          "View-only members cannot make changes in this household.",
-        );
-
       try {
-        const budget = await setHouseholdBudget(context.householdId, {
-          category,
-          amount,
-          mode,
-        });
+        const budget = await setHouseholdBudget(
+          context.householdId,
+          { category, amount, mode },
+          context.role,
+        );
 
         return toolResult({
           id: budget.id,

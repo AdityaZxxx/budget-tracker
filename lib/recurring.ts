@@ -3,6 +3,7 @@ import type { z } from "zod";
 
 import { DomainError } from "@/lib/errors";
 import prisma from "@/lib/prisma";
+import { assertFullMemberRole, type MemberRole } from "@/lib/roles";
 import {
   CreateRecurringItemSchema,
   UpdateRecurringItemSchema,
@@ -212,7 +213,9 @@ function scheduleFields(input: ParsedRecurringItem) {
 export async function createRecurringItem(
   householdId: string,
   input: CreateRecurringItemType,
+  role: MemberRole,
 ) {
+  assertFullMemberRole(role);
   const parsed = CreateRecurringItemSchema.safeParse(input);
   if (!parsed.success) {
     throw new DomainError(parsed.error.issues[0]?.message ?? "Invalid bill");
@@ -242,7 +245,9 @@ export async function createRecurringItem(
 export async function updateRecurringItem(
   householdId: string,
   input: UpdateRecurringItemType,
+  role: MemberRole,
 ) {
+  assertFullMemberRole(role);
   const parsed = UpdateRecurringItemSchema.safeParse(input);
   if (!parsed.success) {
     throw new DomainError(parsed.error.issues[0]?.message ?? "Invalid bill");
@@ -288,7 +293,9 @@ export async function setRecurringItemPaused(
   householdId: string,
   id: string,
   paused: boolean,
+  role: MemberRole,
 ) {
+  assertFullMemberRole(role);
   const result = await prisma.recurringItem.updateMany({
     where: {
       id,
@@ -303,7 +310,12 @@ export async function setRecurringItemPaused(
   }
 }
 
-export async function deleteRecurringItem(householdId: string, id: string) {
+export async function deleteRecurringItem(
+  householdId: string,
+  id: string,
+  role: MemberRole,
+) {
+  assertFullMemberRole(role);
   const result = await prisma.recurringItem.deleteMany({
     where: {
       id,

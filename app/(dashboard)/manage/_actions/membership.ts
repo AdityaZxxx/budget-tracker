@@ -8,14 +8,16 @@ import type {
 
 import { redirect } from "next/navigation";
 
+import { VIEW_ONLY_ROLE } from "@/lib/constants";
 import {
-  assertFullMember,
   clearActiveHouseholdCookie,
-  FULL_MEMBER_ROLE,
   requireHousehold,
   setActiveHouseholdCookie,
-  VIEW_ONLY_ROLE,
 } from "@/lib/household";
+import {
+  removeMember as removeMemberSeam,
+  setMemberRole as setMemberRoleSeam,
+} from "@/lib/members";
 import { notify, notifyHouseholdExcept } from "@/lib/notifications";
 import prisma from "@/lib/prisma";
 import {
@@ -136,65 +138,15 @@ export async function removeMember(form: RemoveMemberSchemaType) {
   if (!result) {
     redirect("/sign-in");
   }
-  assertFullMember(result);
 
   const { session, household } = result;
 
-  if (parsedBody.data.userId === session.user.id) {
-    throw new Error("Use leave household to remove yourself");
-  }
-
-  const removedMembership = await prisma.householdMembership.findUnique({
-    where: {
-      householdId_userId: {
-        householdId: household.id,
-        userId: parsedBody.data.userId,
-      },
-    },
-    include: {
-      user: {
-        select: {
-          name: true,
-        },
-      },
-    },
-  });
-
-  if (!removedMembership) {
-    throw new Error("Member not found");
-  }
-
-  await prisma.$transaction(async (tx) => {
-    await tx.householdMembership.deleteMany({
-      where: {
-        householdId: household.id,
-        userId: parsedBody.data.userId,
-      },
-    });
-
-    await tx.apiToken.updateMany({
-      where: {
-        householdId: household.id,
-        userId: parsedBody.data.userId,
-        revokedAt: null,
-      },
-      data: { revokedAt: new Date() },
-    });
-
-    const remaining = await tx.householdMembership.count({
-      where: {
-        householdId: household.id,
-      },
-    });
-
-    if (remaining === 0) {
-      await tx.household.delete({
-        where: {
-          id: household.id,
-        },
-      });
-    }
-  });
+  const removedName = await removeMemberSeam(
+    household.id,
+    session.user.id,
+    result.membership.role,
+    parsedBody.data,
+  );
 
   // The removed member now belongs to a different household, so their bell
   // would never show this; only the remaining members are notified.
@@ -202,7 +154,7 @@ export async function removeMember(form: RemoveMemberSchemaType) {
     household.id,
     session.user.id,
     "member_left",
-    `${removedMembership.user.name} was removed from the household.`,
+    `${removedName} was removed from the household.`,
   );
 }
 
@@ -217,64 +169,21 @@ export async function setMemberRole(form: SetMemberRoleSchemaType) {
     redirect("/sign-in");
   }
 
-  const { session, household, membership } = result;
-  const { userId, role } = parsedBody.data;
-  const isSelf = userId === session.user.id;
+  const { session, household } = result;
+  const { userId } = parsedBody.data;
 
-  if (isSelf) {
-    if (role !== FULL_MEMBER_ROLE) {
-      throw new Error("Use leave household to give up your own edit access");
-    }
-    const fullMemberCount = await prisma.householdMembership.count({
-      where: {
-        householdId: household.id,
-        role: FULL_MEMBER_ROLE,
-      },
-    });
-    if (fullMemberCount > 0) {
-      throw new Error("Only another member can change your role");
-    }
-  } else if (membership.role !== FULL_MEMBER_ROLE) {
-    throw new Error("View-only members cannot change roles");
-  }
-
-  const targetMembership = await prisma.householdMembership.findUnique({
-    where: {
-      householdId_userId: {
-        householdId: household.id,
-        userId,
-      },
-    },
-    include: {
-      user: {
-        select: {
-          name: true,
-        },
-      },
-    },
-  });
-
-  if (!targetMembership) {
-    throw new Error("Member not found");
-  }
-
-  await prisma.householdMembership.update({
-    where: {
-      householdId_userId: {
-        householdId: household.id,
-        userId,
-      },
-    },
-    data: {
-      role,
-    },
-  });
+  const { role: nextRole } = await setMemberRoleSeam(
+    household.id,
+    session.user.id,
+    result.membership.role,
+    parsedBody.data,
+  );
 
   await notify(
     household.id,
     userId,
     "member_role",
-    role === VIEW_ONLY_ROLE
+    nextRole === VIEW_ONLY_ROLE
       ? `${session.user.name} set your access to view-only in this household.`
       : `${session.user.name} gave you full edit access in this household.`,
   );

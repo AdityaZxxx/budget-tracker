@@ -5,7 +5,7 @@ import type { RecordSettlementSchemaType } from "@/schemas/settlement";
 import { redirect } from "next/navigation";
 
 import { getMemberBalances, getSimplifiedTransfers } from "@/lib/balances";
-import { assertFullMember, requireHousehold } from "@/lib/household";
+import { requireHousehold } from "@/lib/household";
 import { recordSettlement } from "@/lib/settlements";
 import { RecordSettlementSchema } from "@/schemas/settlement";
 
@@ -37,13 +37,13 @@ export async function RecordSettlement(form: RecordSettlementSchemaType) {
   if (!result) {
     redirect("/sign-in");
   }
-  assertFullMember(result);
-
   const { session, household } = result;
   const { memberId, amount } = parsedBody.data;
 
-  await recordSettlement(household.id, session.user.id, {
-    memberId,
-    amount,
-  });
+  await recordSettlement(
+    household.id,
+    session.user.id,
+    { memberId, amount },
+    result.membership.role,
+  );
 }

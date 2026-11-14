@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 
-import { assertFullMember, requireHousehold } from "@/lib/household";
+import { requireHousehold } from "@/lib/household";
 import {
   createRecurringItem,
   deleteRecurringItem,
@@ -31,9 +31,7 @@ export async function CreateRecurringItem(form: CreateRecurringItemType) {
   if (!result) {
     redirect("/sign-in");
   }
-  assertFullMember(result);
-
-  await createRecurringItem(result.household.id, form);
+  await createRecurringItem(result.household.id, form, result.membership.role);
 }
 
 export async function UpdateRecurringItem(form: UpdateRecurringItemType) {
@@ -41,9 +39,7 @@ export async function UpdateRecurringItem(form: UpdateRecurringItemType) {
   if (!result) {
     redirect("/sign-in");
   }
-  assertFullMember(result);
-
-  await updateRecurringItem(result.household.id, form);
+  await updateRecurringItem(result.household.id, form, result.membership.role);
 }
 
 export async function SetRecurringItemPaused(form: {
@@ -59,12 +55,11 @@ export async function SetRecurringItemPaused(form: {
   if (!result) {
     redirect("/sign-in");
   }
-  assertFullMember(result);
-
   await setRecurringItemPaused(
     result.household.id,
     parsedBody.data.id,
     parsedBody.data.paused,
+    result.membership.role,
   );
 }
 
@@ -78,7 +73,9 @@ export async function DeleteRecurringItem(form: { id: string }) {
   if (!result) {
     redirect("/sign-in");
   }
-  assertFullMember(result);
-
-  await deleteRecurringItem(result.household.id, parsedBody.data.id);
+  await deleteRecurringItem(
+    result.household.id,
+    parsedBody.data.id,
+    result.membership.role,
+  );
 }
