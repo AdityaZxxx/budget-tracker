@@ -9,6 +9,7 @@ import {
 import { READ_WRITE_SCOPE, VIEW_ONLY_ROLE } from "@/lib/constants";
 import {
   categoryIconSchema,
+  categoryLookupNameSchema,
   categoryNameSchema,
   categoryTypeSchema,
 } from "@/schemas/categories";
@@ -73,7 +74,7 @@ export function registerCategoryWriteTools(
       description:
         "Rename a Category in the Household or change its icon. Transactions and Budgets that used the old name move with it. The Settlement Category cannot be edited.",
       inputSchema: {
-        originalName: categoryNameSchema.describe(
+        originalName: categoryLookupNameSchema.describe(
           "Current name of the Category. Use list_categories to see them.",
         ),
         name: categoryNameSchema.describe(
@@ -122,7 +123,7 @@ export function registerCategoryWriteTools(
       description:
         "Delete a Category from the Household. Use list_categories to see the Categories. The Settlement Category cannot be deleted.",
       inputSchema: {
-        name: categoryNameSchema.describe(
+        name: categoryLookupNameSchema.describe(
           "Name of the Category to delete. Use list_categories to see them.",
         ),
         type: categoryTypeSchema.describe(

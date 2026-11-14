@@ -1,6 +1,6 @@
-import { z } from "zod";
+import { freeText } from "@/schemas/text";
 
-export const HouseholdNameSchema = z
-  .string()
-  .trim()
-  .max(50, "Keep the name under 50 characters");
+export const HouseholdNameSchema = freeText({
+  max: 50,
+  maxMessage: "Keep the name under 50 characters",
+});
